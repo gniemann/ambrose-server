@@ -1,28 +1,31 @@
 import os
 
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, abort
 
 from devops import DevOpsService, Credentials
+from devops_monitor.models import User
 
 api_bp = Blueprint('api', __name__)
 
-ORGANIZATION = 'mobilecfa'
-PROJECT = 'LidlAPI'
-
 @api_bp.route('/status/releases')
-def get_status():
+def get_release_status():
     username = os.getenv('DEVOPS_USERNAME')
     token = os.getenv('DEVOPS_TOKEN')
-
     service = DevOpsService(Credentials(username, token))
-    summary = service.get_release_summary(ORGANIZATION, PROJECT, 5)
+    user = User.by_username(username)
 
-    retVal = [
-        summary['Development'],
-        summary['Integration'],
-        summary['QA'],
-        summary['Production']
-    ]
+    if not user:
+        abort(404)
 
+    retVal = build_release_statuses(user, service)
     return jsonify(retVal)
 
+
+def build_release_statuses(user, service):
+    task_set = set([(t.project, t.definitionId) for t in user.tasks if t.type == 'release'])
+
+    summary = {}
+    for (project, definition) in task_set:
+        summary.update(service.get_release_summary(user.organization, project, definition))
+
+    return [summary[task.name] for task in user.tasks if task.type == 'release']

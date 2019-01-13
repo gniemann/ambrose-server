@@ -9,4 +9,8 @@ class User(db.Model):
     password = db.Column(db.String)
     organization = db.Column(db.String)
 
-    tasks = db.relationship('Task', back_populates='user')
+    tasks = db.relationship('Task', back_populates='user', order_by='Task.sort_order')
+
+    @classmethod
+    def by_username(cls, username):
+        return cls.query.filter_by(username=username).first()

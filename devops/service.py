@@ -43,7 +43,7 @@ class DevOpsService:
                 if release_env['definitionEnvironmentId'] != env['id']:
                     continue
                 env_name = release_env['name']
-                env_status = release_env['status']
+                env_status = format_status(release_env['status'])
 
                 statuses[env_name] = {
                     'name': env_name,
