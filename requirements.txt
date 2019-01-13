@@ -1,0 +1,8 @@
+flask
+gunicorn
+SQLAlchemy
+Flask-SQLAlchemy
+Flask-migrate
+requests
+psycopg2
+pytest
