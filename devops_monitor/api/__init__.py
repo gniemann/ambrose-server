@@ -28,4 +28,4 @@ def build_release_statuses(user, service):
     for (project, definition) in task_set:
         summary.update(service.get_release_summary(user.organization, project, definition))
 
-    return [summary[task.name] for task in user.tasks if task.type == 'release']
+    return [summary.get(task.name, dict()) for task in user.tasks if task.type == 'release']

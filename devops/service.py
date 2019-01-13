@@ -26,7 +26,7 @@ class DevOpsService:
     def get_release_summary(self, organization, project, definitionId):
         endpoint = 'release/releases?definitionId={}&releaseCount=1&api-version=5.0-preview.8'.format(definitionId)
         summary = self._request(organization, project, endpoint)
-
+        pipeline_name = summary['releaseDefinition']['name']
         releases = {rel['id']: rel for rel in summary['releases']}
 
         statuses = {}
@@ -42,7 +42,7 @@ class DevOpsService:
             for release_env in release['environments']:
                 if release_env['definitionEnvironmentId'] != env['id']:
                     continue
-                env_name = release_env['name']
+                env_name = '{}_{}'.format(pipeline_name, release_env['name']).replace(' ', '_')
                 env_status = format_status(release_env['status'])
 
                 statuses[env_name] = {
