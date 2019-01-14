@@ -52,6 +52,14 @@ class DevOpsService:
                 env_name = '{}_{}'.format(pipeline_name, release_env['name']).replace(' ', '_')
                 env_status = format_status(release_env['status'])
 
+                if env_status == 'inprogress':
+                    if 'postDeployApprovals' in release_env:
+                        approvals = release_env['postDeployApprovals']
+                        if len(approvals) > 0:
+                            approval = approvals[0]
+                            if approval['status'] == 'pending':
+                                env_status = 'pending_approval'
+
                 statuses[env_name] = {
                     'name': env_name,
                     'status': env_status,
