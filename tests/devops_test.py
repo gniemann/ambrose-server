@@ -96,7 +96,7 @@ def test_user(session):
 
 
 def test_build_release_statuses(user, devops_service):
-    releases = build_release_statuses(user, devops_service)
+    releases = release_statuses(user, devops_service)
 
     expected = [
         {

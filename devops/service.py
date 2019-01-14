@@ -5,6 +5,7 @@ from requests.auth import HTTPBasicAuth
 
 Credentials = namedtuple('Credentials', ['username', 'token'])
 
+
 def format_status(status: str):
     status = status.lower()
     if status == 'rejected':
@@ -12,8 +13,10 @@ def format_status(status: str):
 
     return status
 
+
 class DevOpsService:
-    BASE_URL_TEMPLATE = 'https://vsrm.dev.azure.com/{}/{}/_apis/'
+    BASE_URL_TEMPLATE = 'https://{}dev.azure.com/{}/{}/_apis/'
+    RELEASE_PREFIX='vsrm'
 
     def __init__(self, credentials: Credentials):
         self.credentials = credentials
@@ -21,11 +24,15 @@ class DevOpsService:
 
     def list_release_definitions(self, organization, project):
         endpoint = 'release/definitions?api-version=5.0-preview.3'
-        return self._request(organization, project, endpoint)
+        return self._request(organization, project, endpoint, self.RELEASE_PREFIX)
 
-    def get_release_summary(self, organization, project, definitionId):
-        endpoint = 'release/releases?definitionId={}&releaseCount=1&api-version=5.0-preview.8'.format(definitionId)
-        summary = self._request(organization, project, endpoint)
+    def get_release_summary(self, organization, project, definition_id):
+        endpoint = 'release/releases?definitionId={}&releaseCount=1&api-version=5.0-preview.8'.format(definition_id)
+        summary = self._request(organization, project, endpoint, self.RELEASE_PREFIX)
+
+        if not summary:
+            return {}
+
         pipeline_name = summary['releaseDefinition']['name']
         releases = {rel['id']: rel for rel in summary['releases']}
 
@@ -54,18 +61,37 @@ class DevOpsService:
 
         return statuses
 
+    def get_release(self, organization, project, release_id):
+        endpoint = 'release/releases/{}?api-version=5.0-preview.8'.format(release_id)
+        return self._request(organization, project, endpoint, self.RELEASE_PREFIX)
 
-    def get_release(self, organization, project, id):
-        endpoint = 'release/releases/{}?api-version=5.0-preview.8'.format(id)
-        return self._request(organization, project, endpoint)
+    def get_build_summary(self, organization, project, definition_id, branch='master'):
+        endpoint = 'build/latest/{}?api-version=5.0-preview.1&branchName={}'.format(definition_id, branch)
+        summary = self._request(organization, project, endpoint)
+        if not summary:
+            return {}
 
-    def get(self, url):
+        name = summary['definition']['name']
+        status = summary['status']
+        if status == 'completed':
+            status = summary['result']
+
+        return {
+            name: {
+                'name': name,
+                'status': status
+            }
+        }
+
+    def _get(self, url):
         return requests.get(url, auth=self.auth)
 
-    def _request(self, organization, project, endpoint):
-        url = self.BASE_URL_TEMPLATE.format(organization, project) + endpoint
-        res = self.get(url)
-        if res.status_code >= 200 and res.status_code < 400:
+    def _request(self, organization, project, endpoint, host_prefix=''):
+        if len(host_prefix) > 0 and not host_prefix.endswith('.'):
+            host_prefix += '.'
+        url = self.BASE_URL_TEMPLATE.format(host_prefix, organization, project) + endpoint
+        res = self._get(url)
+        if 200 <= res.status_code < 400:
             return res.json()
 
         return None
