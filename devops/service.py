@@ -74,15 +74,16 @@ class DevOpsService:
         return self._request(organization, project, endpoint, self.RELEASE_PREFIX)
 
     def get_build_summary(self, organization, project, definition_id, branch='master'):
-        endpoint = 'build/latest/{}?api-version=5.0-preview.1&branchName={}'.format(definition_id, branch)
+        endpoint = 'build/builds?api-version=5.0-preview.5&maxBuildsPerDefinition=1&definitions={}&branchName=refs/heads/{}'.format(definition_id, branch)
         summary = self._request(organization, project, endpoint)
-        if not summary:
+        if not summary or len(summary['value']) < 1:
             return {}
 
-        name = summary['definition']['name']
-        status = summary['status']
+        latest = summary['value'][0]
+        name = latest['definition']['name']
+        status = latest['status']
         if status == 'completed':
-            status = summary['result']
+            status = latest['result']
 
         return {
             name: {
