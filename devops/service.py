@@ -11,6 +11,9 @@ def format_status(status: str):
     if status == 'rejected':
         return 'failed'
 
+    if status == 'notstarted':
+        return 'queued'
+
     return status
 
 
@@ -88,7 +91,7 @@ class DevOpsService:
         return {
             name: {
                 'name': name,
-                'status': status
+                'status': format_status(status)
             }
         }
 
