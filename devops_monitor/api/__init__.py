@@ -56,8 +56,11 @@ def get_build_status():
 
 def build_statuses(user, service):
     summary = {}
-    for (project, definition) in task_set(user.tasks, 'build'):
-        summary.update(service.get_build_summary(user.organization, project, definition))
+    tasks = task_set(user.tasks, 'build')
+    projects = set([p for (p, _) in tasks])
+    for project in projects:
+        definitions = [d for (p, d) in tasks if p == project]
+        summary.update(service.get_build_summary(user.organization, project, definitions))
 
     return summary
 

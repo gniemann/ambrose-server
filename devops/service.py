@@ -76,24 +76,27 @@ class DevOpsService:
         endpoint = 'release/releases/{}?api-version=5.0-preview.8'.format(release_id)
         return self._request(organization, project, endpoint, self.RELEASE_PREFIX)
 
-    def get_build_summary(self, organization, project, definition_id, branch='master'):
-        endpoint = 'build/builds?api-version=5.0-preview.5&maxBuildsPerDefinition=1&definitions={}&branchName=refs/heads/{}'.format(definition_id, branch)
+    def get_build_summary(self, organization, project, definition_ids, branch='master'):
+        ids = ','.join([str(i) for i in definition_ids])
+
+        endpoint = 'build/builds?api-version=5.0-preview.5&maxBuildsPerDefinition=1&definitions={}&branchName=refs/heads/{}'.format(ids, branch)
         summary = self._request(organization, project, endpoint)
+
         if not summary or len(summary['value']) < 1:
             return {}
 
-        latest = summary['value'][0]
-        name = latest['definition']['name']
-        status = latest['status']
-        if status == 'completed':
-            status = latest['result']
-
-        return {
-            name: {
+        statuses = {}
+        for val in summary['value']:
+            name = val['definition']['name']
+            status = val['status']
+            if status == 'completed':
+                status = val['result']
+            statuses[name] = {
                 'name': name,
                 'status': format_status(status)
             }
-        }
+
+        return statuses
 
     def _get(self, url):
         return requests.get(url, auth=self.auth)
