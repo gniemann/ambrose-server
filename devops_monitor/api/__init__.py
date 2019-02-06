@@ -1,8 +1,9 @@
 import functools
 import os
 
-from flask import Blueprint, jsonify, abort, request
+from flask import Blueprint, jsonify, abort, request, current_app
 import flask_bcrypt as bcrypt
+from cryptography.fernet import Fernet
 
 from devops import DevOpsService, Credentials
 from devops_monitor.models import User
@@ -26,7 +27,8 @@ def authorization_required(func):
 
 
 def get_service(user):
-    token = os.getenv('DEVOPS_TOKEN')
+    cipher = Fernet(current_app.config['SECRET_KEY'])
+    token = cipher.decrypt(user.token.encode('utf-8'))
     return DevOpsService(Credentials(user.username, token))
 
 @api_bp.route('/status/releases')
