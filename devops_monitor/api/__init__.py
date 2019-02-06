@@ -1,7 +1,8 @@
 import functools
 import os
 
-from flask import Blueprint, jsonify, abort, request, g
+from flask import Blueprint, jsonify, abort, request
+import flask_bcrypt as bcrypt
 
 from devops import DevOpsService, Credentials
 from devops_monitor.models import User
@@ -15,7 +16,8 @@ def authorization_required(func):
             abort(401)
         user = User.by_username(request.authorization.username)
 
-        if user:
+        if user and bcrypt.check_password_hash(user.password, request.authorization.password):
+
             return func(*args, user=user, **kwargs)
         else:
             abort(401)

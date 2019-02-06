@@ -6,3 +6,4 @@ Flask-migrate
 requests
 psycopg2
 pytest
+Flask-bcrypt
