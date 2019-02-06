@@ -1,26 +1,35 @@
+import functools
 import os
 
-from flask import Blueprint, jsonify, abort
+from flask import Blueprint, jsonify, abort, request, g
 
 from devops import DevOpsService, Credentials
 from devops_monitor.models import User
 
 api_bp = Blueprint('api', __name__)
 
-def get_user():
-    username = os.getenv('DEVOPS_USERNAME')
-    return User.by_username(username)
+def authorization_required(func):
+    @functools.wraps(func)
+    def inner(*args, **kwargs):
+        if not request.authorization:
+            abort(401)
+        user = User.by_username(request.authorization.username)
+
+        if user:
+            return func(*args, user=user, **kwargs)
+        else:
+            abort(401)
+
+    return inner
+
 
 def get_service(user):
     token = os.getenv('DEVOPS_TOKEN')
     return DevOpsService(Credentials(user.username, token))
 
 @api_bp.route('/status/releases')
-def get_release_status():
-    user = get_user()
-    if not user:
-        abort(404)
-
+@authorization_required
+def get_release_status(user):
     service = get_service(user)
 
     releases = release_statuses(user, service)
@@ -43,11 +52,8 @@ def release_statuses(user, service):
 
 
 @api_bp.route('/status/builds')
-def get_build_status():
-    user = get_user()
-    if not user:
-        abort(404)
-
+@authorization_required
+def get_build_status(user):
     service = get_service(user)
 
     builds = build_statuses(user, service)
@@ -65,11 +71,8 @@ def build_statuses(user, service):
     return summary
 
 @api_bp.route('/status')
-def get_status():
-    user = get_user()
-    if not user:
-        abort(404)
-
+@authorization_required
+def get_status(user):
     service = get_service(user)
 
     releases = release_statuses(user, service)
