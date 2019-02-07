@@ -1,5 +1,4 @@
 import functools
-import os
 
 from flask import Blueprint, jsonify, abort, request, current_app
 import flask_bcrypt as bcrypt

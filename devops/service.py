@@ -19,7 +19,7 @@ def format_status(status: str):
 
 class DevOpsService:
     BASE_URL_TEMPLATE = 'https://{}dev.azure.com/{}/{}/_apis/'
-    RELEASE_PREFIX='vsrm'
+    RELEASE_PREFIX = 'vsrm'
 
     def __init__(self, credentials: Credentials):
         self.credentials = credentials
@@ -79,7 +79,8 @@ class DevOpsService:
     def get_build_summary(self, organization, project, definition_ids, branch='master'):
         ids = ','.join([str(i) for i in definition_ids])
 
-        endpoint = 'build/builds?api-version=5.0-preview.5&maxBuildsPerDefinition=1&definitions={}&branchName=refs/heads/{}'.format(ids, branch)
+        endpoint = 'build/builds?api-version=5.0-preview.5&maxBuildsPerDefinition=1&definitions={}&branchName=refs/heads/{}'.format(
+            ids, branch)
         summary = self._request(organization, project, endpoint)
 
         if not summary or len(summary['value']) < 1:
