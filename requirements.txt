@@ -8,3 +8,5 @@ psycopg2
 pytest
 Flask-bcrypt
 cryptography
+Flask-Login
+Flask-WTF

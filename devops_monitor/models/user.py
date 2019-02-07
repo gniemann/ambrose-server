@@ -12,4 +12,4 @@ class User(db.Model):
 
     @classmethod
     def by_username(cls, username):
-        return cls.query.filter_by(username=username).first()
+        return cls.query.filter_by(username=username).one_or_none()

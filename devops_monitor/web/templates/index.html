@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}DevOps Monitor{% endblock %}
+
+{% block content %}
+<h1 class="text-center">DevOps Monitor Configuration</h1>
+<table class="table">
+    <thead>
+    <tr>
+    <th scope="col">Slot</th>
+    <th scope="col">Name</th>
+    <th scope="col">Project</th>
+    <th scope="col">Type</th>
+    <th scope="col">Definition ID</th>
+    </tr>
+    </thead>
+
+<tbody>
+{% for task in tasks|sort(attribute='sort_order') %}
+    <tr>
+    <td>{{ task.sort_order + 1 }}</td>
+    <td>{{ task.name }}</td>
+    <td>{{ task.project }}</td>
+    <td>{{ task.type }}</td>
+    <td>{{ task.definitionId }}</td>
+    </tr>
+{% endfor %}
+</tbody>
+</table>
+
+{% endblock %}

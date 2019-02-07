@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+{% block title %}Login to DevOps Monitor{% endblock %}
+
+{% block content %}
+<h1>Login</h1>
+    {{ macros.render_form(form, url_for('.login'), 'Login') }}
+{% endblock %}

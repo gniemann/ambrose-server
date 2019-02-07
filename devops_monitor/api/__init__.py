@@ -17,7 +17,6 @@ def authorization_required(func):
         user = User.by_username(request.authorization.username)
 
         if user and bcrypt.check_password_hash(user.password, request.authorization.password):
-            bcrypt.generate_password_hash()
             return func(*args, user=user, **kwargs)
         else:
             abort(401)
