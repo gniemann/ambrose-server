@@ -82,5 +82,10 @@ def get_status(user):
     combined = releases
     combined.update(builds)
 
-    retVal = [combined.get(t.name, dict()) for t in user.tasks]
-    return jsonify(retVal)
+    tasks = [combined.get(t.name, dict()) for t in user.tasks]
+    messages = ["Hello world!"]
+    retval = {
+        "tasks": tasks,
+        "messages": messages
+    }
+    return jsonify(retval)

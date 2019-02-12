@@ -29,6 +29,10 @@ class DevOpsService:
         endpoint = 'release/definitions?api-version=5.0-preview.3'
         return self._request(organization, project, endpoint, self.RELEASE_PREFIX)
 
+    def list_build_definitions(self, organization, project):
+        endpoint = 'build/definitions?api-version=5.0'
+        return self._request(organization, project, endpoint)
+
     def get_release_summary(self, organization, project, definition_id):
         endpoint = 'release/releases?definitionId={}&releaseCount=1&api-version=5.0-preview.8'.format(definition_id)
         summary = self._request(organization, project, endpoint, self.RELEASE_PREFIX)

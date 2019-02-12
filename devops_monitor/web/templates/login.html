@@ -3,6 +3,15 @@
 {% block title %}Login to DevOps Monitor{% endblock %}
 
 {% block content %}
-<h1>Login</h1>
-    {{ macros.render_form(form, url_for('.login'), 'Login') }}
+<h3>Login</h3>
+    {{ macros.render_form(login_form, url_for('.login'), 'Login') }}
+
+    <div class="row">
+    <div class="col-sm-6">
+    <h2 class="text-center">--OR--</h2>
+        </div>
+        </div>
+
+   <h3>Register</h3>
+        {{ macros.render_form(register_form, url_for('.register'), 'Register') }}
 {% endblock %}

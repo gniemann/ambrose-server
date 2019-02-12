@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+{% block title %}Setup DevOps Monitor Configuration{% endblock %}
+
+{% block content %}
+<h1 class="text-center">Setup Configuration</h1>
+{{ macros.render_form(setup_form, url_for('.setup'), 'Find Pipelines') }}
+
+
+<h3 class="text-centered">Select Pipelines</h3>
+<form method="POST">
+<table class="table">
+<thead>
+<tr>
+    <th scope="col">Monitored</th>
+    <th scope="col">Id</th>
+    <th scope="col">Name</th>
+    <th scope="col">Type</th>
+    <th scope="col">Sort Order</th>
+</tr>
+</thead>
+<tbody>
+    {% for task in tasks %}
+        <tr>
+            <td>
+                {% if  %}
+            </td>
+            <td>{{ task.id }}</td>
+            <td>{{ task.name }}</td>
+            <td>{{ task.type }}</td>
+            <td></td>
+        </tr>
+    {% endfor %}
+</tbody>
+</table>
+</form>
+
+
+{% endblock %}

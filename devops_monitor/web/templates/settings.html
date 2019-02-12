@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% set active_page = "settings" %}
+{% import "macros.html" as macros %}
+{% block title %}DevOps Monitor{% endblock %}
+
+{% block content %}
+<h1 class="text-centered">Settings</h1>
+
+{{ macros.render_form(form, url_for('.settings'), 'Update Settings') }}
+
+
+{% endblock %}
