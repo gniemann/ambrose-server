@@ -1,11 +1,12 @@
 import functools
 
-from flask import Blueprint, jsonify, abort, request
+from flask import Blueprint, abort, request, jsonify
 import flask_bcrypt as bcrypt
 
-from devops import DevOpsService, Credentials, determine_build_statuses, determine_release_statuses, BuildStatus, ReleaseStatus
+from devops import DevOpsService, Credentials, determine_build_statuses, determine_release_statuses
 from devops_monitor.models import User
 from devops_monitor.common import cipher_required
+from .schema import TaskSchema, StatusSchema, with_schema
 
 api_bp = Blueprint('api', __name__)
 
@@ -29,22 +30,23 @@ def get_service(user, cipher):
     return DevOpsService(Credentials(user.username, token))
 
 
+
 @api_bp.route('/status/releases')
+@with_schema(TaskSchema)
 @authorization_required
 @cipher_required
 def get_release_status(user, cipher):
     service = get_service(user, cipher)
 
     releases = release_statuses(user, service)
-    retVal = build_summary(releases, user.tasks, 'release', ReleaseStatus)
-    return jsonify(retVal)
+    return build_summary(releases, user.tasks, 'release')
 
 
 def task_set(tasks, task_type):
     return set([(t.project, t.definitionId) for t in tasks if t.type == task_type])
 
-def build_summary(summary, tasks, task_type, missing):
-    return [summary.get(task.name, missing())._asdict() for task in tasks if task.type == task_type]
+def build_summary(summary, tasks, task_type):
+    return [summary.get(task.name, dict()) for task in tasks if task.type == task_type]
 
 def release_statuses(user, service):
     summary = {}
@@ -56,14 +58,14 @@ def release_statuses(user, service):
 
 
 @api_bp.route('/status/builds')
+@with_schema(TaskSchema)
 @authorization_required
 @cipher_required
 def get_build_status(user, cipher):
     service = get_service(user, cipher)
 
     builds = build_statuses(user, service)
-    retVal = build_summary(builds, user.tasks, 'build', BuildStatus)
-    return jsonify(retVal)
+    return build_summary(builds, user.tasks, 'build')
 
 def build_statuses(user, service):
     summary = {}
@@ -77,6 +79,7 @@ def build_statuses(user, service):
     return summary
 
 @api_bp.route('/status')
+@with_schema(StatusSchema)
 @authorization_required
 @cipher_required
 def get_status(user, cipher):
@@ -89,8 +92,7 @@ def get_status(user, cipher):
 
     tasks = [combined.get(t.name, dict())._asdict() for t in user.tasks]
     messages = ["Hello world!"]
-    retval = {
+    return {
         "tasks": tasks,
         "messages": messages
     }
-    return jsonify(retval)

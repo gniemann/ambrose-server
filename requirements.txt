@@ -10,3 +10,4 @@ Flask-bcrypt
 cryptography
 Flask-Login
 Flask-WTF
+marshmallow==3.0.0rc4
