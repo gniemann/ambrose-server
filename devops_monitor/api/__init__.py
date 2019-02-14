@@ -26,7 +26,11 @@ def authorization_required(func):
 
 
 def get_service(user, cipher):
-    token = cipher.decrypt(user.token)
+    token = user.token
+    if not isinstance(token, bytes):
+        token = token.encode('utf-8')
+
+    token = cipher.decrypt(token)
     return DevOpsService(Credentials(user.username, token))
 
 
