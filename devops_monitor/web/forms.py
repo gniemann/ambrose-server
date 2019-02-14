@@ -23,3 +23,6 @@ class SettingsForm(FlaskForm):
 class SetupForm(FlaskForm):
     project = StringField('Project', render_kw={'required': True})
 
+
+class MessageForm(FlaskForm):
+    message = StringField('Message', render_kw={'required': True})

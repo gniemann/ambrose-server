@@ -92,11 +92,9 @@ def get_status(user, cipher):
     combined = releases
     combined.update(builds)
 
-    tasks = [combined.get(t.name, dict())._asdict() for t in user.tasks]
-    messages = [
-        "Hello world!",
-        "All OK Jumpmaster"
-    ]
+    tasks = [combined.get(t.name, dict()) for t in user.tasks]
+    messages = [m.text for m in user.messages]
+
     return {
         "tasks": tasks,
         "messages": messages

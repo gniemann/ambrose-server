@@ -9,6 +9,7 @@ class User(db.Model):
     token = db.Column(db.String)
 
     tasks = db.relationship('Task', back_populates='user', order_by='Task.sort_order')
+    messages = db.relationship('Message')
 
     @classmethod
     def by_username(cls, username):

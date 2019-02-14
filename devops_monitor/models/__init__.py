@@ -7,3 +7,4 @@ migrate = Migrate()
 from .user import User
 from .task import Task
 from .status import Status
+from .message import Message
