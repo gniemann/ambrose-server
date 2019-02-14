@@ -3,7 +3,7 @@ import functools
 from flask import Blueprint, abort, request, jsonify
 import flask_bcrypt as bcrypt
 
-from devops import DevOpsService, Credentials, determine_build_statuses, determine_release_statuses
+from devops import DevOpsService, Credentials
 from devops_monitor.models import User
 from devops_monitor.common import cipher_required
 from .schema import TaskSchema, StatusSchema, with_schema
@@ -51,8 +51,7 @@ def build_summary(summary, tasks, task_type):
 def release_statuses(user, service):
     summary = {}
     for (project, definition) in task_set(user.tasks, 'release'):
-        release_summary = service.get_release_summary(user.organization, project, definition)
-        summary.update(determine_release_statuses(release_summary))
+        summary.update(service.get_release_statuses(user.organization, project, definition))
 
     return summary
 
@@ -73,8 +72,7 @@ def build_statuses(user, service):
     projects = set([p for (p, _) in tasks])
     for project in projects:
         definitions = [d for (p, d) in tasks if p == project]
-        build = service.get_build_summary(user.organization, project, definitions)
-        summary.update(determine_build_statuses(build))
+        summary.update(service.get_build_statuses(user.organization, project, definitions))
 
     return summary
 
@@ -91,7 +89,10 @@ def get_status(user, cipher):
     combined.update(builds)
 
     tasks = [combined.get(t.name, dict())._asdict() for t in user.tasks]
-    messages = ["Hello world!"]
+    messages = [
+        "Hello world!",
+        "All OK Jumpmaster"
+    ]
     return {
         "tasks": tasks,
         "messages": messages

@@ -5,7 +5,6 @@ from flask import jsonify
 from marshmallow import Schema, fields
 
 
-
 class TaskSchema(Schema):
     name = fields.String()
     status = fields.String()
