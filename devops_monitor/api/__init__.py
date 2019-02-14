@@ -93,7 +93,7 @@ def get_status(user, cipher):
     combined.update(builds)
 
     tasks = [combined.get(t.name, dict()) for t in user.tasks]
-    messages = [m.text for m in user.messages]
+    messages = [m.text.upper() for m in user.messages]
 
     return {
         "tasks": tasks,
