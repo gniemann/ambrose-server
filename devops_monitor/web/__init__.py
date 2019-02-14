@@ -1,59 +1,17 @@
-import functools
 from collections import namedtuple
 
-from flask import Blueprint, render_template, abort, redirect, url_for, current_app
-import flask_login
+from flask import Blueprint, render_template, abort, redirect, url_for
 import flask_bcrypt as bcrypt
-from cryptography.fernet import Fernet
+import flask_login
 
-from devops_monitor.models import User, db
+from devops_monitor.models import User
+from devops_monitor.common import cipher_required, db_required, WebUser
 from devops import DevOpsService, Credentials
 from .forms import LoginForm, RegisterForm, SettingsForm, SetupForm
-
-login_manager = flask_login.LoginManager()
-login_manager.login_view = 'web.login'
 
 web_bp = Blueprint('web', __name__, template_folder='templates')
 
 AvailableTask = namedtuple('Task', 'id name type')
-
-class WebUser(flask_login.UserMixin):
-    pass
-
-
-def cipher_required(func):
-    @functools.wraps(func)
-    def inner(*args, **kwargs):
-        cipher = Fernet(current_app.secret_key)
-        return func(*args, cipher=cipher, **kwargs)
-
-    return inner
-
-
-def db_required(func):
-    @functools.wraps(func)
-    def inner(*args, **kwargs):
-        try:
-            resp = func(*args, session=db.session, **kwargs)
-            db.session.commit()
-            return resp
-        except:
-            db.session.rollback()
-            raise
-
-    return inner
-
-@login_manager.user_loader
-def load_user(username):
-    user = User.by_username(username)
-
-    if not user:
-        return None
-
-    web_user = WebUser()
-    web_user.id = username
-    return web_user
-
 
 @web_bp.route('/')
 @flask_login.login_required

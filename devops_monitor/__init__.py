@@ -1,8 +1,9 @@
 from flask import Flask
 
 from .models import db, migrate
+from .common import login_manager
 from .api import api_bp
-from .web import web_bp, login_manager
+from .web import web_bp
 
 
 def build_app(config):
