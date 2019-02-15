@@ -55,7 +55,7 @@ def build_summary(summary, tasks, task_type):
 def release_statuses(user, service):
     summary = {}
     for (project, definition) in task_set(user.tasks, 'release'):
-        summary.update(service.get_release_statuses(user.organization, project, definition))
+        summary.update(service.get_release_summary(user.organization, project, definition).status())
 
     return summary
 
@@ -76,7 +76,7 @@ def build_statuses(user, service):
     projects = set([p for (p, _) in tasks])
     for project in projects:
         definitions = [d for (p, d) in tasks if p == project]
-        summary.update(service.get_build_statuses(user.organization, project, definitions))
+        summary.update(service.get_build_summary(user.organization, project, definitions).status())
 
     return summary
 

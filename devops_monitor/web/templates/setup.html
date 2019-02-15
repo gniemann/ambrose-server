@@ -2,13 +2,13 @@
 {% import "macros.html" as macros %}
 {% block title %}Setup DevOps Monitor Configuration{% endblock %}
 
-{% block content %}
 <h1 class="text-center">Setup Configuration</h1>
 {{ macros.render_form(setup_form, url_for('.setup'), 'Find Pipelines') }}
 
-
+{% if tasks %}
 <h3 class="text-centered">Select Pipelines</h3>
-<form method="POST">
+<form method="POST" action={{ url_for('.setup_pipelines') }}>
+<input type="hidden" name="project" value="{{ project_id }}">
 <table class="table">
 <thead>
 <tr>
@@ -22,18 +22,24 @@
 <tbody>
     {% for task in tasks %}
         <tr>
-            <td>
-                {% if  %}
-            </td>
-            <td>{{ task.id }}</td>
+            <td><input name="{{ task.name }}" type="checkbox" {% if task.monitored %}checked{% endif %}></td>
+            <td><input type="hidden" name="{{ task.name }}_id" value="{{ task.id }}"> {{ task.id }}</td>
             <td>{{ task.name }}</td>
-            <td>{{ task.type }}</td>
+            <td><input type="hidden" name="{{ task.name }}_type" value="{{ task.type }}"> {{ task.type }}</td>
+            <td>
+                {% if task.sort_order is number %}
+                <input name="{{ task.name }}_sortOrder" type="number" value="{{ task.sort_order }}">
+                {% else %}
+                    <input name="{{ task.name }}_sortOrder" type="number" value="">
+                {% endif %}
+            </td>
             <td></td>
         </tr>
     {% endfor %}
 </tbody>
 </table>
+<input type="submit" value="Update" class="btn btn-primary">
 </form>
-
+{% endif %}
 
 {% endblock %}

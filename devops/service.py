@@ -3,22 +3,10 @@ from collections import namedtuple
 import requests
 from requests.auth import HTTPBasicAuth
 
-from devops.devops_json import DevOpsJSON
+from devops.devops_json import DevOpsJSON, ReleaseSummary, format_status, BuildSummary
 
 Credentials = namedtuple('Credentials', ['username', 'token'])
 
-ReleaseStatus = namedtuple('ReleaseStatus', 'name status current')
-BuildStatus = namedtuple('BuildStatus', 'name status')
-
-def format_status(status: str):
-    status = status.lower()
-    if status == 'rejected':
-        return 'failed'
-
-    if status == 'notstarted':
-        return 'queued'
-
-    return status
 
 class DevOpsService:
     BASE_URL_TEMPLATE = 'https://{}dev.azure.com/{}/{}/_apis/'
@@ -38,7 +26,7 @@ class DevOpsService:
 
     def get_release_summary(self, organization, project, definition_id):
         endpoint = 'release/releases?definitionId={}&releaseCount=1&api-version=5.0-preview.8'.format(definition_id)
-        return self._request(organization, project, endpoint, self.RELEASE_PREFIX)
+        return self._request(organization, project, endpoint, self.RELEASE_PREFIX, return_type=ReleaseSummary)
 
     def get_release(self, organization, project, release_id):
         endpoint = 'release/releases/{}?api-version=5.0-preview.8'.format(release_id)
@@ -49,73 +37,17 @@ class DevOpsService:
 
         endpoint = 'build/builds?api-version=5.0-preview.5&maxBuildsPerDefinition=1&definitions={}&branchName=refs/heads/{}'.format(
             ids, branch)
-        return self._request(organization, project, endpoint)
-
-    def get_release_statuses(self, organization, project, definition_id):
-        summary = self.get_release_summary(organization, project, definition_id)
-
-        if not summary:
-            return {}
-
-        pipeline_name = summary.releaseDefinition.name
-        releases = {rel.id: rel for rel in summary.releases}
-
-        statuses = {}
-        for env in summary.environments:
-            last_release = env.lastReleases
-            if not last_release or len(last_release) < 1:
-                continue
-
-            last_release_id = last_release[0].id
-
-            release = releases[last_release_id]
-
-            release_env = [rel_env for rel_env in release.environments if rel_env.definitionEnvironmentId == env.id]
-            if len(release_env) < 1:
-                continue
-
-            release_env = release_env[0]
-
-            env_name = '{}_{}'.format(pipeline_name, release_env.name).replace(' ', '_')
-            env_status = format_status(release_env.status)
-
-            if env_status == 'inprogress':
-                if 'postDeployApprovals' in release_env:
-                    approvals = release_env.postDeployApprovals
-                    if len(approvals) > 0:
-                        approval = approvals[0]
-                        if approval.status == 'pending':
-                            env_status = 'pending_approval'
-
-            statuses[env_name] = ReleaseStatus(name=env_name, status=env_status, current=release.name)
-
-        return statuses
-
-    def get_build_statuses(self, organization, project, definition_ids):
-        summary = self.get_build_summary(organization, project, definition_ids)
-
-        if not summary or len(summary.value) < 1:
-            return {}
-
-        statuses = {}
-        for val in summary.value:
-            name = val.definition.name
-            status = val.status
-            if status == 'completed':
-                status = val.result
-            statuses[name] = BuildStatus(name=name, status=format_status(status))
-
-        return statuses
+        return self._request(organization, project, endpoint, return_type=BuildSummary)
 
     def _get(self, url):
         return requests.get(url, auth=self.auth)
 
-    def _request(self, organization, project, endpoint, host_prefix=''):
+    def _request(self, organization, project, endpoint, host_prefix='', return_type=DevOpsJSON):
         if len(host_prefix) > 0 and not host_prefix.endswith('.'):
             host_prefix += '.'
         url = self.BASE_URL_TEMPLATE.format(host_prefix, organization, project) + endpoint
         res = self._get(url)
         if 200 <= res.status_code < 400:
-            return DevOpsJSON(res.json())
+            return return_type(res.json())
 
         return None
