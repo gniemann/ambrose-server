@@ -1,1 +1,1 @@
-from .service import DevOpsService, Credentials
+from .service import DevOpsService

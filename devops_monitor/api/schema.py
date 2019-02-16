@@ -8,6 +8,7 @@ from marshmallow import Schema, fields
 class TaskSchema(Schema):
     name = fields.String()
     status = fields.String()
+    has_changed = fields.Boolean()
 
 
 class StatusSchema(Schema):

@@ -3,8 +3,8 @@ import functools
 from flask import Blueprint, abort, request, jsonify
 import flask_bcrypt as bcrypt
 
-from devops import DevOpsService, Credentials
-from devops_monitor.models import User
+from devops import DevOpsService
+from devops_monitor.models import User, DevOpsReleaseEnvironment, DevOpsBuildPipeline
 from devops_monitor.common import cipher_required
 from .schema import TaskSchema, StatusSchema, with_schema
 
@@ -25,77 +25,62 @@ def authorization_required(func):
     return inner
 
 
-def get_service(user, cipher):
-    token = user.token
+def get_devops_service(user, cipher):
+    devops_account = user.devops_account()
+
+    if not devops_account:
+        return None
+
+    token = devops_account.token
     if not isinstance(token, bytes):
         token = token.encode('utf-8')
 
     token = cipher.decrypt(token)
-    return DevOpsService(Credentials(user.username, token))
-
-
-
-@api_bp.route('/status/releases')
-@with_schema(TaskSchema)
-@authorization_required
-@cipher_required
-def get_release_status(user, cipher):
-    service = get_service(user, cipher)
-
-    releases = release_statuses(user, service)
-    return build_summary(releases, user.tasks, 'release')
+    return DevOpsService(devops_account.username, token, devops_account.organization)
 
 
 def task_set(tasks, task_type):
-    return set([(t.project, t.definitionId) for t in tasks if t.type == task_type])
+    return set([(t.project, t.definitionId) for t in tasks if isinstance(t, task_type)])
 
-def build_summary(summary, tasks, task_type):
-    return [summary.get(task.name, dict()) for task in tasks if task.type == task_type]
 
 def release_statuses(user, service):
-    summary = {}
-    for (project, definition) in task_set(user.tasks, 'release'):
-        summary.update(service.get_release_summary(user.organization, project, definition).status())
+    devops_account = user.devops_account
+    if not devops_account:
+        return
 
-    return summary
+    releases = [t for t in devops_account.tasks if isinstance(t, DevOpsReleaseEnvironment)]
+    for (project, definition) in set([(t.project, t.definitionId) for t in releases]):
+        statuses = service.get_release_summary(devops_account.organization, project, definition)
+        for env in [r for r in releases if r.project == project and r.definition_id == definition]:
+            env.status = statuses.status_for_environment(env.environment_id)
 
-
-@api_bp.route('/status/builds')
-@with_schema(TaskSchema)
-@authorization_required
-@cipher_required
-def get_build_status(user, cipher):
-    service = get_service(user, cipher)
-
-    builds = build_statuses(user, service)
-    return build_summary(builds, user.tasks, 'build')
 
 def build_statuses(user, service):
-    summary = {}
-    tasks = task_set(user.tasks, 'build')
-    projects = set([p for (p, _) in tasks])
-    for project in projects:
-        definitions = [d for (p, d) in tasks if p == project]
-        summary.update(service.get_build_summary(user.organization, project, definitions).status())
+    devops_account = user.devops_account
+    if not devops_account:
+        return
 
-    return summary
+    builds = [t for t in devops_account.tasks if isinstance(t, DevOpsBuildPipeline)]
+    for project in set([b.project for b in builds]):
+        project_builds = [b for b in builds if b.project == project]
+        definitions = [b.definition_id for b in project_builds]
+        statuses = service.get_build_summary(devops_account.organization, project, definitions)
+
+        for build in project_builds:
+            build.status = statuses.status_for_definition(build.definition_id)
+
 
 @api_bp.route('/status')
 @with_schema(StatusSchema)
 @authorization_required
 @cipher_required
 def get_status(user, cipher):
-    service = get_service(user, cipher)
+    service = get_devops_service(user, cipher)
 
-    releases = release_statuses(user, service)
-    builds = build_statuses(user, service)
-    combined = releases
-    combined.update(builds)
-
-    tasks = [combined.get(t.name, dict()) for t in user.tasks]
-    messages = [m.text.upper() for m in user.messages]
+    release_statuses(user, service)
+    build_statuses(user, service)
 
     return {
-        "tasks": tasks,
-        "messages": messages
+        "tasks": user.tasks,
+        "messages": [m.text.upper() for m in user.messages]
     }

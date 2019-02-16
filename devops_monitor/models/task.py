@@ -1,33 +1,94 @@
 from . import db
 
+
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    account_id = db.Column(db.Integer, db.ForeignKey('account.id'))
 
     user = db.relationship('User', uselist=False)
+    account = db.relationship('Account', uselist=False, back_populates='tasks')
 
-    project = db.Column(db.String)
-    type = db.Column(db.String)
-    name = db.Column(db.String)
-    definitionId = db.Column(db.Integer)
-    status_time = db.Column(db.DateTime)
-    sort_order = db.Column(db.Integer)
+    _type = db.Column(db.String)
+    _status = db.Column(db.String)
+    has_changed = db.Column(db.Boolean)
 
-    _status_id = db.Column(db.Integer, db.ForeignKey('status.id'))
-    _prev_status_id = db.Column(db.Integer, db.ForeignKey('status.id'))
-
-    _status = db.relationship('Status', uselist=False, foreign_keys=[_status_id])
-    _prev_status = db.relationship('Status', uselist=False, foreign_keys=[_prev_status_id])
+    sort_order = db.Column(db.Integer, default=0)
 
     @property
     def status(self):
-        return self._status.value
+        return self._status
 
     @status.setter
     def status(self, new_status):
-        self._prev_status = self._status
+        self.has_changed = new_status != self._status
         self._status = new_status
 
+    __mapper_args__ = {
+        'polymorphic_identity': 'task',
+        'polymorphic_on': _type
+    }
+
+
+class DevOpsBuildPipeline(Task):
+    __tablename__ = 'devops_build_pipeline'
+    task_id = db.Column(db.Integer, db.ForeignKey('task.id'), primary_key=True)
+
+    project = db.Column(db.String)
+    definition_id = db.Column(db.Integer)
+    pipeline = db.Column(db.String)
+    branch = db.Column(db.String, default='master')
+
     @property
-    def prev_status(self):
-        return self._prev_status.value
+    def name(self):
+        return self.pipeline
+
+    @property
+    def type(self):
+        return 'Azure DevOps Build Pipeline'
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'devops_build_pipeline',
+    }
+
+    def __eq__(self, other):
+        if not hasattr(other, 'project') or \
+                not hasattr(other, 'definition_id'):
+            return False
+
+        return self.project == other.project and \
+            self.definition_id == other.definition_id
+
+
+class DevOpsReleaseEnvironment(Task):
+    __tablename__ = 'devops_release_environment'
+
+    task_id = db.Column(db.Integer, db.ForeignKey('task.id'), primary_key=True)
+    project = db.Column(db.String)
+    definition_id = db.Column(db.Integer)
+    pipeline = db.Column(db.String)
+
+    environment = db.Column(db.String)
+    environment_id = db.Column(db.Integer)
+
+    @property
+    def name(self):
+        return '{} {}'.format(self.pipeline, self.environment)
+
+    @property
+    def type(self):
+        return 'Azure DevOps Release Pipeline Environment'
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'devops_release_environment',
+    }
+
+    def __eq__(self, other):
+        if not hasattr(other, 'project') or \
+                not hasattr(other, 'definition_id') or \
+                not hasattr(other, 'environment_id'):
+            return False
+
+        return self.project == other.project and \
+            self.definition_id == other.definition_id and \
+            self.environment_id == other.environment_id

@@ -9,24 +9,22 @@
     <tr>
     <th scope="col">Slot</th>
     <th scope="col">Name</th>
-    <th scope="col">Project</th>
     <th scope="col">Type</th>
-    <th scope="col">Definition ID</th>
+    <th scope="col">Last Status</th>
     </tr>
     </thead>
 
 <tbody>
 {% for task in tasks|sort(attribute='sort_order') %}
     <tr>
-    <td>{{ task.sort_order + 1 }}</td>
+    <td>{{ task.sort_order }}</td>
     <td>{{ task.name }}</td>
-    <td>{{ task.project }}</td>
     <td>{{ task.type }}</td>
-    <td>{{ task.definitionId }}</td>
+    <td>{{ task.status }}</td>
     </tr>
 {% endfor %}
 </tbody>
 </table>
-<a href="{{ url_for('.setup') }}" class="btn btn-primary">Edit</a>
+{#<a href="{{ url_for('.setup') }}" class="btn btn-primary">Edit</a>#}
 
 {% endblock %}

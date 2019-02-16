@@ -4,7 +4,7 @@ from flask_migrate import Migrate
 db = SQLAlchemy()
 migrate = Migrate()
 
-from .user import User
-from .task import Task
-from .status import Status
-from .message import Message
+from .task import *
+from .account import *
+from .user import *
+from .message import *

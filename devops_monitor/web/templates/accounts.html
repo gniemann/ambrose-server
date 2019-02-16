@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+{% set active_page = "accounts" %}
+{% block title %}Configure Accounts{% endblock %}
+
+{% block content %}
+<h1 class="text-center">Configure Monitoring Accounts</h1>
+    <h3>Linked Accounts</h3>
+<table class="table">
+<thead>
+<tr>
+    <th scope="col">Type</th>
+    <th scope="col">Nickname</th>
+</tr>
+</thead>
+    <tbody>
+    {% for account in accounts %}
+    <tr>
+        <td>{{ account.type }}</td>
+        <td>{{ account.nickname }}</td>
+        <td><a href="{{ url_for('.account_tasks', account_id=account.id) }} " class="btn btn-primary">Configure tasks</a></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</thead>
+</table>
+
+<h3>Link new DevOps account</h3>
+{{ macros.render_form(new_account_form, url_for('.accounts'), 'Link Account') }}
+
+{% endblock %}

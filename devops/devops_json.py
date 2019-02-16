@@ -43,9 +43,13 @@ class DevOpsJSON:
 
 
 class ReleaseSummary(DevOpsJSON):
+    def __init__(self, json):
+        super(ReleaseSummary, self).__init__(json)
+        if 'releases' in json:
+            self._data['releases'] = {rel.id: rel for rel in json['releases']}
+
     def status(self):
         pipeline_name = self.releaseDefinition.name
-        releases = {rel.id: rel for rel in self.releases}
 
         statuses = {}
         for env in self.environments:
@@ -55,7 +59,7 @@ class ReleaseSummary(DevOpsJSON):
 
             last_release_id = last_release[0].id
 
-            release = releases[last_release_id]
+            release = self.releases[last_release_id]
 
             release_env = [rel_env for rel_env in release.environments if rel_env.definitionEnvironmentId == env.id]
             if len(release_env) < 1:
@@ -64,23 +68,52 @@ class ReleaseSummary(DevOpsJSON):
             release_env = release_env[0]
 
             env_name = '{}_{}'.format(pipeline_name, release_env.name).replace(' ', '_')
-            env_status = format_status(release_env.status)
-
-            if env_status == 'inprogress':
-                if 'postDeployApprovals' in release_env:
-                    approvals = release_env.postDeployApprovals
-                    if len(approvals) > 0:
-                        approval = approvals[0]
-                        if approval.status == 'pending':
-                            env_status = 'pending_approval'
+            env_status = self._format_status(release_env)
 
             statuses[env_name] = ReleaseStatus(name=env_name, status=env_status, current=release.name)
 
         return statuses
 
-    def environment_names(self):
-        releases = {rel.id: rel for rel in self.releases}
+    def _format_status(self, environment):
+        status = format_status(environment.status)
 
+        if status == 'inprogress':
+            if 'postDeployApprovals' in environment:
+                approvals = environment.postDeployApprovals
+                if len(approvals) > 0:
+                    approval = approvals[0]
+                    if approval.status == 'pending':
+                        status = 'pending_approval'
+
+        return status
+
+    def status_for_environment(self, env_id):
+        environment = None
+        for env in self.environments:
+            if env.id == env_id:
+                environment = env
+                break
+
+        if environment is None:
+            return None
+
+        last_release = environment.lastReleases
+        if not last_release or len(last_release) < 1:
+            return None
+
+        release = self.releases[last_release[0].id]
+
+        release_env = None
+        for env in release.environments:
+            if env.definitionEnvironmentId == env_id:
+                release_env = env
+                break
+        if release_env is None:
+            return None
+
+        return self._format_status(release_env)
+
+    def environment_names(self):
         environments = []
         for env in self.environments:
             last_release = env.lastReleases
@@ -89,7 +122,7 @@ class ReleaseSummary(DevOpsJSON):
 
             last_release_id = last_release[0].id
 
-            release = releases[last_release_id]
+            release = self.releases[last_release_id]
 
             release_env = [rel_env for rel_env in release.environments if rel_env.definitionEnvironmentId == env.id]
             if len(release_env) < 1:
@@ -100,7 +133,6 @@ class ReleaseSummary(DevOpsJSON):
             environments.append('{}_{}'.format(self.releaseDefinition.name, release_env.name).replace(' ', '_'))
 
         return environments
-
 
 
 class BuildSummary(DevOpsJSON):
@@ -114,3 +146,41 @@ class BuildSummary(DevOpsJSON):
             statuses[name] = BuildStatus(name=name, status=format_status(status))
 
         return statuses
+
+    def status_for_definition(self, definition_id):
+        target_build = None
+        for build in self.value:
+            if build.definition.id == definition_id:
+                target_build = build
+                break
+        if target_build is None:
+            return None
+
+        status = target_build.status
+        if status == 'completed':
+            status = target_build.result
+
+        return status
+
+
+class DevOpsProjects(DevOpsJSON):
+    def __init__(self, json):
+        super(DevOpsProjects, self).__init__({"projects": json['value']})
+
+    def __iter__(self):
+        return iter(self.projects)
+
+class DevOpsReleaseDefinitions(DevOpsJSON):
+    def __init__(self, json):
+        super(DevOpsReleaseDefinitions, self).__init__({'definitions': json['value']})
+
+    def __iter__(self):
+        return iter(self.definitions)
+
+
+class DevOpsBuildDefinitions(DevOpsJSON):
+    def __init__(self, json):
+        super(DevOpsBuildDefinitions, self).__init__({'builds': json['value']})
+
+    def __iter__(self):
+        return iter(self.builds)
