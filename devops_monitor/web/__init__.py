@@ -62,18 +62,6 @@ def register(cipher, session):
 
     return redirect(url_for('.login'))
 
-@web_bp.route('/settings', methods=['GET', 'POST'])
-@flask_login.login_required
-def settings():
-    settings_form = SettingsForm()
-    user = User.by_username(flask_login.current_user.id)
-
-    if settings_form.validate_on_submit():
-        return redirect(url_for('.index'))
-
-    settings_form.username.data = user.username
-    return render_template('settings.html', form=settings_form)
-
 @web_bp.route('/logout')
 @flask_login.login_required
 def logout():
@@ -278,3 +266,24 @@ def account_tasks(account_id, session, cipher):
 
     current_tasks = current_build_tasks.union(current_release_tasks)
     return render_template('tasks.html', tasks=tasks, current_tasks=current_tasks, account_id=account_id)
+
+@web_bp.route('/edit', methods=['GET', 'POST'])
+@flask_login.login_required
+@db_required
+def edit(session):
+    user = User.by_username(flask_login.current_user.id)
+
+    if request.method == 'POST':
+        to_remove = []
+        for task in user.tasks:
+            if 'Task_{}_delete'.format(task.id) in request.form:
+                to_remove.append(task)
+            else:
+                task.sort_order = int(request.form['Task_'+str (task.id) + '_sortOrder'])
+
+        for task in to_remove:
+            user.tasks.remove(task)
+
+        return redirect(url_for('.index'))
+
+    return render_template('edit.html', tasks=user.tasks)

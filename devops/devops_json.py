@@ -46,7 +46,7 @@ class ReleaseSummary(DevOpsJSON):
     def __init__(self, json):
         super(ReleaseSummary, self).__init__(json)
         if 'releases' in json:
-            self._data['releases'] = {rel.id: rel for rel in json['releases']}
+            self._data['releases'] = {rel.id: rel for rel in self.releases}
 
     def status(self):
         pipeline_name = self.releaseDefinition.name

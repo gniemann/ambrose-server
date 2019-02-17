@@ -1,11 +1,11 @@
 import functools
 
-from flask import Blueprint, abort, request, jsonify
+from flask import Blueprint, abort, request
 import flask_bcrypt as bcrypt
 
 from devops import DevOpsService
 from devops_monitor.models import User, DevOpsReleaseEnvironment, DevOpsBuildPipeline
-from devops_monitor.common import cipher_required
+from devops_monitor.common import cipher_required, db_required
 from .schema import TaskSchema, StatusSchema, with_schema
 
 api_bp = Blueprint('api', __name__)
@@ -26,7 +26,7 @@ def authorization_required(func):
 
 
 def get_devops_service(user, cipher):
-    devops_account = user.devops_account()
+    devops_account = user.devops_account
 
     if not devops_account:
         return None
@@ -49,8 +49,8 @@ def release_statuses(user, service):
         return
 
     releases = [t for t in devops_account.tasks if isinstance(t, DevOpsReleaseEnvironment)]
-    for (project, definition) in set([(t.project, t.definitionId) for t in releases]):
-        statuses = service.get_release_summary(devops_account.organization, project, definition)
+    for (project, definition) in set([(t.project, t.definition_id) for t in releases]):
+        statuses = service.get_release_summary(project, definition)
         for env in [r for r in releases if r.project == project and r.definition_id == definition]:
             env.status = statuses.status_for_environment(env.environment_id)
 
@@ -64,7 +64,7 @@ def build_statuses(user, service):
     for project in set([b.project for b in builds]):
         project_builds = [b for b in builds if b.project == project]
         definitions = [b.definition_id for b in project_builds]
-        statuses = service.get_build_summary(devops_account.organization, project, definitions)
+        statuses = service.get_build_summary(project, definitions)
 
         for build in project_builds:
             build.status = statuses.status_for_definition(build.definition_id)
@@ -73,8 +73,9 @@ def build_statuses(user, service):
 @api_bp.route('/status')
 @with_schema(StatusSchema)
 @authorization_required
+@db_required
 @cipher_required
-def get_status(user, cipher):
+def get_status(user, session, cipher):
     service = get_devops_service(user, cipher)
 
     release_statuses(user, service)
