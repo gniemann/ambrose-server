@@ -5,15 +5,12 @@
 
 {% block content %}
 <h1 class="text-centered">Messages</h1>
-<table>
-<tbody>
-{% for msg in messages %}
-    <tr>
-    <td>{{ msg }}</td>
-    </tr>
-{% endfor %}
-</tbody>
-</table>
+<ul class="list-group">
+    {% for msg in messages %}
+        <li class="list-group-item">{{ msg }}</li>
+    {% endfor %}
+</ul>
+
 
 <h3 class="text-centered">New Message</h3>
 {{ macros.render_form(message_form, url_for('.messages'), 'Add message') }}

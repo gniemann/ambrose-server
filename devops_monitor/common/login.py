@@ -5,16 +5,10 @@ from devops_monitor.models import User
 login_manager = flask_login.LoginManager()
 login_manager.login_view = 'web.login'
 
-class WebUser(flask_login.UserMixin):
-    pass
 
 @login_manager.user_loader
-def load_user(username):
-    user = User.by_username(username)
+def load_user(user_id):
+    return User.by_id(user_id)
 
-    if not user:
-        return None
 
-    web_user = WebUser()
-    web_user.id = username
-    return web_user
+

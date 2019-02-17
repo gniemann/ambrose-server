@@ -5,7 +5,7 @@ import flask_bcrypt as bcrypt
 
 from devops import DevOpsService
 from devops_monitor.models import User, DevOpsReleaseEnvironment, DevOpsBuildPipeline
-from devops_monitor.common import cipher_required, db_required
+from devops_monitor.common import cipher_required, db_transaction
 from .schema import TaskSchema, StatusSchema, with_schema
 
 api_bp = Blueprint('api', __name__)
@@ -73,13 +73,13 @@ def build_statuses(user, service):
 @api_bp.route('/status')
 @with_schema(StatusSchema)
 @authorization_required
-@db_required
 @cipher_required
-def get_status(user, session, cipher):
+def get_status(user, cipher):
     service = get_devops_service(user, cipher)
 
-    release_statuses(user, service)
-    build_statuses(user, service)
+    with db_transaction():
+        release_statuses(user, service)
+        build_statuses(user, service)
 
     return {
         "tasks": user.tasks,

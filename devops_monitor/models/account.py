@@ -1,4 +1,5 @@
-from . import db, Task
+from . import db
+from .task import Task, DevOpsReleaseEnvironment, DevOpsBuildPipeline
 
 
 class Account(db.Model):
@@ -23,6 +24,7 @@ class Account(db.Model):
     def add_task(self, task):
         if isinstance(task, Task):
             task.user_id = self.user_id
+            task.account_id = self.id
             self.tasks.append(task)
 
     def remove_task(self, task):
@@ -49,3 +51,11 @@ class DevOpsAccount(Account):
             for t in self.tasks:
                 if t == task:
                     self.tasks.remove(t)
+
+    @property
+    def build_tasks(self):
+        return [t for t in self.tasks if isinstance(t, DevOpsBuildPipeline)]
+
+    @property
+    def release_tasks(self):
+        return [t for t in self.tasks if isinstance(t, DevOpsReleaseEnvironment)]

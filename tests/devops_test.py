@@ -2,113 +2,61 @@ import pytest
 
 from config import Config
 import devops_monitor
-from devops_monitor.models import Task, User, Status
-from devops_monitor.api import *
 
 
 class TestConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite://'
     WTF_CSRF_ENABLED = False
-
+    SECRET_KEY = 'secret'
 
 @pytest.fixture(scope='module')
-def client():
+def app():
     app = devops_monitor.build_app(TestConfig)
+    with app.app_context():
+        seed_database()
+
+    return app
+
+@pytest.fixture(scope='module')
+def client(app):
     client = app.test_client()
 
     with app.app_context():
         yield client
 
 
-@pytest.fixture(scope='module')
-def session(client):
+def seed_database():
     devops_monitor.db.create_all()
-    return devops_monitor.db.session
+
+    user = devops_monitor.models.User(
+        username='test@test.com'
+    )
+    devops_monitor.db.session.add(user)
+    devops_monitor.db.session.commit()
 
 
-@pytest.fixture(scope='module')
-def failed(session):
-    failed_status = Status(value='failed')
-    session.add(failed_status)
-    return failed_status
+@pytest.fixture()
+def authenticated_user(app):
+    @devops_monitor.login_manager.request_loader
+    def load_user_from_request(request):
+        return devops_monitor.models.User.query.first()
+        
+
+@pytest.mark.parametrize('route', [
+    '/web/',
+    '/web/messages',
+    '/web/accounts',
+    '/web/edit'
+])
+def test_unauthenticated(client, route):
+    resp = client.get(route)
+
+    assert resp.status_code == 302
+    assert '/web/login' in resp.headers['Location']
 
 
-@pytest.fixture(scope='module')
-def succeeded(session):
-    succeeded_status = Status(value='succeeded')
-    session.add(succeeded_status)
-    return succeeded_status
+def test_index_authenticated(client, authenticated_user):
+    resp = client.get('/web/')
 
-
-@pytest.fixture(scope='module')
-def devops_service():
-    class MockDevops:
-        def get_release_summary(self, *args, **kwargs):
-            return {
-                'Dev': {
-                    'name': 'Dev',
-                    'status': 'succeeded',
-                    'current': 'Release-2',
-                },
-                'Prod': {
-                    'name': 'Prod',
-                    'status': 'failed',
-                    'current': 'Release-1'
-                }
-            }
-
-    return MockDevops()
-
-@pytest.fixture(scope='module')
-def user(session):
-    testUser = User(organization='ExampleOrg')
-    devTask = Task(name='Dev', definitionId=1, project='MyProj', sort_order=0, type='release')
-    prodTask = Task(name='Prod', definitionId=1, project='MyProj', sort_order=1, type='release')
-    for obj in [testUser, devTask, prodTask]:
-        session.add(obj)
-    testUser.tasks.extend([devTask, prodTask])
-    session.commit()
-
-    return testUser
-
-def test_task(failed, succeeded):
-    task = Task()
-    task.status = failed
-    task.status = succeeded
-
-    assert task.status == succeeded.value
-    assert task.prev_status == failed.value
-
-
-def test_user(session):
-    user = User()
-    task1 = Task(name='Task1', sort_order=2)
-    task2 = Task(name='Task2', sort_order=1)
-    session.add(task1)
-    session.add(task2)
-    user.tasks.append(task1)
-    user.tasks.append(task2)
-    session.add(user)
-    session.commit()
-
-    assert user.tasks == [task2, task1]
-
-
-def test_build_release_statuses(user, devops_service):
-    releases = release_statuses(user, devops_service)
-
-    expected = [
-        {
-            'name': 'Dev',
-            'current': 'Release-2',
-            'status': 'succeeded'
-        },
-        {
-            'name': 'Prod',
-            'current': 'Release-1',
-            'status': 'failed'
-        }
-    ]
-
-    assert releases == expected
+    assert resp.status_code == 200
