@@ -12,9 +12,9 @@ class TaskSchema(Schema):
 
 
 class ColorSchema(Schema):
-    red = fields.Number()
-    green = fields.Number()
-    blue = fields.Number()
+    red = fields.Integer()
+    green = fields.Integer()
+    blue = fields.Integer()
 
 
 class LightSchema(Schema):
