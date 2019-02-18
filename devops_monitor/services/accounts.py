@@ -104,7 +104,10 @@ class DevOpsAccountService(AccountService):
                 ))
 
     def get_service(self, account):
-        token = self.cipher.decrypt(account.token)
+        token = account.token
+        if not isinstance(token, bytes):
+            token = token.encode('utf-8')
+        token = self.cipher.decrypt(token)
         return DevOpsService(account.username, token, account.organization)
 
     def list_all_tasks(self, account):
