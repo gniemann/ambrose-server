@@ -3,7 +3,7 @@ import functools
 from flask import Blueprint, abort, request
 import flask_bcrypt as bcrypt
 
-from devops_monitor.models import User
+from devops_monitor.models import User, MessageTask
 from devops_monitor.common import cipher_required
 from devops_monitor.services import DevOpsAccountService, LightService
 from .schema import TaskSchema, StatusSchema, with_schema
@@ -35,8 +35,9 @@ def get_status(user, cipher):
         abort(404)
 
     DevOpsAccountService(cipher).get_task_statuses(account)
+    messages = [t.message.upper() for t in user.tasks if isinstance(t, MessageTask)] + [m.upper() for m in user.messages]
 
     return {
         "lights": LightService.lights_for_user(user),
-        "messages": [m.upper() for m in user.messages]
+        "messages": messages
     }

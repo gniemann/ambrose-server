@@ -56,3 +56,12 @@ def create_edit_form(lights, tasks):
     }
 
     return EditForm(data=data)
+
+
+class NewTaskForm(FlaskForm):
+    type = SelectField('Select task type', choices=[(0, 'DateTime Message')], coerce=int)
+
+
+class DateTimeMessageForm(FlaskForm):
+    dateformat = StringField('Enter datetime format')
+    message = StringField('Enter message', render_kw={'required': True})

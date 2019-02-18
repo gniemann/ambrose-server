@@ -3,10 +3,10 @@ from flask import Blueprint, render_template, abort, redirect, url_for, request
 from devops_monitor.common import cipher_required
 from devops_monitor.services import UserService, UserCredentialMismatchException, DevOpsAccountService, \
     UnauthorizedAccessException
-from .forms import LoginForm, RegisterForm, MessageForm, DevOpsAccountForm, create_edit_form
+from .forms import LoginForm, RegisterForm, MessageForm, DevOpsAccountForm, create_edit_form, NewTaskForm
+from .tasks import tasks_bp
 
 web_bp = Blueprint('web', __name__, template_folder='templates')
-
 
 @web_bp.route('/')
 @UserService.auth_required
@@ -113,7 +113,7 @@ def account_tasks(account_id, user, cipher):
     tasks = account_service.list_all_tasks(account)
 
     current_tasks = current_build_tasks.union(current_release_tasks)
-    return render_template('tasks.html', tasks=tasks, current_tasks=current_tasks, account_id=account_id)
+    return render_template('account_tasks.html', tasks=tasks, current_tasks=current_tasks, account_id=account_id)
 
 
 @web_bp.route('/edit', methods=['GET', 'POST'])
@@ -127,3 +127,13 @@ def edit(user):
         edit_form = create_edit_form(user.lights, user.tasks)
 
     return render_template('edit.html', form=edit_form)
+
+@web_bp.route('/tasks', methods=['GET', 'POST'])
+@UserService.auth_required
+def tasks(user):
+    new_task_form = NewTaskForm()
+
+    if new_task_form.validate_on_submit():
+        return redirect(url_for('tasks.datetime_message'))
+
+    return render_template('tasks.html', tasks=user.tasks, form=new_task_form)

@@ -12,7 +12,7 @@ class User(db.Model, flask_login.UserMixin):
 
     accounts = db.relationship('Account', back_populates='user')
 
-    tasks = db.relationship('Task', back_populates='user', order_by='Task.sort_order', cascade='all, delete, delete-orphan')
+    tasks = db.relationship('Task', back_populates='user', cascade='all, delete, delete-orphan')
     _messages = db.relationship('Message', cascade='all, delete, delete-orphan')
 
     messages = association_proxy('_messages', 'text', creator=lambda text: Message(text=text))
@@ -68,3 +68,6 @@ class User(db.Model, flask_login.UserMixin):
 
     def add_account(self, account):
         self.accounts.append(account)
+
+    def add_task(self, task):
+        self.tasks.append(task)

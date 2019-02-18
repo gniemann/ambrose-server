@@ -1,67 +1,29 @@
 {% extends "base.html" %}
 {% import "macros.html" as macros %}
-{% block title %}Setup DevOps Monitor Configuration{% endblock %}
+{% set active_page = "tasks" %}
+{% block title %}Configure Tasks{% endblock %}
 
 {% block content %}
 <h1 class="text-center">Configure Tasks</h1>
 
-{% if tasks %}
-<form method="POST" action={{ url_for('.account_tasks', account_id=account_id) }}>
-
-<h4>Build Tasks</h4>
 <table class="table">
-    <thead>
-    <tr>
-        <th scope="col">Monitor</th>
-        <th scope="col">Project</th>
-        <th scope="col">Name</th>
-    </tr>
-    </thead>
+<thead>
+<tr>
+    <th scope="col">Name</th>
+    <th scope="col">Type</th>
+</tr>
+</thead>
     <tbody>
-    {% for task in tasks|selectattr('type', 'eq', 'build') %}
-        <input type="hidden" name="build{{ loop.index0 }}_definition_id" value="{{ task.definition_id }}">
-        <input type="hidden" name="build{{ loop.index0 }}_project" value="{{ task.project }}">
-        <input type="hidden" name="build{{ loop.index0 }}_name" value="{{ task.name }}">
-
-        <tr>
-            <td><input type="checkbox" name="build{{ loop.index0 }}" {% if task in current_tasks %}checked{% endif %}></td>
-            <td>{{ task.project }}</td>
-            <td>{{ task.name }}</td>
-        </tr>
+    {% for task in tasks %}
+    <tr>
+        <td>{{ task.name }}</td>
+        <td>{{ task.type }}</td>
+    </tr>
     {% endfor %}
     </tbody>
 </table>
 
-<h4>Release Tasks</h4>
-<table class="table">
-    <thead>
-    <tr>
-        <th scope="col">Monitored</th>
-        <th scope="col">Project</th>
-        <th scope="col">Pipeline</th>
-        <th scope="col">Environment</th>
-    </tr>
-    </thead>
-    <tbody>
-    {% for task in tasks|selectattr('type', 'eq', 'release') %}
-        <input type="hidden" name="releases{{ loop.index0 }}_project" value="{{ task.project }}">
-        <input type="hidden" name="releases{{ loop.index0 }}_name" value="{{ task.name }}">
-        <input type="hidden" name="releases{{ loop.index0 }}_environment" value="{{ task.environment }}">
-        <input type="hidden" name="releases{{ loop.index0 }}_environment_id" value="{{ task.environment_id }}">
-        <input type="hidden" name="releases{{ loop.index0 }}_definition_id" value="{{ task.definition_id }}">
-
-        <tr>
-            <td><input type="checkbox" name="releases{{ loop.index0 }}" {% if task in current_tasks %}checked{% endif %}></td>
-            <td>{{ task.project }}</td>
-            <td>{{ task.name }}</td>
-            <td>{{ task.environment }}</td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
-
-<input type="submit" value="Update" class="btn btn-primary">
-</form>
-{% endif %}
+<h3>Create New Task</h3>
+{{ macros.render_form(form, url_for('.tasks'), 'Add Task') }}
 
 {% endblock %}
