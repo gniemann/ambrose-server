@@ -23,7 +23,7 @@ class AccountService:
 
 class DevOpsAccountService(AccountService):
     def new_account(self, user, username, organization, token, nickname):
-        token = self.cipher.encrypt(token.encode('utf-8'))
+        token = str(self.cipher.encrypt(token.encode('utf-8')))
 
         account = DevOpsAccount(
             username=username,
