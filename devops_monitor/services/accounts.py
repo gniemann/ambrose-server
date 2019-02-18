@@ -23,7 +23,7 @@ class AccountService:
 
 class DevOpsAccountService(AccountService):
     def new_account(self, user, username, organization, token, nickname):
-        token = str(self.cipher.encrypt(token.encode('utf-8')))
+        token = self.cipher.encrypt(token.encode('utf-8')).decode('utf-8')
 
         account = DevOpsAccount(
             username=username,
@@ -107,7 +107,7 @@ class DevOpsAccountService(AccountService):
         token = account.token
         if not isinstance(token, bytes):
             token = token.encode('utf-8')
-        token = self.cipher.decrypt(token)
+        token = self.cipher.decrypt(token).decode('utf-8')
         return DevOpsService(account.username, token, account.organization)
 
     def list_all_tasks(self, account):
