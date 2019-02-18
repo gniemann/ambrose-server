@@ -1,28 +1,29 @@
 {% extends "base.html" %}
 {% import "macros.html" as macros %}
-{% set active_page = "accounts" %}
 {% block title %}Edit Tasks{% endblock %}
 
 {% block content %}
-<h1 class="text-center">Edit Tasks</h1>
+<h1 class="text-center">Edit Configuration</h1>
 
 <form method="POST" action="{{ url_for('.edit') }}">
+{{ form.csrf_token }}
+<div class="form-group row">
+    {{ form.num_lights.label(class='col-sm-2 col-form-label') }}
+    <div class="col-sm-4">{{ form.num_lights(class='form-control') }}</div>
+</div>
 <table class="table">
 <thead>
 <tr>
-    <td scope="col">Name</td>
-    <td scope="col">Type</td>
-    <td scope="col">Position</td>
-    <td scope="col">Delete</td>
+    <td scope="col">Slot</td>
+    <td scope="col">Task</td>
 </tr>
 </thead>
 <tbody>
-{% for task in tasks|sort(attribute='sort_order') %}
+{% for light_form in form.lights %}
+    {{ light_form.hidden_tag() }}
     <tr>
-    <td>{{ task.name }}</td>
-    <td>{{ task.type }}</td>
-    <td><input type="number" name="Task_{{ task.id }}_sortOrder" value="{{ task.sort_order }}"></td>
-    <td><input type="checkbox" name="Task_{{ task.id }}_delete"></td>
+        <td>{{ loop.index }}</td>
+        <td>{{ light_form.task() }}</td>
     </tr>
 {% endfor %}
 </tbody>

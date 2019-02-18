@@ -1,6 +1,7 @@
 import flask_login
 from sqlalchemy.ext.associationproxy import association_proxy
 
+from devops_monitor.models.light import StatusLight
 from . import db, DevOpsAccount, Message
 
 
@@ -15,6 +16,7 @@ class User(db.Model, flask_login.UserMixin):
     _messages = db.relationship('Message', cascade='all, delete, delete-orphan')
 
     messages = association_proxy('_messages', 'text')
+    lights = db.relationship('StatusLight', cascade='all, delete, delete-orphan')
 
     @classmethod
     def by_username(cls, username):
@@ -30,6 +32,33 @@ class User(db.Model, flask_login.UserMixin):
             if isinstance(account, DevOpsAccount):
                 return account
         return None
+
+    def light_for_slot(self, index):
+        return StatusLight.by_id(self.id, index)
+
+    def set_task_for_light(self, task, index):
+        light = self.light_for_slot(index)
+        if light:
+            light.task = task
+        else:
+            light = StatusLight(slot=index, user_id=self.id)
+            light.task = task
+            self.lights.append(light)
+
+    def resize_lights(self, count):
+        lights = self.lights
+        current_count = len(lights)
+        if count == current_count:
+            return
+        if count > current_count:
+            last_slot = lights[-1].slot if current_count > 0 else 0
+            diff = count - current_count
+            for slot in range(last_slot + 1, last_slot + diff + 1):
+                self.set_task_for_light(None, slot)
+        else:
+            for light in lights[count:]:
+                self.lights.remove(light)
+
 
     def add_message(self, text):
         self.messages.append(text)

@@ -4,7 +4,8 @@ import flask_bcrypt as bcrypt
 import flask_login
 
 from devops_monitor.common import db_transaction
-from devops_monitor.models import User
+from devops_monitor.models import User, Task
+
 
 class UserCredentialMismatchException(Exception):
     pass
@@ -53,3 +54,15 @@ class UserService:
     def clear_messages(cls, user):
         with db_transaction():
             user.clear_messages()
+
+    @classmethod
+    def update_lights(cls, user, data):
+        with db_transaction():
+            if data['num_lights'] != len(user.lights):
+                user.resize_lights(data['num_lights'])
+                return
+
+            for light_data in data['lights']:
+                task_id = light_data['task']
+                task = Task.by_id(task_id) if task_id >= 0 else None
+                user.set_task_for_light(task, light_data['slot'])

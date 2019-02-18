@@ -1,23 +1,17 @@
-from collections import namedtuple
-
 from flask import Blueprint, render_template, abort, redirect, url_for, request
 
-from devops import DevOpsService
-from devops_monitor.models import DevOpsAccount, Account, DevOpsBuildPipeline, \
-    DevOpsReleaseEnvironment
-from devops_monitor.common import cipher_required, db_transaction
-from devops_monitor.services import UserService, UserCredentialMismatchException, DevOpsAccountService
-from .forms import LoginForm, RegisterForm, MessageForm, DevOpsAccountForm
+from devops_monitor.common import cipher_required
+from devops_monitor.services import UserService, UserCredentialMismatchException, DevOpsAccountService, \
+    UnauthorizedAccessException
+from .forms import LoginForm, RegisterForm, MessageForm, DevOpsAccountForm, create_edit_form
 
 web_bp = Blueprint('web', __name__, template_folder='templates')
-
-AvailableTask = namedtuple('Task', 'id name type monitored sort_order')
 
 
 @web_bp.route('/')
 @UserService.auth_required
 def index(user):
-    return render_template('index.html', tasks=user.tasks)
+    return render_template('index.html', lights=user.lights)
 
 
 @web_bp.route('/login', methods=['GET', 'POST'])
@@ -95,11 +89,12 @@ def accounts(user, cipher):
 @UserService.auth_required
 @cipher_required
 def account_tasks(account_id, user, cipher):
-    account = Account.by_id(account_id)
-    if account not in user.accounts:
-        abort(403)
-
     account_service = DevOpsAccountService(cipher)
+    account = None
+    try:
+        account = account_service.get_account(account_id, user)
+    except UnauthorizedAccessException:
+        abort(403)
 
     if request.method == 'POST':
         # TODO: WTForms to clean this up (somehow)
@@ -124,18 +119,11 @@ def account_tasks(account_id, user, cipher):
 @web_bp.route('/edit', methods=['GET', 'POST'])
 @UserService.auth_required
 def edit(user):
-    if request.method == 'POST':
-        with db_transaction():
-            to_remove = []
-            for task in user.tasks:
-                if 'Task_{}_delete'.format(task.id) in request.form:
-                    to_remove.append(task)
-                else:
-                    task.sort_order = int(request.form['Task_' + str(task.id) + '_sortOrder'])
+    edit_form = create_edit_form(user.lights, user.tasks)
 
-            for task in to_remove:
-                user.tasks.remove(task)
+    if edit_form.validate_on_submit():
+        UserService.update_lights(user, edit_form.data)
+        # regenerate the form, in case there were size changes
+        edit_form = create_edit_form(user.lights, user.tasks)
 
-        return redirect(url_for('.index'))
-
-    return render_template('edit.html', tasks=user.tasks)
+    return render_template('edit.html', form=edit_form)

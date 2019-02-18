@@ -2,15 +2,24 @@ from collections import namedtuple
 
 from devops import DevOpsService
 from devops_monitor.common import db_transaction
-from devops_monitor.models import DevOpsAccount, DevOpsBuildPipeline, DevOpsReleaseEnvironment
+from devops_monitor.models import DevOpsAccount, DevOpsBuildPipeline, DevOpsReleaseEnvironment, Account
 
 BuildTask = namedtuple('BuildTask', 'project definition_id name type')
 ReleaseTask = namedtuple('ReleaseTask', 'project definition_id name environment environment_id type')
+
+class UnauthorizedAccessException(Exception):
+    pass
 
 class AccountService:
     def __init__(self, cipher=None):
         self.cipher = cipher
 
+    def get_account(self, account_id, user):
+        account = Account.by_id(account_id)
+        if account not in user.accounts:
+            raise UnauthorizedAccessException()
+
+        return account
 
 class DevOpsAccountService(AccountService):
     def new_account(self, user, username, organization, token, nickname):
@@ -94,10 +103,13 @@ class DevOpsAccountService(AccountService):
                     environment_id=task.environment_id
                 ))
 
+    def get_service(self, account):
+        token = self.cipher.decrypt(account.token)
+        return DevOpsService(account.username, token, account.organization)
+
     def list_all_tasks(self, account):
         tasks = []
-        token = self.cipher.decrypt(account.token)
-        service = DevOpsService(account.username, token, account.organization)
+        service = self.get_service(account)
         project_list = service.list_projects()
         if not project_list:
             return [] # TODO: raise exception instead
@@ -127,3 +139,31 @@ class DevOpsAccountService(AccountService):
                     ))
 
         return tasks
+
+    def get_task_statuses(self, account):
+        with db_transaction():
+            self.update_build_statuses(account)
+            self.update_release_statuses(account)
+
+    def update_build_statuses(self, account):
+        builds = account.build_tasks
+        service = self.get_service(account)
+
+        with db_transaction():
+            for project in {b.project for b in builds}:
+                project_builds = [b for b in builds if b.project == project]
+                definitions = [b.definition_id for b in project_builds]
+                statuses = service.get_build_summary(project, definitions)
+
+                for build in project_builds:
+                    build.status = statuses.status_for_definition(build.definition_id)
+
+    def update_release_statuses(self, account):
+        releases = account.release_tasks
+        service = self.get_service(account)
+
+        with db_transaction():
+            for (project, definition) in {(t.project, t.definition_id) for t in releases}:
+                statuses = service.get_release_summary(project, definition)
+                for env in [r for r in releases if r.project == project and r.definition_id == definition]:
+                    env.status = statuses.status_for_environment(env.environment_id)

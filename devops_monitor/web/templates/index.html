@@ -4,6 +4,7 @@
 
 {% block content %}
 <h1 class="text-center">DevOps Monitor Configuration</h1>
+<h3>Status Lights</h3>
 <table class="table">
     <thead>
     <tr>
@@ -15,14 +16,15 @@
     </thead>
 
 <tbody>
-{% for task in tasks|sort(attribute='sort_order') %}
+{% for light in lights|sort(attribute='slot') %}
     <tr>
-    <td>{{ task.sort_order }}</td>
-    <td>{{ task.name }}</td>
-    <td>{{ task.type }}</td>
-    <td>{{ task.status }}</td>
+    <td>{{ light.slot }}</td>
+    <td>{% if light.task %}{{ light.task.name }}{% endif %}</td>
+    <td>{% if light.task %}{{ light.task.type }}{% endif %}</td>
+    <td>{% if light.task %}{{ light.task.status }}{% endif %}</td>
     </tr>
 {% endfor %}
+
 </tbody>
 </table>
 <a href="{{ url_for('.edit') }}" class="btn btn-primary">Edit</a>

@@ -24,6 +24,10 @@ class Task(db.Model):
         self.has_changed = new_status != self._status
         self._status = new_status
 
+    @classmethod
+    def by_id(cls, task_id):
+        return cls.query.get(task_id)
+
     __mapper_args__ = {
         'polymorphic_identity': 'task',
         'polymorphic_on': _type
