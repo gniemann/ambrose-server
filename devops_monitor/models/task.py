@@ -11,6 +11,7 @@ class Task(db.Model):
 
     _type = db.Column(db.String)
     _status = db.Column(db.String)
+    prev_status = db.Column(db.String)
     has_changed = db.Column(db.Boolean)
 
     sort_order = db.Column(db.Integer, default=0)
@@ -22,7 +23,10 @@ class Task(db.Model):
     @status.setter
     def status(self, new_status):
         self.has_changed = new_status != self._status
-        self._status = new_status
+
+        if self.has_changed:
+            self.prev_status = self.status
+            self._status = new_status
 
     @classmethod
     def by_id(cls, task_id):

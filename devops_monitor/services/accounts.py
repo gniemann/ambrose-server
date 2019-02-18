@@ -7,8 +7,10 @@ from devops_monitor.models import DevOpsAccount, DevOpsBuildPipeline, DevOpsRele
 BuildTask = namedtuple('BuildTask', 'project definition_id name type')
 ReleaseTask = namedtuple('ReleaseTask', 'project definition_id name environment environment_id type')
 
+
 class UnauthorizedAccessException(Exception):
     pass
+
 
 class AccountService:
     def __init__(self, cipher=None):
@@ -20,6 +22,7 @@ class AccountService:
             raise UnauthorizedAccessException()
 
         return account
+
 
 class DevOpsAccountService(AccountService):
     def new_account(self, user, username, organization, token, nickname):
@@ -35,15 +38,13 @@ class DevOpsAccountService(AccountService):
         with db_transaction():
             user.add_account(account)
 
-
     def build_tasks(self, account):
         return {BuildTask(
             project=t.project,
             definition_id=t.definition_id,
             name=t.pipeline,
             type='build'
-     ) for t in account.build_tasks}
-
+        ) for t in account.build_tasks}
 
     def release_tasks(self, account):
         return {ReleaseTask(
@@ -53,8 +54,7 @@ class DevOpsAccountService(AccountService):
             environment=t.environment,
             environment_id=t.environment_id,
             type='release'
-    ) for t in account.release_tasks}
-
+        ) for t in account.release_tasks}
 
     def update_tasks(self, account, data):
         new_build_tasks = {BuildTask(
@@ -89,7 +89,7 @@ class DevOpsAccountService(AccountService):
                     pipeline=task.name
                 ))
 
-            #release tasks to remove
+            # release tasks to remove
             for task in current_release_tasks.difference(new_release_tasks):
                 account.remove_task(task)
 
@@ -115,7 +115,7 @@ class DevOpsAccountService(AccountService):
         service = self.get_service(account)
         project_list = service.list_projects()
         if not project_list:
-            return [] # TODO: raise exception instead
+            return []  # TODO: raise exception instead
 
         for project in [p.name for p in project_list]:
             release_list = service.list_release_definitions(project)
