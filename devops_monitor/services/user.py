@@ -28,7 +28,7 @@ class UserService:
         with db_transaction() as session:
             session.add(user)
 
-        flask_login.logout_user(user)
+        flask_login.login_user(user)
 
         return user
 
