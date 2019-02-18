@@ -34,7 +34,7 @@ def get_status(user, cipher):
     if not account:
         abort(404)
 
-    # DevOpsAccountService(cipher).get_task_statuses(account)
+    DevOpsAccountService(cipher).get_task_statuses(account)
 
     return {
         "lights": LightService.lights_for_user(user),
