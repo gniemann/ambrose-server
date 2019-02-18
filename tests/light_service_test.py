@@ -7,7 +7,7 @@ from devops_monitor.services import LightService
     ('Succeeded', (0, 255, 0)),
     ('Failed', (255, 0, 0)),
     ('Queued', (0, 0, 255)),
-    ('in_PROGRESS', (0, 0, 255)),
+    ('inPROGRESS', (0, 0, 255)),
     ('Pending_Approval', (255, 0, 255))
 ])
 def test_color_for_status(status, expected):
@@ -19,8 +19,8 @@ def test_color_for_status(status, expected):
     ('succeeded', True, 'initially_blinking'),
     ('queued', False, 'blinking'),
     ('queued', True, 'blinking'),
-    ('in_progress', False, 'blinking'),
-    ('in_progress', True, 'blinking'),
+    ('inprogress', False, 'blinking'),
+    ('inprogress', True, 'blinking'),
     ('pending_approval', False, 'blinking'),
     ('pending_approval', True, 'blinking'),
     ('failed', False, 'steady'),
