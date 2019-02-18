@@ -141,3 +141,25 @@ class DateTimeMessageTask(Task, MessageTask):
     __mapper_args__ = {
         'polymorphic_identity': 'date_time_message',
     }
+
+class MetricTask:
+    value = db.Column(db.Numeric)
+
+class ApplicationInsightMetricTask(Task):
+    __tablename__ = 'application_insight_metric'
+    task_id = db.Column(db.Integer, db.ForeignKey('task.id'), primary_key=True)
+
+    metric = db.Column(db.String)
+    nickname = db.Column(db.String)
+
+    @property
+    def type(self):
+        return 'Application Insights metric'
+
+    @property
+    def name(self):
+        return self.nickname if self.nickname else self.metric
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'application_insight_metric',
+    }

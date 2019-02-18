@@ -2,7 +2,8 @@ from collections import namedtuple
 
 from devops import DevOpsService
 from devops_monitor.common import db_transaction
-from devops_monitor.models import DevOpsAccount, DevOpsBuildPipeline, DevOpsReleaseEnvironment, Account
+from devops_monitor.models import DevOpsAccount, DevOpsBuildPipeline, DevOpsReleaseEnvironment, Account, \
+    ApplicationInsightsAccount, ApplicationInsightMetricTask
 
 BuildTask = namedtuple('BuildTask', 'project definition_id name type')
 ReleaseTask = namedtuple('ReleaseTask', 'project definition_id name environment environment_id type')
@@ -16,6 +17,14 @@ class AccountService:
     def __init__(self, cipher=None):
         self.cipher = cipher
 
+    def _encrypt(self, token):
+        return self.cipher.encrypt(token.encode('utf-8')).decode('utf-8')
+
+    def _decrypt(self, token):
+        if not isinstance(token, bytes):
+            token = token.encode('utf-8')
+        return self.cipher.decrypt(token).decode('utf-8')
+
     def get_account(self, account_id, user):
         account = Account.by_id(account_id)
         if account not in user.accounts:
@@ -26,17 +35,13 @@ class AccountService:
 
 class DevOpsAccountService(AccountService):
     def new_account(self, user, username, organization, token, nickname):
-        token = self.cipher.encrypt(token.encode('utf-8')).decode('utf-8')
-
-        account = DevOpsAccount(
-            username=username,
-            organization=organization,
-            token=token,
-            nickname=nickname
-        )
-
         with db_transaction():
-            user.add_account(account)
+            user.add_account(DevOpsAccount(
+                username=username,
+                organization=organization,
+                token=self._encrypt(token),
+                nickname=nickname
+            ))
 
     def build_tasks(self, account):
         return {BuildTask(
@@ -104,10 +109,7 @@ class DevOpsAccountService(AccountService):
                 ))
 
     def get_service(self, account):
-        token = account.token
-        if not isinstance(token, bytes):
-            token = token.encode('utf-8')
-        token = self.cipher.decrypt(token).decode('utf-8')
+        token = self._decrypt(account.token)
         return DevOpsService(account.username, token, account.organization)
 
     def list_all_tasks(self, account):
@@ -170,3 +172,19 @@ class DevOpsAccountService(AccountService):
                 statuses = service.get_release_summary(project, definition)
                 for env in [r for r in releases if r.project == project and r.definition_id == definition]:
                     env.status = statuses.status_for_environment(env.environment_id)
+
+
+class ApplicationInsightsAccountService(AccountService):
+    def new_account(self, user, application_id, api_key):
+        with db_transaction():
+            user.add_account(ApplicationInsightsAccount(
+                application_id=application_id,
+                api_key=self._encrypt(api_key)
+            ))
+
+    def add_metric(self, account, metric, nickname):
+        with db_transaction():
+            account.add_task(ApplicationInsightMetricTask(
+                metric=metric,
+                nickname=nickname
+            ))

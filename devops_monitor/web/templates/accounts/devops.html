@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+{% set active_page = "accounts" %}
+{% block title %}Configure Accounts{% endblock %}
+
+{% block content %}
+<h2>Link new DevOps account</h2>
+{{ macros.render_form(new_account_form, url_for('.devops_account'), 'Link Account') }}
+
+{% endblock %}

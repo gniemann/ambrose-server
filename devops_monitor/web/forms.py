@@ -18,11 +18,20 @@ class MessageForm(FlaskForm):
     message = StringField('Message', [InputRequired()], render_kw={'required': True})
 
 
+class NewAccountForm(FlaskForm):
+    type = SelectField('Select new account type', coerce=int)
+
+
 class DevOpsAccountForm(FlaskForm):
     username = StringField('Username', [InputRequired()], render_kw={'required': True})
     organization = StringField('Organization', [InputRequired()], render_kw={'required': True})
     token = StringField('DevOps Personal Access Token', [InputRequired()], render_kw={'required': True})
     nickname = StringField('Nickname')
+
+
+class ApplicationInsightsAccountForm(FlaskForm):
+    application_id = StringField('Application ID', [InputRequired()], render_kw={'required': True})
+    api_key = StringField('API Key', [InputRequired()], render_kw={'required': True})
 
 
 def create_edit_form(lights, tasks):
@@ -65,3 +74,8 @@ class NewTaskForm(FlaskForm):
 class DateTimeMessageForm(FlaskForm):
     dateformat = StringField('Enter datetime format')
     message = StringField('Enter message', render_kw={'required': True})
+
+
+class ApplicationInsightsMetricForm(FlaskForm):
+    metric = SelectField('Select metric')
+    nickname = StringField('Nickname')

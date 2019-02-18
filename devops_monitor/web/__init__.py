@@ -1,10 +1,9 @@
 from flask import Blueprint, render_template, abort, redirect, url_for, request
 
-from devops_monitor.common import cipher_required
-from devops_monitor.services import UserService, UserCredentialMismatchException, DevOpsAccountService, \
-    UnauthorizedAccessException
+from devops_monitor.services import UserService, UserCredentialMismatchException
 from .forms import LoginForm, RegisterForm, MessageForm, DevOpsAccountForm, create_edit_form, NewTaskForm
 from .tasks import tasks_bp
+from .accounts import accounts_bp
 
 web_bp = Blueprint('web', __name__, template_folder='templates')
 
@@ -65,56 +64,6 @@ def clear_messages(user):
     return redirect(url_for('.messages'))
 
 
-@web_bp.route('/accounts', methods=['GET', 'POST'])
-@UserService.auth_required
-@cipher_required
-def accounts(user, cipher):
-    new_account_form = DevOpsAccountForm(data={'username': user.username})
-
-    if new_account_form.validate_on_submit():
-        DevOpsAccountService(cipher).new_account(
-            user,
-            new_account_form.username.data,
-            new_account_form.organization.data,
-            new_account_form.token.data,
-            new_account_form.nickname.data
-        )
-
-        new_account_form = DevOpsAccountForm(data={'username': user.username})
-
-    return render_template('accounts.html', new_account_form=new_account_form, accounts=user.accounts)
-
-
-@web_bp.route('/accounts/<account_id>/tasks', methods=['GET', 'POST'])
-@UserService.auth_required
-@cipher_required
-def account_tasks(account_id, user, cipher):
-    account_service = DevOpsAccountService(cipher)
-    account = None
-    try:
-        account = account_service.get_account(account_id, user)
-    except UnauthorizedAccessException:
-        abort(403)
-
-    if request.method == 'POST':
-        # TODO: WTForms to clean this up (somehow)
-        task_data = {task:dict() for task in [key for key, val in request.form.items() if val == 'on']}
-
-        for task in task_data:
-            raw_properties = [val for val in request.form if val.startswith(task + '_')]
-            task_data[task] = {prop.split('_', maxsplit=1)[1]: request.form[prop] for prop in raw_properties}
-
-        account_service.update_tasks(account, task_data)
-
-        return redirect(url_for('.index'))
-
-    current_build_tasks = account_service.build_tasks(account)
-    current_release_tasks = account_service.release_tasks(account)
-    tasks = account_service.list_all_tasks(account)
-
-    current_tasks = current_build_tasks.union(current_release_tasks)
-    return render_template('account_tasks.html', tasks=tasks, current_tasks=current_tasks, account_id=account_id)
-
 
 @web_bp.route('/edit', methods=['GET', 'POST'])
 @UserService.auth_required
@@ -127,13 +76,3 @@ def edit(user):
         edit_form = create_edit_form(user.lights, user.tasks)
 
     return render_template('edit.html', form=edit_form)
-
-@web_bp.route('/tasks', methods=['GET', 'POST'])
-@UserService.auth_required
-def tasks(user):
-    new_task_form = NewTaskForm()
-
-    if new_task_form.validate_on_submit():
-        return redirect(url_for('tasks.datetime_message'))
-
-    return render_template('tasks.html', tasks=user.tasks, form=new_task_form)

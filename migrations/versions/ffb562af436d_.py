@@ -25,7 +25,7 @@ def upgrade():
     sa.ForeignKeyConstraint(['task_id'], ['task.id'], ),
     sa.PrimaryKeyConstraint('task_id')
     )
-    # op.drop_column('task', 'sort_order')
+    op.drop_column('task', 'sort_order')
     # ### end Alembic commands ###
 
 

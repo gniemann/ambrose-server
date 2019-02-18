@@ -59,3 +59,15 @@ class DevOpsAccount(Account):
     @property
     def release_tasks(self):
         return [t for t in self.tasks if isinstance(t, DevOpsReleaseEnvironment)]
+
+
+class ApplicationInsightsAccount(Account):
+    __tablename__ = 'application_insights_account'
+    account_id = db.Column(db.Integer, db.ForeignKey('account.id'), primary_key=True)
+
+    application_id = db.Column(db.String)
+    api_key = db.Column(db.String)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'application_insights_account'
+    }
