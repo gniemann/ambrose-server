@@ -15,7 +15,7 @@ class User(db.Model, flask_login.UserMixin):
     tasks = db.relationship('Task', back_populates='user', order_by='Task.sort_order', cascade='all, delete, delete-orphan')
     _messages = db.relationship('Message', cascade='all, delete, delete-orphan')
 
-    messages = association_proxy('_messages', 'text')
+    messages = association_proxy('_messages', 'text', creator=lambda text: Message(text=text))
     lights = db.relationship('StatusLight', cascade='all, delete, delete-orphan')
 
     @classmethod
