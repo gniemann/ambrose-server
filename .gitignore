@@ -129,4 +129,13 @@ dmypy.json
 devops.db
 
 http-client.env.json
-http-client.private.env.json
+http-client.private.env.json.idea/dataSources
+.idea/dataSources.local.xml
+.idea/dataSources.xml
+.idea/devops_monitor.iml
+.idea/encodings.xml
+.idea/httpRequests
+.idea/misc.xml
+.idea/modules.xml
+.idea/vcs.xml
+.idea/workspace.xml

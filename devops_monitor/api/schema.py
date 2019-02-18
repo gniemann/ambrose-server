@@ -28,7 +28,6 @@ class LightSchema(Schema):
 
 class StatusSchema(Schema):
     lights = fields.Nested(LightSchema, many=True)
-    tasks = fields.Nested(TaskSchema, many=True)
     messages = fields.List(fields.String())
 
 
