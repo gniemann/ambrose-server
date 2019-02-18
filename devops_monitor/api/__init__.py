@@ -37,6 +37,6 @@ def get_status(user, cipher):
     DevOpsAccountService(cipher).get_task_statuses(account)
 
     return {
-        # "lights": LightService.lights_for_user(user),
+        "lights": LightService.lights_for_user(user),
         "messages": [m.upper() for m in user.messages]
     }
