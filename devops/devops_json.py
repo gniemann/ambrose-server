@@ -41,6 +41,9 @@ class DevOpsJSON:
     def __getitem__(self, item):
         return self._data[item]
 
+    def __contains__(self, item):
+        return item in self._data
+
 
 class ReleaseSummary(DevOpsJSON):
     def __init__(self, json):
@@ -160,7 +163,7 @@ class BuildSummary(DevOpsJSON):
         if status == 'completed':
             status = target_build.result
 
-        return status
+        return format_status(status)
 
 
 class DevOpsProjects(DevOpsJSON):

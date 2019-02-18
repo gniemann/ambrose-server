@@ -20,10 +20,10 @@ class ColorSchema(Schema):
 class LightSchema(Schema):
     type = fields.String()
     primary_color = fields.Nested(ColorSchema)
-    primary_period = fields.Number(missing=None)
+    primary_period = fields.Integer(missing=None)
     secondary_color = fields.Nested(ColorSchema, missing=None)
-    secondary_period = fields.Number(missing=None)
-    repeat = fields.Number(missing=None)
+    secondary_period = fields.Integer(missing=None)
+    repeat = fields.Integer(missing=None)
 
 
 class StatusSchema(Schema):
