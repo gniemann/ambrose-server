@@ -15,7 +15,7 @@ class User(db.Model, flask_login.UserMixin):
     tasks = db.relationship('Task', back_populates='user', cascade='all, delete, delete-orphan')
     _messages = db.relationship('Message', cascade='all, delete, delete-orphan')
 
-    messages = association_proxy('_messages', 'text', creator=lambda text: Message(text=text))
+    messages = association_proxy('_messages', 'value', creator=lambda text: Message(text=text))
     lights = db.relationship('StatusLight', cascade='all, delete, delete-orphan')
 
     @classmethod
@@ -60,11 +60,8 @@ class User(db.Model, flask_login.UserMixin):
                 self.lights.remove(light)
 
 
-    def add_message(self, text):
-        self.messages.append(text)
-
-    def clear_messages(self):
-        self.messages.clear()
+    def add_message(self, message):
+        self._messages.append(message)
 
     def add_account(self, account):
         self.accounts.append(account)

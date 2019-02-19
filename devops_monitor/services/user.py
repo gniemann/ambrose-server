@@ -4,7 +4,7 @@ import flask_bcrypt as bcrypt
 import flask_login
 
 from devops_monitor.common import db_transaction
-from devops_monitor.models import User, Task, DateTimeMessageTask
+from devops_monitor.models import User, Task, DateTimeMessage, TextMessage, TaskMessage
 
 
 class UserCredentialMismatchException(Exception):
@@ -48,7 +48,7 @@ class UserService:
     @classmethod
     def add_message(cls, user, message):
         with db_transaction():
-            user.add_message(message)
+            user.add_message(TextMessage(text=message))
 
     @classmethod
     def clear_messages(cls, user):
@@ -70,4 +70,11 @@ class UserService:
     @classmethod
     def add_datetime_message(cls, user, format_string, date_format):
         with db_transaction():
-            user.add_task(DateTimeMessageTask(format=format_string, dateformat=date_format))
+            user.add_message(DateTimeMessage(text=format_string, dateformat=date_format))
+
+
+    @classmethod
+    def add_task_message(cls, user, task_id, format_string):
+        task = Task.by_id(task_id)
+        with db_transaction():
+            user.add_message(TaskMessage(text=format_string, task=task))

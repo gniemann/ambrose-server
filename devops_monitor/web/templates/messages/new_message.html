@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+{% set active_page = "accounts" %}
+{% block title %}Configure Message{% endblock %}
+
+{% block content %}
+<h2 class="text-capitalize text-centered">Create new {{ message_type }}</h2>
+{{ macros.render_form(form, message_url, 'Create Message') }}
+
+{% endblock %}

@@ -9,54 +9,66 @@ from devops_monitor.web.forms import NewAccountForm, ApplicationInsightsAccountF
 
 accounts_bp = Blueprint('accounts', __name__, template_folder='templates/accounts')
 
-@accounts_bp.route('/accounts', methods=['GET', 'POST'])
+@accounts_bp.route('/', methods=['GET', 'POST'])
 @UserService.auth_required
 def index(user):
     new_account_form = NewAccountForm()
 
-    new_account_form.type.choices = [(0, 'Azure DevOps'), (1, 'Application Insights')]
+    new_account_form.type.choices = [
+        ('devops', 'Azure DevOps'),
+        ('application_insights', 'Application Insights')
+    ]
+
     if new_account_form.validate_on_submit():
-        type_index = new_account_form.type.data
-        if type_index == 0:
-            return redirect(url_for('.devops_account'))
-        if type_index == 1:
-            return redirect(url_for('.app_insights_account'))
+        account_type = new_account_form.type.data
+        return redirect(url_for('.new_account', account_type=account_type))
 
     return render_template('accounts.html', new_account_form=new_account_form, accounts=user.accounts)
 
 
-@accounts_bp.route('/devops_account', methods=['GET', 'POST'])
+@accounts_bp.route('/<account_type>', methods=['GET', 'POST'])
 @UserService.auth_required
 @cipher_required
-def devops_account(user, cipher):
-    new_account_form = DevOpsAccountForm(data={'username': user.username})
+def new_account(account_type, user, cipher):
+    form = new_account_form(account_type)
 
-    if new_account_form.validate_on_submit():
-        DevOpsAccountService(cipher).new_account(
-            user,
-            new_account_form.username.data,
-            new_account_form.organization.data,
-            new_account_form.token.data,
-            new_account_form.nickname.data
-        )
-
+    if form.validate_on_submit():
+        create_new_account(form, user, cipher, account_type)
         return redirect(url_for('.index'))
 
-    return render_template('devops.html', new_account_form=new_account_form)
+    display_account_type = account_type.replace('_', ' ').capitalize()
+    return render_template('new_account.html', form=form, account_type=display_account_type, account_url=url_for('.new_account', account_type=account_type))
 
-@accounts_bp.route('/application_insights', methods=['GET', 'POST'])
-@UserService.auth_required
-@cipher_required
-def app_insights_account(user, cipher):
-    new_account_form = ApplicationInsightsAccountForm()
 
-    if new_account_form.validate_on_submit():
-        ApplicationInsightsAccountService(cipher)\
-            .new_account(user, new_account_form.application_id.data, new_account_form.api_key.data)
+def new_account_form(account_type):
+    if account_type == 'devops':
+        return DevOpsAccountForm()
+    if account_type == 'application_insights':
+        return ApplicationInsightsAccountForm()
 
-        return redirect(url_for('.index'))
+    abort(404)
 
-    return render_template('application_insights.html', new_account_form=new_account_form)
+def create_new_account(form, user, cipher, account_type):
+    if account_type == 'devops':
+        new_devops_account(form, user, cipher)
+    elif account_type == 'application_insights':
+        new_app_insights_account(form, user, cipher)
+
+
+def new_devops_account(form, user, cipher):
+    DevOpsAccountService(cipher).new_account(
+        user,
+        form.username.data,
+        form.organization.data,
+        form.token.data,
+        form.nickname.data
+    )
+
+
+def new_app_insights_account(form, user, cipher):
+    ApplicationInsightsAccountService(cipher)\
+        .new_account(user, form.application_id.data, form.api_key.data)
+
 
 @accounts_bp.route('/accounts/<account_id>/tasks', methods=['GET', 'POST'])
 @UserService.auth_required

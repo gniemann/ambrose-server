@@ -14,12 +14,8 @@ class RegisterForm(FlaskForm):
     confirm_password = PasswordField('Confirm Password', render_kw={'required': True})
 
 
-class MessageForm(FlaskForm):
-    message = StringField('Message', [InputRequired()], render_kw={'required': True})
-
-
 class NewAccountForm(FlaskForm):
-    type = SelectField('Select new account type', coerce=int)
+    type = SelectField('Select new account type')
 
 
 class DevOpsAccountForm(FlaskForm):
@@ -68,14 +64,26 @@ def create_edit_form(lights, tasks):
 
 
 class NewTaskForm(FlaskForm):
-    type = SelectField('Select task type', choices=[(0, 'DateTime Message')], coerce=int)
-
-
-class DateTimeMessageForm(FlaskForm):
-    dateformat = StringField('Enter datetime format')
-    message = StringField('Enter message', render_kw={'required': True})
+    type = SelectField('Select task type')
 
 
 class ApplicationInsightsMetricForm(FlaskForm):
     metric = SelectField('Select metric')
     nickname = StringField('Nickname')
+
+
+class NewMessageForm(FlaskForm):
+    type = SelectField('Select task type')
+
+
+class MessageForm(FlaskForm):
+    message = StringField('Enter message', render_kw={'required': True})
+
+
+class DateTimeMessageForm(MessageForm):
+    dateformat = StringField('Enter datetime format')
+    message = StringField('Enter message', render_kw={'required': True})
+
+
+class TaskMessageForm(MessageForm):
+    task = SelectField('Select task', coerce=int)

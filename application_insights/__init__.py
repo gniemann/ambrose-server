@@ -1,10 +1,26 @@
+from datetime import datetime
+
 import requests
+from dateutil import parser
 
 from json_object import JSONObject
 
 class MetricJSON(JSONObject):
     def __init__(self, json):
         super(MetricJSON, self).__init__(json['value'])
+
+
+class Metric:
+    def __init__(self, json, metric):
+        metric = metric.replace('/', '_')
+        # this should be a dictionary one 1 pair
+        for key, val in json[metric].items():
+            setattr(self, key, val)
+            self.value_type = key
+            self.value = val
+
+        self.start = parser.parse(json.start)
+        self.end = parser.parse(json.end)
 
 
 class ApplicationInsightsService:
@@ -15,8 +31,23 @@ class ApplicationInsightsService:
         self.api_key = api_key
 
     def get_request_duration(self):
-        endpoint = 'metrics/requests/duration'
-        return self._request(endpoint)
+        return self.get_metric('requests/duration')
+
+    def get_metric(self, metric, aggregation=None, timespan=None):
+        endpoint = 'metrics/{}'.format(metric)
+        query = []
+        if aggregation:
+            query.append('aggregation={}'.format(aggregation))
+        if timespan:
+            query.append('timespan={}'.format(timespan))
+
+        if len(query) > 0:
+            endpoint += '?' + '&'.join(query)
+
+        json = self._request(endpoint)
+        if json:
+            return Metric(json, metric)
+        return None
 
     def _get(self, url):
         return requests.get(url, headers={'x-api-key': self.api_key})

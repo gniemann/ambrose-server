@@ -1,4 +1,5 @@
 import pytest
+from cryptography.fernet import Fernet
 
 from config import Config
 import devops_monitor
@@ -8,7 +9,7 @@ class TestConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite://'
     WTF_CSRF_ENABLED = False
-    SECRET_KEY = 'secret'
+    SECRET_KEY = Fernet.generate_key()
 
 @pytest.fixture(scope='module')
 def app():
@@ -45,8 +46,8 @@ def authenticated_user(app):
 
 @pytest.mark.parametrize('route', [
     '/web/',
-    '/web/messages',
-    '/web/accounts',
+    '/web/messages/',
+    '/web/accounts/',
     '/web/edit'
 ])
 def test_unauthenticated(client, route):
@@ -55,8 +56,16 @@ def test_unauthenticated(client, route):
     assert resp.status_code == 302
     assert '/web/login' in resp.headers['Location']
 
-
-def test_index_authenticated(client, authenticated_user):
-    resp = client.get('/web/')
+@pytest.mark.parametrize('route', [
+    '/web/',
+    '/web/messages/',
+    '/web/edit',
+    '/web/accounts/',
+    '/web/accounts/devops',
+    '/web/accounts/application_insights',
+    '/web/tasks/'
+])
+def test_index_authenticated(client, route, authenticated_user):
+    resp = client.get(route)
 
     assert resp.status_code == 200

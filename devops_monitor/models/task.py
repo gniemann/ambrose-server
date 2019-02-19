@@ -13,21 +13,9 @@ class Task(db.Model):
     account = db.relationship('Account', uselist=False, back_populates='tasks')
 
     _type = db.Column(db.String)
-    _status = db.Column(db.String)
-    prev_status = db.Column(db.String)
-    has_changed = db.Column(db.Boolean)
-
-    @property
-    def status(self):
-        return self._status
-
-    @status.setter
-    def status(self, new_status):
-        self.has_changed = new_status != self._status
-
-        if self.has_changed:
-            self.prev_status = self.status
-            self._status = new_status
+    _value = db.Column(db.String)
+    _prev_value = db.Column(db.String)
+    last_update = db.Column(db.DateTime)
 
     @classmethod
     def by_id(cls, task_id):
@@ -41,11 +29,32 @@ class Task(db.Model):
     def name(self):
         return self.__class__.__name__
 
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, new_value):
+        self._prev_value = self._value
+        self._value = new_value
+
+    @property
+    def has_changed(self):
+        return self._prev_value != self._value
+
     __mapper_args__ = {
         'polymorphic_identity': 'task',
         'polymorphic_on': _type
     }
 
+class StatusTask:
+    @property
+    def status(self):
+        return self.value
+
+    @status.setter
+    def status(self, new_status):
+        self.value = new_status
 
 class DevOpsTask:
     project = db.Column(db.String)
@@ -53,7 +62,7 @@ class DevOpsTask:
     pipeline = db.Column(db.String)
 
 
-class DevOpsBuildPipeline(Task, DevOpsTask):
+class DevOpsBuildPipeline(Task, DevOpsTask, StatusTask):
     __tablename__ = 'devops_build_pipeline'
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'), primary_key=True)
 
@@ -80,7 +89,7 @@ class DevOpsBuildPipeline(Task, DevOpsTask):
             self.definition_id == other.definition_id
 
 
-class DevOpsReleaseEnvironment(Task, DevOpsTask):
+class DevOpsReleaseEnvironment(Task, DevOpsTask, StatusTask):
     __tablename__ = 'devops_release_environment'
 
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'), primary_key=True)
@@ -111,46 +120,18 @@ class DevOpsReleaseEnvironment(Task, DevOpsTask):
             self.environment_id == other.environment_id
 
 
-class MessageTask:
-    format = db.Column(db.String)
-
-    @property
-    def message(self):
-        return format
-
-
-class DateTimeMessageTask(Task, MessageTask):
-    __tablename__ = 'date_time_message'
-    default_format = '%b %m, %M%M'
-    task_id = db.Column(db.Integer, db.ForeignKey('task.id'), primary_key=True)
-    dateformat = db.Column(db.String, default=default_format)
-
-    @property
-    def type(self):
-        return 'DateTime Message'
-
-    @property
-    def name(self):
-        return self.message
-
-    @property
-    def message(self):
-        now = datetime.now()
-        return self.format.format(now.strftime(self.dateformat))
-
-    __mapper_args__ = {
-        'polymorphic_identity': 'date_time_message',
-    }
-
-class MetricTask:
-    value = db.Column(db.Numeric)
-
 class ApplicationInsightMetricTask(Task):
     __tablename__ = 'application_insight_metric'
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'), primary_key=True)
 
     metric = db.Column(db.String)
     nickname = db.Column(db.String)
+
+    start = db.Column(db.DateTime)
+    end = db.Column(db.DateTime)
+
+    aggregation = db.Column(db.String)
+    timespan = db.Column(db.String)
 
     @property
     def type(self):

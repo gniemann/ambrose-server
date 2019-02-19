@@ -13,10 +13,7 @@
 
 
 <h3 class="text-centered">New Message</h3>
-{{ macros.render_form(message_form, url_for('.messages'), 'Add message') }}
-<form method="POST" action="{{ url_for('.clear_messages') }}">
-<input type="submit" class="btn btn-danger" value="Clear Messages">
-</form>
+{{ macros.render_form(form, url_for('.index'), 'Add message') }}
 
 
 {% endblock %}

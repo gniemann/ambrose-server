@@ -1,5 +1,6 @@
 from collections import namedtuple
 
+from application_insights import ApplicationInsightsService
 from devops import DevOpsService
 from devops_monitor.common import db_transaction
 from devops_monitor.models import DevOpsAccount, DevOpsBuildPipeline, DevOpsReleaseEnvironment, Account, \
@@ -31,6 +32,7 @@ class AccountService:
             raise UnauthorizedAccessException()
 
         return account
+
 
 
 class DevOpsAccountService(AccountService):
@@ -188,3 +190,13 @@ class ApplicationInsightsAccountService(AccountService):
                 metric=metric,
                 nickname=nickname
             ))
+
+    def update_task_statuses(self, account):
+        insights = ApplicationInsightsService(account.application_id, self._decrypt(account.api_key))
+        with db_transaction():
+            for task in [t for t in account.tasks if isinstance(t, ApplicationInsightMetricTask)]:
+                metric = insights.get_metric(task.metric, aggregation=task.aggregation, timespan=task.timespan)
+                if metric:
+                    task.value = metric.value
+                    task.start = metric.start
+                    task.end = metric.end

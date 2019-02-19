@@ -1,9 +1,10 @@
-from flask import Blueprint, render_template, abort, redirect, url_for, request
+from flask import Blueprint, render_template, abort, redirect, url_for
 
 from devops_monitor.services import UserService, UserCredentialMismatchException
-from .forms import LoginForm, RegisterForm, MessageForm, DevOpsAccountForm, create_edit_form, NewTaskForm
+from .forms import LoginForm, RegisterForm, DevOpsAccountForm, create_edit_form, NewTaskForm
 from .tasks import tasks_bp
 from .accounts import accounts_bp
+from .messages import messages_bp
 
 web_bp = Blueprint('web', __name__, template_folder='templates')
 
@@ -44,17 +45,6 @@ def register():
 def logout(user):
     UserService.logout()
     return redirect(url_for('.login'))
-
-
-@web_bp.route('/messages', methods=['GET', 'POST'])
-@UserService.auth_required
-def messages(user):
-    message_form = MessageForm()
-
-    if message_form.validate_on_submit():
-        UserService.add_message(user, message_form.message.data)
-
-    return render_template('messages.html', message_form=message_form, messages=user.messages)
 
 
 @web_bp.route('/messages/clear', methods=['POST'])
