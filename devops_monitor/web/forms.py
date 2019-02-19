@@ -70,6 +70,8 @@ class NewTaskForm(FlaskForm):
 
 class ApplicationInsightsMetricForm(FlaskForm):
     metric = SelectField('Select metric')
+    aggregation = SelectField("Select aggregation", choices=[('avg', 'Average'), ('sum', 'Sum'), ('min', 'Min'), ('max', 'Max'), ('count', 'Count')])
+    timespan = StringField('Timespan')
     nickname = StringField('Nickname')
 
 

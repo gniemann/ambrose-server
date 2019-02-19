@@ -109,7 +109,11 @@ def devops_account_tasks(account, cipher):
 
 def app_insights_account_tasks(account):
     new_metric_form = ApplicationInsightsMetricForm()
-    new_metric_form.metric.choices = [('requests/count', 'Request count')]
+    new_metric_form.metric.choices = [
+        ('requests/count', 'Request count'),
+        ('requests/duration', 'Request duration'),
+        ('requests/failed', 'Failed requests')
+    ]
 
     if new_metric_form.validate_on_submit():
         ApplicationInsightsAccountService().add_metric(
