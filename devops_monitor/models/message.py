@@ -31,12 +31,14 @@ class Message(db.Model):
         'polymorphic_on': _type
     }
 
+
 class TextMessage(Message):
     __tablename__ = 'text_message'
 
     __mapper_args__ = {
         'polymorphic_identity': 'text_message',
     }
+
 
 class DateTimeMessage(Message):
     __tablename__ = 'datetime_message'

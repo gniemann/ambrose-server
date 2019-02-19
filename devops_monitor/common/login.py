@@ -1,4 +1,5 @@
 import flask_login
+import flask_bcrypt as bcrypt
 
 from devops_monitor.models import User
 
@@ -11,4 +12,13 @@ def load_user(user_id):
     return User.by_id(user_id)
 
 
+@login_manager.request_loader
+def request_loader(request):
+    if not request.authorization:
+        return None
 
+    user = User.by_username(request.authorization.username)
+    if user and bcrypt.check_password_hash(user.password, request.authorization.password):
+        return user
+
+    return None

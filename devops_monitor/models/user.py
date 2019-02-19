@@ -57,7 +57,6 @@ class User(db.Model, flask_login.UserMixin):
             for light in lights[count:]:
                 self.lights.remove(light)
 
-
     def add_message(self, message):
         self.messages.append(message)
 

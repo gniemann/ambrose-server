@@ -13,18 +13,18 @@ accounts_bp = Blueprint('accounts', __name__, template_folder='templates/account
 @accounts_bp.route('/', methods=['GET', 'POST'])
 @UserService.auth_required
 def index(user):
-    new_account_form = NewAccountForm()
+    form = NewAccountForm()
 
-    new_account_form.type.choices = [
+    form.type.choices = [
         ('devops', 'Azure DevOps'),
         ('application_insights', 'Application Insights')
     ]
 
-    if new_account_form.validate_on_submit():
-        account_type = new_account_form.type.data
+    if form.validate_on_submit():
+        account_type = form.type.data
         return redirect(url_for('.new_account', account_type=account_type))
 
-    return render_template('accounts.html', new_account_form=new_account_form, accounts=user.accounts)
+    return render_template('accounts.html', new_account_form=form, accounts=user.accounts)
 
 
 @accounts_bp.route('/<account_type>', methods=['GET', 'POST'])

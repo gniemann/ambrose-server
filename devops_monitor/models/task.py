@@ -51,6 +51,7 @@ class Task(db.Model):
         'polymorphic_on': _type
     }
 
+
 class StatusTask:
     @property
     def status(self):
@@ -59,6 +60,7 @@ class StatusTask:
     @status.setter
     def status(self, new_status):
         self.value = new_status
+
 
 class DevOpsTask:
     project = db.Column(db.String)
@@ -90,7 +92,7 @@ class DevOpsBuildPipeline(Task, DevOpsTask, StatusTask):
             return False
 
         return self.project == other.project and \
-            self.definition_id == other.definition_id
+               self.definition_id == other.definition_id
 
 
 class DevOpsReleaseEnvironment(Task, DevOpsTask, StatusTask):
@@ -120,8 +122,8 @@ class DevOpsReleaseEnvironment(Task, DevOpsTask, StatusTask):
             return False
 
         return self.project == other.project and \
-            self.definition_id == other.definition_id and \
-            self.environment_id == other.environment_id
+               self.definition_id == other.definition_id and \
+               self.environment_id == other.environment_id
 
 
 class ApplicationInsightMetricTask(Task):

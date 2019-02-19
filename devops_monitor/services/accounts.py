@@ -32,7 +32,6 @@ class AccountService:
         return account
 
 
-
 class DevOpsAccountService(AccountService):
     def new_account(self, user, username, organization, token, nickname):
         with db_transaction():
