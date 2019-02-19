@@ -15,9 +15,10 @@ class JSONObject:
         self._data = {}
 
         for key, value in wrapped.items():
-            key = key.replace('/', '_')
-            if keyword.iskeyword(key):
-                key += '_'
+            if isinstance(key, str):
+                key = key.replace('/', '_')
+                if keyword.iskeyword(key):
+                    key += '_'
             self._data[key] = value
 
     def __getattr__(self, item):

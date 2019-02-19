@@ -47,14 +47,6 @@ def logout(user):
     return redirect(url_for('.login'))
 
 
-@web_bp.route('/messages/clear', methods=['POST'])
-@UserService.auth_required
-def clear_messages(user):
-    UserService.clear_messages(user)
-    return redirect(url_for('.messages'))
-
-
-
 @web_bp.route('/edit', methods=['GET', 'POST'])
 @UserService.auth_required
 def edit(user):
