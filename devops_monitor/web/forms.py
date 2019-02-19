@@ -1,3 +1,4 @@
+import pytz
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, FormField, FieldList, HiddenField, SelectField, IntegerField
 from wtforms.validators import InputRequired, EqualTo
@@ -83,6 +84,7 @@ class MessageForm(FlaskForm):
 class DateTimeMessageForm(MessageForm):
     dateformat = StringField('Enter datetime format')
     message = StringField('Enter message', render_kw={'required': True})
+    timezone = SelectField('Select display timezone', choices=[(tz, tz) for tz in pytz.all_timezones if tz.startswith('US')])
 
 
 class TaskMessageForm(MessageForm):

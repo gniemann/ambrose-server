@@ -35,6 +35,7 @@ class DateTimeMessage(Message):
 
     message_id = db.Column(db.Integer, db.ForeignKey('message.id'), primary_key=True)
     dateformat = db.Column(db.String, default=default_format)
+    timezone = db.Column(db.String)
 
     @property
     def value(self):

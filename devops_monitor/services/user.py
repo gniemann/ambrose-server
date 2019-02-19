@@ -69,7 +69,7 @@ class UserService:
                 user.set_task_for_light(task, light_data['slot'])
 
     @classmethod
-    def add_datetime_message(cls, user, format_string, date_format):
+    def add_datetime_message(cls, user, format_string, date_format, timezone):
         with db_transaction():
             user.add_message(DateTimeMessage(text=format_string, dateformat=date_format))
 

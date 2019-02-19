@@ -61,7 +61,12 @@ def new_text_message(form, user):
 
 
 def new_datetime_message(form, user):
-    UserService.add_datetime_message(user, form.message.data, form.dateformat.data)
+    UserService.add_datetime_message(
+        user,
+        form.message.data,
+        form.dateformat.data,
+        form.timezone.data
+    )
 
 
 def new_task_message(form, user):
