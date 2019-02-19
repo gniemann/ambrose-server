@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+{% set active_page = "accounts" %}
+{% block title %}Configure Message{% endblock %}
+
+{% block content %}
+<h2 class="text-capitalize text-centered">
+{% if is_new %}
+    Create new {{ message_type }}
+{% else %}
+    Edit Message
+{% endif %}
+</h2>
+    {% if is_new %}
+{{ macros.render_form(form, message_url, 'Create Message') }}
+{% else %}
+    {{ macros.render_form(form, message_url, 'Save Changes') }}
+    {% endif %}
+{% endblock %}

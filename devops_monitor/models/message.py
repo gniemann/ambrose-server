@@ -18,6 +18,14 @@ class Message(db.Model):
     def __str__(self):
         return self.value
 
+    @classmethod
+    def by_id(cls, message_id):
+        return cls.query.get(message_id)
+
+    @property
+    def type(self):
+        return self._type.split('_')[0]
+
     __mapper_args__ = {
         'polymorphic_identity': 'message',
         'polymorphic_on': _type

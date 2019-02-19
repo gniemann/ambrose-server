@@ -39,5 +39,5 @@ def get_status(user, cipher):
 
     return {
         "lights": LightService.lights_for_user(user),
-        "messages": [m.upper() for m in user.messages]
+        "messages": [m.value.upper() for m in user.messages]
     }

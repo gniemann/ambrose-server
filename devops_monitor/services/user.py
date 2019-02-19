@@ -4,7 +4,8 @@ import flask_bcrypt as bcrypt
 import flask_login
 
 from devops_monitor.common import db_transaction
-from devops_monitor.models import User, Task, DateTimeMessage, TextMessage, TaskMessage
+from devops_monitor.models import User, Task, DateTimeMessage, TextMessage, TaskMessage, Message
+from devops_monitor.services import UnauthorizedAccessException
 
 
 class UserCredentialMismatchException(Exception):
@@ -83,3 +84,11 @@ class UserService:
         task = Task.by_id(task_id)
         with db_transaction():
             user.add_message(TaskMessage(text=format_string, task=task))
+
+    @classmethod
+    def get_message(cls, user, message_id):
+        message = Message.by_id(message_id)
+        if message not in user.messages:
+            raise UnauthorizedAccessException()
+
+        return message

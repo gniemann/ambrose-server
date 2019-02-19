@@ -1,8 +1,7 @@
 import flask_login
-from sqlalchemy.ext.associationproxy import association_proxy
 
 from devops_monitor.models.light import StatusLight
-from . import db, DevOpsAccount, Message
+from . import db, DevOpsAccount
 
 
 class User(db.Model, flask_login.UserMixin):
@@ -13,9 +12,8 @@ class User(db.Model, flask_login.UserMixin):
     accounts = db.relationship('Account', back_populates='user')
 
     tasks = db.relationship('Task', back_populates='user', cascade='all, delete, delete-orphan')
-    _messages = db.relationship('Message', cascade='all, delete, delete-orphan')
+    messages = db.relationship('Message', cascade='all, delete, delete-orphan')
 
-    messages = association_proxy('_messages', 'value', creator=lambda text: Message(text=text))
     lights = db.relationship('StatusLight', cascade='all, delete, delete-orphan')
 
     @classmethod
@@ -61,7 +59,7 @@ class User(db.Model, flask_login.UserMixin):
 
 
     def add_message(self, message):
-        self._messages.append(message)
+        self.messages.append(message)
 
     def add_account(self, account):
         self.accounts.append(account)

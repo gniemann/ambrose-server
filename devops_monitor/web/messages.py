@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, url_for, redirect
 
+from devops_monitor.common import db_transaction
 from devops_monitor.services import UserService
 from devops_monitor.web.forms import NewMessageForm, DateTimeMessageForm, MessageForm, TaskMessageForm
 
@@ -23,26 +24,38 @@ def index(user):
     return render_template('messages.html', form=form, messages=user.messages)
 
 
-@messages_bp.route('/<message_type>', methods=['GET', 'POST'])
+@messages_bp.route('/new/<message_type>', methods=['GET', 'POST'])
 @UserService.auth_required
 def new_message(message_type, user):
-    form = new_message_form(message_type, user)
+    form = message_form(message_type, user)
 
     if form.validate_on_submit():
         create_new_message(form, user, message_type)
         return redirect(url_for('.index'))
 
-    return render_template('new_message.html', form=form, message_type=message_type,
-                           message_url=url_for('.new_message', message_type=message_type))
+    return render_template('message.html', form=form, message_type=message_type,
+                           message_url=url_for('.new_message', message_type=message_type), is_new=True)
 
+@messages_bp.route('/<int:message_id>', methods=['GET', 'POST'])
+@UserService.auth_required
+def edit_message(message_id, user):
+    message = UserService.get_message(user, message_id)
 
-def new_message_form(message_type, user):
+    form = message_form(message.type, user, obj=message)
+    if form.validate_on_submit():
+        with db_transaction():
+            form.populate_obj(message)
+        return redirect(url_for('.index'))
+
+    return render_template('message.html', form=form, message_type='datetime', message_url=url_for('.edit_message', message_id=message_id), is_new=False)
+
+def message_form(message_type, user, obj=None, data=None):
     if message_type == 'datetime':
-        return DateTimeMessageForm()
+        return DateTimeMessageForm(obj=obj, data=data)
     if message_type == 'text':
-        return MessageForm()
+        return MessageForm(obj=obj, data=data)
     if message_type == 'task':
-        form = TaskMessageForm()
+        form = TaskMessageForm(obj=obj, data=data)
         form.task.choices = [(t.id, t.name) for t in user.tasks]
         return form
 
@@ -57,17 +70,17 @@ def create_new_message(form, user, message_type):
 
 
 def new_text_message(form, user):
-    UserService.add_message(user, form.message.data)
+    UserService.add_message(user, form.text.data)
 
 
 def new_datetime_message(form, user):
     UserService.add_datetime_message(
         user,
-        form.message.data,
+        form.text.data,
         form.dateformat.data,
         form.timezone.data
     )
 
 
 def new_task_message(form, user):
-    UserService.add_task_message(user, form.task.data, form.message.data)
+    UserService.add_task_message(user, form.task.data, form.text.data)

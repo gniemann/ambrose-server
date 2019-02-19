@@ -78,12 +78,11 @@ class NewMessageForm(FlaskForm):
 
 
 class MessageForm(FlaskForm):
-    message = StringField('Enter message', render_kw={'required': True})
+    text = StringField('Enter message', render_kw={'required': True})
 
 
 class DateTimeMessageForm(MessageForm):
     dateformat = StringField('Enter datetime format')
-    message = StringField('Enter message', render_kw={'required': True})
     timezone = SelectField('Select display timezone', choices=[(tz, tz) for tz in pytz.all_timezones if tz.startswith('US')])
 
 

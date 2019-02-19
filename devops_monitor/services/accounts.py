@@ -6,13 +6,10 @@ from devops import DevOpsService
 from devops_monitor.common import db_transaction
 from devops_monitor.models import DevOpsAccount, DevOpsBuildPipeline, DevOpsReleaseEnvironment, Account, \
     ApplicationInsightsAccount, ApplicationInsightMetricTask
+from .exceptions import UnauthorizedAccessException
 
 BuildTask = namedtuple('BuildTask', 'project definition_id name type')
 ReleaseTask = namedtuple('ReleaseTask', 'project definition_id name environment environment_id type')
-
-
-class UnauthorizedAccessException(Exception):
-    pass
 
 
 class AccountService:
