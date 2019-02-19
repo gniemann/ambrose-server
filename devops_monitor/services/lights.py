@@ -1,5 +1,7 @@
 from collections import namedtuple
 
+from devops_monitor.models import StatusTask
+
 Color = namedtuple('Color', 'red green blue')
 
 RED = Color(255, 0, 0)
@@ -61,12 +63,12 @@ class LightService:
         if task is None:
             return SteadyLight(OFF)
 
-        status = task.status.lower()
+        status = task.value.lower()
         primary_color = cls.color_for_status(status)
 
         # queued, in_progress and pending_approval always are the same regardless of has_changed (to ensure they persist between updates
         if status == 'queued' or status == 'inprogress' or status == 'pending_approval':
-            secondary_color = cls.color_for_status(task.prev_status)
+            secondary_color = cls.color_for_status(task.prev_value)
             return BlinkingLight(primary_color, 4, secondary_color, 4)
 
         # all others are different based on has_changed

@@ -39,6 +39,10 @@ class Task(db.Model):
         self._value = new_value
 
     @property
+    def prev_value(self):
+        return self._prev_value
+
+    @property
     def has_changed(self):
         return self._prev_value != self._value
 
