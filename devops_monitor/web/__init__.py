@@ -49,11 +49,11 @@ def logout(user):
 
 @web_bp.route('/edit', methods=['GET', 'POST'])
 @UserService.auth_required
-def edit(user):
+def edit(user, user_service):
     edit_form = create_edit_form(user.lights, user.tasks)
 
     if edit_form.validate_on_submit():
-        UserService.update_lights(user, edit_form.data)
+        user_service.update_lights(edit_form.data)
         # regenerate the form, in case there were size changes
         edit_form = create_edit_form(user.lights, user.tasks)
 

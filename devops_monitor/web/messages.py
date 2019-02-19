@@ -36,10 +36,11 @@ def new_message(message_type, user):
     return render_template('message.html', form=form, message_type=message_type,
                            message_url=url_for('.new_message', message_type=message_type), is_new=True)
 
+
 @messages_bp.route('/<int:message_id>', methods=['GET', 'POST'])
 @UserService.auth_required
-def edit_message(message_id, user):
-    message = UserService.get_message(user, message_id)
+def edit_message(message_id, user, user_service):
+    message = user_service.get_message(message_id)
 
     form = message_form(message.type, user, obj=message)
     if form.validate_on_submit():
@@ -47,7 +48,9 @@ def edit_message(message_id, user):
             form.populate_obj(message)
         return redirect(url_for('.index'))
 
-    return render_template('message.html', form=form, message_type='datetime', message_url=url_for('.edit_message', message_id=message_id), is_new=False)
+    return render_template('message.html', form=form, message_type='datetime',
+                           message_url=url_for('.edit_message', message_id=message_id), is_new=False)
+
 
 def message_form(message_type, user, obj=None, data=None):
     if message_type == 'datetime':
@@ -70,12 +73,11 @@ def create_new_message(form, user, message_type):
 
 
 def new_text_message(form, user):
-    UserService.add_message(user, form.text.data)
+    UserService(user).add_message(form.text.data)
 
 
 def new_datetime_message(form, user):
-    UserService.add_datetime_message(
-        user,
+    UserService(user).add_datetime_message(
         form.text.data,
         form.dateformat.data,
         form.timezone.data
@@ -83,4 +85,4 @@ def new_datetime_message(form, user):
 
 
 def new_task_message(form, user):
-    UserService.add_task_message(user, form.task.data, form.text.data)
+    UserService(user).add_task_message(form.task.data, form.text.data)

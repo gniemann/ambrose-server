@@ -9,6 +9,7 @@ from devops_monitor.web.forms import NewAccountForm, ApplicationInsightsAccountF
 
 accounts_bp = Blueprint('accounts', __name__, template_folder='templates/accounts')
 
+
 @accounts_bp.route('/', methods=['GET', 'POST'])
 @UserService.auth_required
 def index(user):
@@ -37,7 +38,8 @@ def new_account(account_type, user, cipher):
         return redirect(url_for('.index'))
 
     display_account_type = account_type.replace('_', ' ').capitalize()
-    return render_template('new_account.html', form=form, account_type=display_account_type, account_url=url_for('.new_account', account_type=account_type))
+    return render_template('new_account.html', form=form, account_type=display_account_type,
+                           account_url=url_for('.new_account', account_type=account_type))
 
 
 def new_account_form(account_type):
@@ -47,6 +49,7 @@ def new_account_form(account_type):
         return ApplicationInsightsAccountForm()
 
     abort(404)
+
 
 def create_new_account(form, user, cipher, account_type):
     if account_type == 'devops':
@@ -66,7 +69,7 @@ def new_devops_account(form, user, cipher):
 
 
 def new_app_insights_account(form, user, cipher):
-    ApplicationInsightsAccountService(cipher)\
+    ApplicationInsightsAccountService(cipher) \
         .new_account(user, form.application_id.data, form.api_key.data)
 
 
@@ -86,11 +89,12 @@ def account_tasks(account_id, user, cipher):
     if isinstance(account, ApplicationInsightsAccount):
         return app_insights_account_tasks(account)
 
+
 def devops_account_tasks(account, cipher):
     account_service = DevOpsAccountService(cipher)
     if request.method == 'POST':
         # TODO: WTForms to clean this up (somehow)
-        task_data = {task:dict() for task in [key for key, val in request.form.items() if val == 'on']}
+        task_data = {task: dict() for task in [key for key, val in request.form.items() if val == 'on']}
 
         for task in task_data:
             raw_properties = [val for val in request.form if val.startswith(task + '_')]
@@ -106,6 +110,7 @@ def devops_account_tasks(account, cipher):
 
     current_tasks = current_build_tasks.union(current_release_tasks)
     return render_template('devops_account_tasks.html', tasks=tasks, current_tasks=current_tasks, account_id=account.id)
+
 
 def app_insights_account_tasks(account):
     new_metric_form = ApplicationInsightsMetricForm()

@@ -1,4 +1,5 @@
 import functools
+import inspect
 
 import flask_bcrypt as bcrypt
 import flask_login
@@ -13,6 +14,9 @@ class UserCredentialMismatchException(Exception):
 
 
 class UserService:
+    def __init__(self, user):
+        self.user = user
+
     @classmethod
     def login(cls, username, password):
         user = User.by_username(username)
@@ -40,55 +44,53 @@ class UserService:
 
     @staticmethod
     def auth_required(func):
+        signature = inspect.signature(func)
+
         @functools.wraps(func)
         @flask_login.login_required
         def inner(*args, **kwargs):
-            return func(*args, user=flask_login.current_user, **kwargs)
+            added_kwargs = {}
+
+            if 'user' in signature.parameters:
+                added_kwargs['user'] = flask_login.current_user
+            if 'user_service' in signature.parameters:
+                added_kwargs['user_service'] = UserService(flask_login.current_user)
+
+            return func(*args, **added_kwargs, **kwargs)
 
         return inner
 
-    @classmethod
-    def add_message(cls, user, message):
+    def add_message(self, message):
         with db_transaction():
-            user.add_message(TextMessage(text=message))
+            self.user.add_message(TextMessage(text=message))
 
-    @classmethod
-    def clear_messages(cls, user):
+    def update_lights(self, data):
         with db_transaction():
-            user.clear_messages()
-
-    @classmethod
-    def update_lights(cls, user, data):
-        with db_transaction():
-            if data['num_lights'] != len(user.lights):
-                user.resize_lights(data['num_lights'])
+            if data['num_lights'] != len(self.user.lights):
+                self.user.resize_lights(data['num_lights'])
                 return
 
             for light_data in data['lights']:
                 task_id = light_data['task']
                 task = Task.by_id(task_id) if task_id >= 0 else None
-                user.set_task_for_light(task, light_data['slot'])
+                self.user.set_task_for_light(task, light_data['slot'])
 
-    @classmethod
-    def add_datetime_message(cls, user, format_string, date_format, timezone):
+    def add_datetime_message(self, format_string, date_format, timezone):
         with db_transaction():
-            user.add_message(DateTimeMessage(
+            self.user.add_message(DateTimeMessage(
                 text=format_string,
                 dateformat=date_format,
                 timezone=timezone
             ))
 
-
-    @classmethod
-    def add_task_message(cls, user, task_id, format_string):
+    def add_task_message(self, task_id, format_string):
         task = Task.by_id(task_id)
         with db_transaction():
-            user.add_message(TaskMessage(text=format_string, task=task))
+            self.user.add_message(TaskMessage(text=format_string, task=task))
 
-    @classmethod
-    def get_message(cls, user, message_id):
+    def get_message(self, message_id):
         message = Message.by_id(message_id)
-        if message not in user.messages:
+        if message not in self.user.messages:
             raise UnauthorizedAccessException()
 
         return message

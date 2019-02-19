@@ -1,5 +1,3 @@
-from datetime import datetime
-
 import requests
 from dateutil import parser
 
@@ -35,6 +33,15 @@ class ApplicationInsightsService:
         return self.get_metric('requests/duration')
 
     def get_metric(self, metric, aggregation=None, timespan=None):
+        """
+        Queries Application Insights for the requested metric. If provided, adds aggregation and timespan to the query.
+        If the optional arguments are None, they are not sent as part of the query and the application insights defaults
+        are used.
+        :param metric: the metric to retrieve, in the form of 'requests/duration'
+        :param aggregation: Optional, what aggregate to use (ie, avg, sum, etc).
+        :param timespan: Optional, what timespan to use. See app insights REST API documentation.
+        :return: Returns a Metric object if successful, or None if unsuccessful
+        """
         endpoint = 'metrics/{}'.format(metric)
         query = []
         if aggregation:
@@ -59,4 +66,4 @@ class ApplicationInsightsService:
         if 200 <= res.status_code < 400:
             return MetricJSON(res.json())
 
-        return res
+        return None
