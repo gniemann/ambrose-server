@@ -1,5 +1,7 @@
 from datetime import datetime
 
+import dateutil
+
 from . import db
 
 
@@ -39,7 +41,8 @@ class DateTimeMessage(Message):
 
     @property
     def value(self):
-        now = datetime.now()
+        tz = dateutil.tz.gettz(self.timezone)
+        now = datetime.now(tz=tz)
         return self.text.format(now.strftime(self.dateformat))
 
     __mapper_args__ = {

@@ -71,7 +71,11 @@ class UserService:
     @classmethod
     def add_datetime_message(cls, user, format_string, date_format, timezone):
         with db_transaction():
-            user.add_message(DateTimeMessage(text=format_string, dateformat=date_format))
+            user.add_message(DateTimeMessage(
+                text=format_string,
+                dateformat=date_format,
+                timezone=timezone
+            ))
 
 
     @classmethod
