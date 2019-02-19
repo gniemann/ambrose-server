@@ -5,6 +5,7 @@ from dateutil import parser
 
 from json_object import JSONObject
 
+
 class MetricJSON(JSONObject):
     def __init__(self, json):
         super(MetricJSON, self).__init__(json['value'])
