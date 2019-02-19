@@ -21,6 +21,10 @@ class Account(db.Model):
     def by_id(cls, account_id):
         return cls.query.get(account_id)
 
+    @property
+    def name(self):
+        return self.nickname if self.nickname else self.type
+
     def add_task(self, task):
         if isinstance(task, Task):
             task.user_id = self.user_id

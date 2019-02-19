@@ -24,3 +24,19 @@
         <input type="submit" value="{{ submit }}" class="btn btn-primary">
     </form>
 {%- endmacro %}
+
+{% macro message_list(messages) -%}
+    <ul class="list-group">
+    {% for msg in messages %}
+        <li class="list-group-item">
+        <div class="d-flex justify-content-between">
+            <div>{{ msg.value }}</div>
+            <div class="btn-group" role="group">
+                <a href="{{ url_for('messages.edit_message', message_id=msg.id) }}" class="btn btn-outline-secondary">Edit</a>
+                <a class="btn btn-outline-danger">Delete</a>
+            </div>
+        </div>
+        </li>
+    {% endfor %}
+
+{% endmacro %}

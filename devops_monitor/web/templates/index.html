@@ -1,10 +1,15 @@
 {% extends "base.html" %}
 {% set active_page = "dashboard" %}
+{% import "macros.html" as macros %}
 {% block title %}DevOps Monitor{% endblock %}
 
 {% block content %}
 <h1 class="text-center">DevOps Monitor Configuration</h1>
+<div class="d-flex justify-content-between">
 <h3>Status Lights</h3>
+<a href="{{ url_for('.edit') }}" class="btn btn-outline-secondary">Edit</a>
+</div>
+
 <table class="table">
     <thead>
     <tr>
@@ -15,18 +20,20 @@
     </tr>
     </thead>
 
-<tbody>
-{% for light in lights|sort(attribute='slot') %}
-    <tr>
-    <td>{{ light.slot }}</td>
-    <td>{% if light.task %}{{ light.task.name }}{% endif %}</td>
-    <td>{% if light.task %}{{ light.task.type }}{% endif %}</td>
-    <td>{% if light.task %}{{ light.task.status }}{% endif %}</td>
-    </tr>
-{% endfor %}
+    <tbody>
+    {% for light in lights|sort(attribute='slot') %}
+        <tr>
+        <td>{{ light.slot }}</td>
+        <td>{% if light.task %}{{ light.task.name }}{% endif %}</td>
+        <td>{% if light.task %}{{ light.task.type }}{% endif %}</td>
+        <td>{% if light.task %}{{ light.task.status }}{% endif %}</td>
+        </tr>
+    {% endfor %}
 
-</tbody>
+    </tbody>
 </table>
-<a href="{{ url_for('.edit') }}" class="btn btn-primary">Edit</a>
+
+<h3>Messages</h3>
+{{ macros.message_list(messages) }}
 
 {% endblock %}

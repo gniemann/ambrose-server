@@ -65,7 +65,7 @@ def create_edit_form(lights, tasks):
 
 
 class NewTaskForm(FlaskForm):
-    type = SelectField('Select task type')
+    account = SelectField('Select account', coerce=int)
 
 
 class ApplicationInsightsMetricForm(FlaskForm):
