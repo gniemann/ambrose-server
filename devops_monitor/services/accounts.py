@@ -1,4 +1,5 @@
 from collections import namedtuple
+from datetime import datetime
 
 from application_insights import ApplicationInsightsService
 from devops import DevOpsService
@@ -163,9 +164,11 @@ class DevOpsAccountService(AccountService):
                 project_builds = [b for b in builds if b.project == project]
                 definitions = [b.definition_id for b in project_builds]
                 statuses = service.get_build_summary(project, definitions)
+                update_time = datetime.now()
 
                 for build in project_builds:
                     build.status = statuses.status_for_definition(build.definition_id)
+                    build.last_update = update_time
 
     def update_release_statuses(self, account):
         releases = account.release_tasks
@@ -174,8 +177,10 @@ class DevOpsAccountService(AccountService):
         with db_transaction():
             for (project, definition) in {(t.project, t.definition_id) for t in releases}:
                 statuses = service.get_release_summary(project, definition)
+                update_time = datetime.now()
                 for env in [r for r in releases if r.project == project and r.definition_id == definition]:
                     env.status = statuses.status_for_environment(env.environment_id)
+                    env.last_update = update_time
 
 
 class ApplicationInsightsAccountService(AccountService):
@@ -199,6 +204,7 @@ class ApplicationInsightsAccountService(AccountService):
             for task in [t for t in account.tasks if isinstance(t, ApplicationInsightMetricTask)]:
                 metric = insights.get_metric(task.metric, aggregation=task.aggregation, timespan=task.timespan)
                 if metric:
+                    task.last_update = datetime.now()
                     task.value = metric.value
                     task.start = metric.start
                     task.end = metric.end

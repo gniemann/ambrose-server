@@ -13,3 +13,4 @@ Flask-WTF
 marshmallow==3.0.0rc4
 python-dateutil
 Faker
+pytz
