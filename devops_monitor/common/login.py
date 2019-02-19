@@ -1,5 +1,6 @@
 import flask_login
 import flask_bcrypt as bcrypt
+from flask import abort
 
 from devops_monitor.models import User
 
@@ -21,4 +22,4 @@ def request_loader(request):
     if user and bcrypt.check_password_hash(user.password, request.authorization.password):
         return user
 
-    return None
+    abort(401)
