@@ -38,12 +38,14 @@ class AccountService:
 class DevOpsAccountService(AccountService):
     def new_account(self, user, username, organization, token, nickname):
         with db_transaction():
-            user.add_account(DevOpsAccount(
+            account = DevOpsAccount(
                 username=username,
                 organization=organization,
                 token=self._encrypt(token),
                 nickname=nickname
-            ))
+            )
+            user.add_account(account)
+            return account
 
     def build_tasks(self, account):
         return {BuildTask(

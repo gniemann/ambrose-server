@@ -10,6 +10,7 @@ from devops_monitor.models import User, Task, DateTimeMessage, TextMessage, Task
 class UserCredentialMismatchException(Exception):
     pass
 
+
 class UserService:
     @classmethod
     def login(cls, username, password):

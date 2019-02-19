@@ -1,19 +1,7 @@
 import pytest
-from cryptography.fernet import Fernet
 
-from config import Config
 import devops_monitor
 
-
-@pytest.fixture(scope='module')
-def user(app):
-    user = devops_monitor.models.User(username='test@test.com')
-    devops_monitor.db.session.add(user)
-    devops_monitor.db.session.commit()
-
-    yield user
-
-    devops_monitor.db.session.delete(user)
 
 @pytest.fixture()
 def authenticated_user(user):
