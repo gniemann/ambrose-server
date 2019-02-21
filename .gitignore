@@ -131,3 +131,4 @@ devops.db
 
 http-client.env.json
 http-client.private.env.json.idea/dataSources
+http-client.private.env.json
