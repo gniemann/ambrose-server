@@ -2,8 +2,7 @@ from flask import Blueprint
 
 from devops_monitor.models import DevOpsAccount, ApplicationInsightsAccount
 from devops_monitor.common import cipher_required
-from devops_monitor.services import DevOpsAccountService, LightService, UserService
-from devops_monitor.services.accounts import ApplicationInsightsAccountService
+from devops_monitor.services import DevOpsAccountService, LightService, UserService, ApplicationInsightsAccountService
 from .schema import TaskSchema, StatusSchema, with_schema
 
 api_bp = Blueprint('api', __name__)

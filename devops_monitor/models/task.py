@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from . import db
 
 
@@ -16,6 +14,7 @@ class Task(db.Model):
     _value = db.Column(db.String)
     _prev_value = db.Column(db.String)
     last_update = db.Column(db.DateTime)
+    has_changed = db.Column(db.Boolean)
 
     @classmethod
     def by_id(cls, task_id):
@@ -35,16 +34,14 @@ class Task(db.Model):
 
     @value.setter
     def value(self, new_value):
-        self._prev_value = self._value
-        self._value = new_value
+        self.has_changed = new_value != self._value
+        if self.has_changed:
+            self._prev_value = self._value
+            self._value = new_value
 
     @property
     def prev_value(self):
         return self._prev_value
-
-    @property
-    def has_changed(self):
-        return self._prev_value != self._value
 
     __mapper_args__ = {
         'polymorphic_identity': 'task',
