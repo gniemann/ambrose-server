@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, abort, redirect, url_for
 
-from devops_monitor.services import UserService, UserCredentialMismatchException
+from devops_monitor.services import UserService, UserCredentialMismatchException, AuthService
 from .forms import LoginForm, RegisterForm, DevOpsAccountForm, create_edit_form, NewTaskForm
 from .tasks import tasks_bp
 from .accounts import accounts_bp
@@ -9,7 +9,7 @@ from .messages import messages_bp
 web_bp = Blueprint('web', __name__, template_folder='templates')
 
 @web_bp.route('/')
-@UserService.auth_required
+@AuthService.auth_required
 def index(user):
     return render_template('index.html', lights=user.lights, messages=user.messages)
 
@@ -20,7 +20,7 @@ def login():
 
     if login_form.validate_on_submit():
         try:
-            UserService.login(login_form.username.data, login_form.password.data)
+            AuthService.login(login_form.username.data, login_form.password.data)
         except UserCredentialMismatchException:
             abort(401)
 
@@ -34,21 +34,22 @@ def register():
     form = RegisterForm()
 
     if form.validate_on_submit():
-        UserService.create_user(form.username.data, form.password.data)
+        user = UserService.create_user(form.username.data, form.password.data)
+        AuthService.login_user(user)
         return redirect(url_for('.index'))
 
     return redirect(url_for('.login'))
 
 
 @web_bp.route('/logout')
-@UserService.auth_required
+@AuthService.auth_required
 def logout(user):
-    UserService.logout()
+    AuthService.logout()
     return redirect(url_for('.login'))
 
 
 @web_bp.route('/edit', methods=['GET', 'POST'])
-@UserService.auth_required
+@AuthService.auth_required
 def edit(user, user_service):
     edit_form = create_edit_form(user.lights, user.tasks)
 

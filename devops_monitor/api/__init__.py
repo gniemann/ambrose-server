@@ -1,7 +1,7 @@
 from flask import Blueprint
 
 from devops_monitor.common import cipher_required
-from devops_monitor.services import LightService, UserService, AccountService
+from devops_monitor.services import LightService, AccountService, AuthService
 from .schema import TaskSchema, StatusSchema, with_schema
 
 api_bp = Blueprint('api', __name__)
@@ -9,7 +9,7 @@ api_bp = Blueprint('api', __name__)
 
 @api_bp.route('/status')
 @with_schema(StatusSchema)
-@UserService.auth_required
+@AuthService.auth_required
 @cipher_required
 def get_status(user, cipher):
     for account in user.accounts:

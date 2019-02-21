@@ -2,7 +2,8 @@ import flask_login
 import pytest
 
 from devops_monitor.models import User, db
-from devops_monitor.services import UserService
+from devops_monitor.services import UserService, AuthService
+
 
 @pytest.fixture(scope='module')
 def username(faker):
@@ -25,6 +26,7 @@ def known_user(app, username, password):
 def test_create_user(app, username, password):
     with app.test_request_context('/'):
         new_user = UserService.create_user(username, password)
+        AuthService.login_user(new_user)
         assert flask_login.current_user == new_user
 
     user = User.by_username(username)
@@ -40,7 +42,7 @@ def test_login(app, known_user, username, password):
     with app.test_request_context('/'):
         assert flask_login.current_user != known_user
 
-        user = UserService.login(username, password)
+        user = AuthService.login(username, password)
 
         assert user == known_user
         assert flask_login.current_user == known_user

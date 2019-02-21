@@ -1,14 +1,14 @@
 from flask import Blueprint, render_template, url_for, redirect
 
 from devops_monitor.common import db_transaction
-from devops_monitor.services import UserService
+from devops_monitor.services import UserService, AuthService
 from devops_monitor.web.forms import NewMessageForm, DateTimeMessageForm, MessageForm, TaskMessageForm
 
 messages_bp = Blueprint('messages', __name__, template_folder='templates/messages')
 
 
 @messages_bp.route('/', methods=['GET', 'POST'])
-@UserService.auth_required
+@AuthService.auth_required
 def index(user):
     form = NewMessageForm()
     form.type.choices = [
@@ -25,7 +25,7 @@ def index(user):
 
 
 @messages_bp.route('/new/<message_type>', methods=['GET', 'POST'])
-@UserService.auth_required
+@AuthService.auth_required
 def new_message(message_type, user):
     form = message_form(message_type, user)
 
@@ -38,7 +38,7 @@ def new_message(message_type, user):
 
 
 @messages_bp.route('/<int:message_id>', methods=['GET', 'POST'])
-@UserService.auth_required
+@AuthService.auth_required
 def edit_message(message_id, user, user_service):
     message = user_service.get_message(message_id)
 

@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, abort, request
 
 from devops_monitor.common import cipher_required
 from devops_monitor.models import DevOpsAccount, ApplicationInsightsAccount
-from devops_monitor.services import UserService, DevOpsAccountService, UnauthorizedAccessException
+from devops_monitor.services import DevOpsAccountService, UnauthorizedAccessException, AuthService
 from devops_monitor.services.accounts import ApplicationInsightsAccountService, AccountService
 from devops_monitor.web import DevOpsAccountForm
 from devops_monitor.web.forms import NewAccountForm, ApplicationInsightsAccountForm, ApplicationInsightsMetricForm
@@ -11,7 +11,7 @@ accounts_bp = Blueprint('accounts', __name__, template_folder='templates/account
 
 
 @accounts_bp.route('/', methods=['GET', 'POST'])
-@UserService.auth_required
+@AuthService.auth_required
 def index(user):
     form = NewAccountForm()
 
@@ -28,7 +28,7 @@ def index(user):
 
 
 @accounts_bp.route('/<account_type>', methods=['GET', 'POST'])
-@UserService.auth_required
+@AuthService.auth_required
 @cipher_required
 def new_account(account_type, user, cipher):
     form = new_account_form(account_type)
@@ -74,7 +74,7 @@ def new_app_insights_account(form, user, cipher):
 
 
 @accounts_bp.route('/accounts/<account_id>/tasks', methods=['GET', 'POST'])
-@UserService.auth_required
+@AuthService.auth_required
 @cipher_required
 def account_tasks(account_id, user, cipher):
     account = None
