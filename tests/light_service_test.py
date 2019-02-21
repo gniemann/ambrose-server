@@ -14,19 +14,19 @@ def test_color_for_status(status, expected):
     assert LightService.color_for_status(status) == expected
 
 
-@pytest.mark.parametrize('value, prev_value, expected_type', [
-    ('succeeded', 'succeeded', 'steady'),
-    ('succeeded', 'failed', 'initially_blinking'),
-    ('queued', 'queued', 'blinking'),
-    ('queued', 'failed', 'blinking'),
-    ('inprogress', 'inprogress', 'blinking'),
-    ('inprogress', 'failed', 'blinking'),
-    ('pending_approval', 'pending_approval', 'blinking'),
-    ('pending_approval', 'failed', 'blinking'),
-    ('failed', 'failed', 'steady'),
-    ('failed', 'inprogress', 'initially_blinking')
+@pytest.mark.parametrize('value, has_changed, expected_type', [
+    ('succeeded', False, 'steady'),
+    ('succeeded', True, 'initially_blinking'),
+    ('queued', False, 'blinking'),
+    ('queued', True, 'blinking'),
+    ('inprogress', False, 'blinking'),
+    ('inprogress', True, 'blinking'),
+    ('pending_approval', False, 'blinking'),
+    ('pending_approval', True, 'blinking'),
+    ('failed', False, 'steady'),
+    ('failed', True, 'initially_blinking')
 ])
-def test_light_for_task(value, prev_value, expected_type):
-    task = Task(_value=value, _prev_value=prev_value)
+def test_light_for_task(value, has_changed, expected_type):
+    task = Task(_value=value, has_changed=has_changed)
     light = LightService.light_for_task(task)
     assert light.type == expected_type

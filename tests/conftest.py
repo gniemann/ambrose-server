@@ -57,7 +57,7 @@ def cipher():
 
 @pytest.fixture(scope='module')
 def devops_account(user, faker, token, cipher):
-    account = DevOpsAccountService(cipher).new_account(
+    account = DevOpsAccountService(None, cipher).new_account(
         user,
         faker.email(),
         faker.word(),

@@ -1,3 +1,5 @@
+from numbers import Number
+
 import requests
 from dateutil import parser
 
@@ -16,6 +18,8 @@ class Metric:
         for key, val in json[metric].items():
             setattr(self, key, val)
             self.value_type = key
+            if isinstance(val, Number):
+                val = int(val)
             self.value = val
 
         self.start = parser.parse(json.start)

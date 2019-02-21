@@ -59,7 +59,7 @@ def create_new_account(form, user, cipher, account_type):
 
 
 def new_devops_account(form, user, cipher):
-    DevOpsAccountService(cipher).new_account(
+    DevOpsAccountService(None, cipher).new_account(
         user,
         form.username.data,
         form.organization.data,
@@ -69,7 +69,7 @@ def new_devops_account(form, user, cipher):
 
 
 def new_app_insights_account(form, user, cipher):
-    ApplicationInsightsAccountService(cipher) \
+    ApplicationInsightsAccountService(None, cipher) \
         .new_account(user, form.application_id.data, form.api_key.data)
 
 
@@ -79,7 +79,7 @@ def new_app_insights_account(form, user, cipher):
 def account_tasks(account_id, user, cipher):
     account = None
     try:
-        account = AccountService().get_account(account_id, user)
+        account = AccountService.get_account(account_id, user)
     except UnauthorizedAccessException:
         abort(403)
 
@@ -91,7 +91,7 @@ def account_tasks(account_id, user, cipher):
 
 
 def devops_account_tasks(account, cipher):
-    account_service = DevOpsAccountService(cipher)
+    account_service = DevOpsAccountService(account, cipher)
     if request.method == 'POST':
         # TODO: WTForms to clean this up (somehow)
         task_data = {task: dict() for task in [key for key, val in request.form.items() if val == 'on']}
@@ -100,13 +100,13 @@ def devops_account_tasks(account, cipher):
             raw_properties = [val for val in request.form if val.startswith(task + '_')]
             task_data[task] = {prop.split('_', maxsplit=1)[1]: request.form[prop] for prop in raw_properties}
 
-        account_service.update_tasks(account, task_data)
+        account_service.update_tasks(task_data)
 
         return redirect(url_for('.index'))
 
-    current_build_tasks = account_service.build_tasks(account)
-    current_release_tasks = account_service.release_tasks(account)
-    tasks = account_service.list_all_tasks(account)
+    current_build_tasks = account_service.build_tasks
+    current_release_tasks = account_service.release_tasks
+    tasks = account_service.list_all_tasks()
 
     current_tasks = current_build_tasks.union(current_release_tasks)
     return render_template('devops_account_tasks.html', tasks=tasks, current_tasks=current_tasks, account_id=account.id)
@@ -121,8 +121,7 @@ def app_insights_account_tasks(account):
     ]
 
     if new_metric_form.validate_on_submit():
-        ApplicationInsightsAccountService().add_metric(
-            account,
+        ApplicationInsightsAccountService(account).add_metric(
             new_metric_form.metric.data,
             new_metric_form.nickname.data
         )

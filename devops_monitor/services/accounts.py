@@ -13,8 +13,22 @@ ReleaseTask = namedtuple('ReleaseTask', 'project definition_id name environment 
 
 
 class AccountService:
-    def __init__(self, cipher=None):
+    registry = {}
+
+    def __init_subclass__(cls, model, **kwargs):
+        super(AccountService, cls).__init_subclass__(**kwargs)
+        cls.registry[model.__name__] = cls
+
+    def __new__(cls, account, cipher=None):
+        if not account:
+            return super().__new__(cls)
+
+        service_type = cls.registry[account.__class__.__name__]
+        return super().__new__(service_type)
+
+    def __init__(self, account, cipher=None):
         self.cipher = cipher
+        self.account = account
 
     def _encrypt(self, token):
         return self.cipher.encrypt(token.encode('utf-8')).decode('utf-8')
@@ -24,6 +38,7 @@ class AccountService:
             token = token.encode('utf-8')
         return self.cipher.decrypt(token).decode('utf-8')
 
+    @classmethod
     def get_account(self, account_id, user):
         account = Account.by_id(account_id)
         if account not in user.accounts:
@@ -31,8 +46,10 @@ class AccountService:
 
         return account
 
+    def get_task_statuses(self):
+        pass
 
-class DevOpsAccountService(AccountService):
+class DevOpsAccountService(AccountService, model=DevOpsAccount):
     def new_account(self, user, username, organization, token, nickname):
         with db_transaction():
             account = DevOpsAccount(
@@ -42,17 +59,20 @@ class DevOpsAccountService(AccountService):
                 nickname=nickname
             )
             user.add_account(account)
+            self.account = account
             return account
 
-    def build_tasks(self, account):
+    @property
+    def build_tasks(self):
         return {BuildTask(
             project=t.project,
             definition_id=t.definition_id,
             name=t.pipeline,
             type='build'
-        ) for t in account.build_tasks}
+        ) for t in self.account.build_tasks}
 
-    def release_tasks(self, account):
+    @property
+    def release_tasks(self):
         return {ReleaseTask(
             project=t.project,
             definition_id=t.definition_id,
@@ -60,9 +80,9 @@ class DevOpsAccountService(AccountService):
             environment=t.environment,
             environment_id=t.environment_id,
             type='release'
-        ) for t in account.release_tasks}
+        ) for t in self.account.release_tasks}
 
-    def update_tasks(self, account, data):
+    def update_tasks(self, data):
         new_build_tasks = {BuildTask(
             project=properties['project'],
             definition_id=int(properties['definition_id']),
@@ -79,17 +99,17 @@ class DevOpsAccountService(AccountService):
             type='release'
         ) for key, properties in data.items() if key.startswith('release')}
 
-        current_build_tasks = self.build_tasks(account)
-        current_release_tasks = self.release_tasks(account)
+        current_build_tasks = self.build_tasks
+        current_release_tasks = self.release_tasks
 
         with db_transaction():
             # build tasks to remove
             for task in current_build_tasks.difference(new_build_tasks):
-                account.remove_task(task)
+                self.account.remove_task(task)
 
             # build tasks to add
             for task in new_build_tasks.difference(current_build_tasks):
-                account.add_task(DevOpsBuildPipeline(
+                self.account.add_task(DevOpsBuildPipeline(
                     project=task.project,
                     definition_id=task.definition_id,
                     pipeline=task.name
@@ -97,11 +117,11 @@ class DevOpsAccountService(AccountService):
 
             # release tasks to remove
             for task in current_release_tasks.difference(new_release_tasks):
-                account.remove_task(task)
+                self.account.remove_task(task)
 
             # release tasks to add
             for task in new_release_tasks.difference(current_release_tasks):
-                account.add_task(DevOpsReleaseEnvironment(
+                self.account.add_task(DevOpsReleaseEnvironment(
                     project=task.project,
                     definition_id=task.definition_id,
                     pipeline=task.name,
@@ -109,13 +129,13 @@ class DevOpsAccountService(AccountService):
                     environment_id=task.environment_id
                 ))
 
-    def get_service(self, account):
-        token = self._decrypt(account.token)
-        return DevOpsService(account.username, token, account.organization)
+    def get_service(self):
+        token = self._decrypt(self.account.token)
+        return DevOpsService(self.account.username, token, self.account.organization)
 
-    def list_all_tasks(self, account):
+    def list_all_tasks(self):
         tasks = []
-        service = self.get_service(account)
+        service = self.get_service()
         project_list = service.list_projects()
         if not project_list:
             return []  # TODO: raise exception instead
@@ -146,14 +166,14 @@ class DevOpsAccountService(AccountService):
 
         return tasks
 
-    def get_task_statuses(self, account):
+    def get_task_statuses(self):
         with db_transaction():
-            self.update_build_statuses(account)
-            self.update_release_statuses(account)
+            self.update_build_statuses()
+            self.update_release_statuses()
 
-    def update_build_statuses(self, account):
-        builds = account.build_tasks
-        service = self.get_service(account)
+    def update_build_statuses(self):
+        builds = self.account.build_tasks
+        service = self.get_service()
 
         with db_transaction():
             for project in {b.project for b in builds}:
@@ -166,9 +186,9 @@ class DevOpsAccountService(AccountService):
                     build.status = statuses.status_for_definition(build.definition_id)
                     build.last_update = update_time
 
-    def update_release_statuses(self, account):
-        releases = account.release_tasks
-        service = self.get_service(account)
+    def update_release_statuses(self):
+        releases = self.account.release_tasks
+        service = self.get_service()
 
         with db_transaction():
             for (project, definition) in {(t.project, t.definition_id) for t in releases}:
@@ -179,25 +199,28 @@ class DevOpsAccountService(AccountService):
                     env.last_update = update_time
 
 
-class ApplicationInsightsAccountService(AccountService):
+class ApplicationInsightsAccountService(AccountService, model=ApplicationInsightsAccount):
     def new_account(self, user, application_id, api_key):
         with db_transaction():
-            user.add_account(ApplicationInsightsAccount(
+            account = ApplicationInsightsAccount(
                 application_id=application_id,
                 api_key=self._encrypt(api_key)
-            ))
+            )
+            user.add_account(account)
+            self.account = account
+            return account
 
-    def add_metric(self, account, metric, nickname):
+    def add_metric(self, metric, nickname):
         with db_transaction():
-            account.add_task(ApplicationInsightMetricTask(
+            self.account.add_task(ApplicationInsightMetricTask(
                 metric=metric,
                 nickname=nickname
             ))
 
-    def update_task_statuses(self, account):
-        insights = ApplicationInsightsService(account.application_id, self._decrypt(account.api_key))
+    def get_task_statuses(self):
+        insights = ApplicationInsightsService(self.account.application_id, self._decrypt(self.account.api_key))
         with db_transaction():
-            for task in [t for t in account.tasks if isinstance(t, ApplicationInsightMetricTask)]:
+            for task in [t for t in self.account.tasks if isinstance(t, ApplicationInsightMetricTask)]:
                 metric = insights.get_metric(task.metric, aggregation=task.aggregation, timespan=task.timespan)
                 if metric:
                     task.last_update = datetime.now()
