@@ -1,5 +1,6 @@
 import functools
 import inspect
+from typing import Callable
 
 import flask_bcrypt as bcrypt
 import flask_login
@@ -14,7 +15,7 @@ class UserCredentialMismatchException(Exception):
 
 class AuthService:
     @classmethod
-    def login(cls, username, password):
+    def login(cls, username: str, password: str) -> User:
         user = User.by_username(username)
         if not user or not bcrypt.check_password_hash(user.password, password):
             raise UserCredentialMismatchException()
@@ -27,7 +28,7 @@ class AuthService:
         flask_login.logout_user()
 
     @staticmethod
-    def auth_required(func):
+    def auth_required(func: Callable) -> Callable:
         signature = inspect.signature(func)
 
         @functools.wraps(func)
@@ -45,5 +46,5 @@ class AuthService:
         return inner
 
     @classmethod
-    def login_user(cls, user):
+    def login_user(cls, user: User):
         flask_login.login_user(user)

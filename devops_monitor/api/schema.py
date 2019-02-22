@@ -1,5 +1,6 @@
 import functools
 from collections import abc
+from typing import Union, Type, Callable
 
 from flask import jsonify
 from marshmallow import Schema, fields
@@ -31,7 +32,7 @@ class StatusSchema(Schema):
     messages = fields.List(fields.String())
 
 
-def with_schema(schema):
+def with_schema(schema: Union[Type[Schema], Schema]) -> Callable[[Callable], Callable]:
     def decorator(func):
         @functools.wraps(func)
         def inner(*args, **kwargs):

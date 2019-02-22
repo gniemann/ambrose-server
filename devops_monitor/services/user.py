@@ -1,5 +1,4 @@
 import flask_bcrypt as bcrypt
-import flask_login
 
 from devops_monitor.common import db_transaction
 from devops_monitor.models import User, Task, DateTimeMessage, TextMessage, TaskMessage, Message
@@ -54,3 +53,13 @@ class UserService:
             raise UnauthorizedAccessException()
 
         return message
+
+    def update_message(self, message, data):
+        with db_transaction():
+            message.update(data)
+
+    def create_message(self, message_type, data):
+        message = Message.new_message(message_type, data)
+
+        with db_transaction():
+            self.user.add_message(message)

@@ -1,4 +1,5 @@
 from collections import namedtuple
+from typing import Optional, List, Any, Dict, Iterable, Mapping
 
 from json_object import JSONObject
 
@@ -6,7 +7,7 @@ ReleaseStatus = namedtuple('ReleaseStatus', 'name status current')
 BuildStatus = namedtuple('BuildStatus', 'name status')
 
 
-def format_status(status: str):
+def format_status(status: str) -> str:
     status = status.lower()
     if status == 'rejected':
         return 'failed'
@@ -22,12 +23,12 @@ class DevOpsJSON(JSONObject):
 
 
 class ReleaseSummary(DevOpsJSON):
-    def __init__(self, json):
+    def __init__(self, json: Mapping[str, Any]):
         super(ReleaseSummary, self).__init__(json)
         if 'releases' in json:
             self._data['releases'] = {rel.id: rel for rel in self.releases}
 
-    def status(self):
+    def status(self) -> Dict[str, ReleaseStatus]:
         pipeline_name = self.releaseDefinition.name
 
         statuses = {}
@@ -53,7 +54,7 @@ class ReleaseSummary(DevOpsJSON):
 
         return statuses
 
-    def _format_status(self, environment):
+    def _format_status(self, environment: JSONObject) -> str:
         status = format_status(environment.status)
 
         if status == 'inprogress':
@@ -66,7 +67,7 @@ class ReleaseSummary(DevOpsJSON):
 
         return status
 
-    def status_for_environment(self, env_id):
+    def status_for_environment(self, env_id: int) -> Optional[str]:
         environment = None
         for env in self.environments:
             if env.id == env_id:
@@ -92,7 +93,7 @@ class ReleaseSummary(DevOpsJSON):
 
         return self._format_status(release_env)
 
-    def environment_names(self):
+    def environment_names(self) -> List[str]:
         environments = []
         for env in self.environments:
             last_release = env.lastReleases
@@ -115,7 +116,7 @@ class ReleaseSummary(DevOpsJSON):
 
 
 class BuildSummary(DevOpsJSON):
-    def status(self):
+    def status(self) -> Dict[str, BuildStatus]:
         statuses = {}
         for val in self.value:
             name = val.definition.name
@@ -126,7 +127,7 @@ class BuildSummary(DevOpsJSON):
 
         return statuses
 
-    def status_for_definition(self, definition_id):
+    def status_for_definition(self, definition_id: int) -> Optional[str]:
         target_build = None
         for build in self.value:
             if build.definition.id == definition_id:
@@ -143,23 +144,24 @@ class BuildSummary(DevOpsJSON):
 
 
 class DevOpsProjects(DevOpsJSON):
-    def __init__(self, json):
+    def __init__(self, json: Mapping[str, Any]):
         super(DevOpsProjects, self).__init__({"projects": json['value']})
 
-    def __iter__(self):
+    def __iter__(self) -> Iterable[JSONObject]:
         return iter(self.projects)
 
+
 class DevOpsReleaseDefinitions(DevOpsJSON):
-    def __init__(self, json):
+    def __init__(self, json: Mapping[str, Any]):
         super(DevOpsReleaseDefinitions, self).__init__({'definitions': json['value']})
 
-    def __iter__(self):
+    def __iter__(self) -> Iterable[JSONObject]:
         return iter(self.definitions)
 
 
 class DevOpsBuildDefinitions(DevOpsJSON):
-    def __init__(self, json):
+    def __init__(self, json: Mapping[str, Any]):
         super(DevOpsBuildDefinitions, self).__init__({'builds': json['value']})
 
-    def __iter__(self):
+    def __iter__(self) -> Iterable[JSONObject]:
         return iter(self.builds)

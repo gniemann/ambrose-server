@@ -1,4 +1,5 @@
 from numbers import Number
+from typing import Optional
 
 import requests
 from dateutil import parser
@@ -7,12 +8,12 @@ from json_object import JSONObject
 
 
 class MetricJSON(JSONObject):
-    def __init__(self, json):
+    def __init__(self, json: dict):
         super(MetricJSON, self).__init__(json['value'])
 
 
 class Metric:
-    def __init__(self, json, metric):
+    def __init__(self, json: MetricJSON, metric: str):
         metric = metric.replace('/', '_')
         # this should be a dictionary one 1 pair
         for key, val in json[metric].items():
@@ -29,14 +30,14 @@ class Metric:
 class ApplicationInsightsService:
     BASE_URL_TEMPLATE = 'https://api.applicationinsights.io/v1/apps/{}/'
 
-    def __init__(self, application_id, api_key):
+    def __init__(self, application_id: str, api_key: str):
         self.application_id = application_id
         self.api_key = api_key
 
-    def get_request_duration(self):
+    def get_request_duration(self) -> Optional[Metric]:
         return self.get_metric('requests/duration')
 
-    def get_metric(self, metric, aggregation=None, timespan=None):
+    def get_metric(self, metric: str, aggregation: str = None, timespan: str = None) -> Optional[Metric]:
         """
         Queries Application Insights for the requested metric. If provided, adds aggregation and timespan to the query.
         If the optional arguments are None, they are not sent as part of the query and the application insights defaults
@@ -61,10 +62,10 @@ class ApplicationInsightsService:
             return Metric(json, metric)
         return None
 
-    def _get(self, url):
+    def _get(self, url: str) -> requests.Response:
         return requests.get(url, headers={'x-api-key': self.api_key})
 
-    def _request(self, endpoint):
+    def _request(self, endpoint: str) -> Optional[MetricJSON]:
         url = self.BASE_URL_TEMPLATE.format(self.application_id) + endpoint
         res = self._get(url)
         if 200 <= res.status_code < 400:

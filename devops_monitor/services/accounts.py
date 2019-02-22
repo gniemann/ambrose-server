@@ -1,11 +1,14 @@
 from collections import namedtuple
 from datetime import datetime
+from typing import Type, Optional, AnyStr, Set, Any, Mapping, Union, List
+
+from cryptography.fernet import Fernet
 
 from application_insights import ApplicationInsightsService
 from devops import DevOpsService
 from devops_monitor.common import db_transaction
 from devops_monitor.models import DevOpsAccount, DevOpsBuildPipeline, DevOpsReleaseEnvironment, Account, \
-    ApplicationInsightsAccount, ApplicationInsightMetricTask
+    ApplicationInsightsAccount, ApplicationInsightMetricTask, User
 from .exceptions import UnauthorizedAccessException
 
 BuildTask = namedtuple('BuildTask', 'project definition_id name type')
@@ -13,33 +16,33 @@ ReleaseTask = namedtuple('ReleaseTask', 'project definition_id name environment 
 
 
 class AccountService:
-    registry = {}
+    _registry = {}
 
-    def __init_subclass__(cls, model, **kwargs):
+    def __init_subclass__(cls, model: Type[Account], **kwargs):
         super(AccountService, cls).__init_subclass__(**kwargs)
-        cls.registry[model.__name__] = cls
+        cls._registry[model.__name__] = cls
 
-    def __new__(cls, account, cipher=None):
+    def __new__(cls, account: Optional[Account], cipher: Optional[Fernet] = None):
         if not account:
             return super().__new__(cls)
 
-        service_type = cls.registry[account.__class__.__name__]
+        service_type = cls._registry[account.__class__.__name__]
         return super().__new__(service_type)
 
-    def __init__(self, account, cipher=None):
+    def __init__(self, account: Optional[Account], cipher: Optional[Fernet] = None):
         self.cipher = cipher
         self.account = account
 
-    def _encrypt(self, token):
+    def _encrypt(self, token: str) -> str:
         return self.cipher.encrypt(token.encode('utf-8')).decode('utf-8')
 
-    def _decrypt(self, token):
+    def _decrypt(self, token: AnyStr) -> str:
         if not isinstance(token, bytes):
             token = token.encode('utf-8')
         return self.cipher.decrypt(token).decode('utf-8')
 
     @classmethod
-    def get_account(self, account_id, user):
+    def get_account(self, account_id: int, user: User) -> Account:
         account = Account.by_id(account_id)
         if account not in user.accounts:
             raise UnauthorizedAccessException()
@@ -49,8 +52,9 @@ class AccountService:
     def get_task_statuses(self):
         pass
 
+
 class DevOpsAccountService(AccountService, model=DevOpsAccount):
-    def new_account(self, user, username, organization, token, nickname):
+    def new_account(self, user: User, username: str, organization: str, token: str, nickname: str) -> DevOpsAccount:
         with db_transaction():
             account = DevOpsAccount(
                 username=username,
@@ -63,7 +67,7 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
             return account
 
     @property
-    def build_tasks(self):
+    def build_tasks(self) -> Set[BuildTask]:
         return {BuildTask(
             project=t.project,
             definition_id=t.definition_id,
@@ -72,7 +76,7 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
         ) for t in self.account.build_tasks}
 
     @property
-    def release_tasks(self):
+    def release_tasks(self) -> Set[ReleaseTask]:
         return {ReleaseTask(
             project=t.project,
             definition_id=t.definition_id,
@@ -82,7 +86,7 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
             type='release'
         ) for t in self.account.release_tasks}
 
-    def update_tasks(self, data):
+    def update_tasks(self, data: Mapping[str, Any]):
         new_build_tasks = {BuildTask(
             project=properties['project'],
             definition_id=int(properties['definition_id']),
@@ -129,11 +133,11 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
                     environment_id=task.environment_id
                 ))
 
-    def get_service(self):
+    def get_service(self) -> DevOpsService:
         token = self._decrypt(self.account.token)
         return DevOpsService(self.account.username, token, self.account.organization)
 
-    def list_all_tasks(self):
+    def list_all_tasks(self) -> List[Union[BuildTask, ReleaseTask]]:
         tasks = []
         service = self.get_service()
         project_list = service.list_projects()
@@ -200,7 +204,7 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
 
 
 class ApplicationInsightsAccountService(AccountService, model=ApplicationInsightsAccount):
-    def new_account(self, user, application_id, api_key):
+    def new_account(self, user: User, application_id: str, api_key: str) -> ApplicationInsightsAccount:
         with db_transaction():
             account = ApplicationInsightsAccount(
                 application_id=application_id,
@@ -210,7 +214,7 @@ class ApplicationInsightsAccountService(AccountService, model=ApplicationInsight
             self.account = account
             return account
 
-    def add_metric(self, metric, nickname):
+    def add_metric(self, metric: str, nickname: str):
         with db_transaction():
             self.account.add_task(ApplicationInsightMetricTask(
                 metric=metric,

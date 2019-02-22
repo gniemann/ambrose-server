@@ -1,3 +1,5 @@
+from typing import Optional
+
 import flask_login
 import flask_bcrypt as bcrypt
 from flask import abort
@@ -9,12 +11,12 @@ login_manager.login_view = 'web.login'
 
 
 @login_manager.user_loader
-def load_user(user_id):
+def load_user(user_id: int) -> Optional[User]:
     return User.by_id(user_id)
 
 
 @login_manager.request_loader
-def request_loader(request):
+def request_loader(request) -> Optional[User]:
     if not request.authorization:
         return None
 

@@ -1,7 +1,11 @@
+from __future__ import annotations
+
+from typing import Optional
+
 import flask_login
 
 from devops_monitor.models.light import StatusLight
-from . import db, DevOpsAccount
+from . import db, DevOpsAccount, Task, Message, Account
 
 
 class User(db.Model, flask_login.UserMixin):
@@ -17,24 +21,24 @@ class User(db.Model, flask_login.UserMixin):
     lights = db.relationship('StatusLight', cascade='all, delete, delete-orphan')
 
     @classmethod
-    def by_username(cls, username):
+    def by_username(cls, username: str) -> Optional[User]:
         return cls.query.filter_by(username=username).one_or_none()
 
     @classmethod
-    def by_id(cls, user_id):
+    def by_id(cls, user_id: int) -> Optional[User]:
         return cls.query.get(user_id)
 
     @property
-    def devops_account(self):
+    def devops_account(self) -> Optional[DevOpsAccount]:
         for account in self.accounts:
             if isinstance(account, DevOpsAccount):
                 return account
         return None
 
-    def light_for_slot(self, index):
+    def light_for_slot(self, index: int) -> Optional[StatusLight]:
         return StatusLight.by_id(self.id, index)
 
-    def set_task_for_light(self, task, index):
+    def set_task_for_light(self, task: Optional[Task], index: int):
         light = self.light_for_slot(index)
         if light:
             light.task = task
@@ -43,7 +47,7 @@ class User(db.Model, flask_login.UserMixin):
             light.task = task
             self.lights.append(light)
 
-    def resize_lights(self, count):
+    def resize_lights(self, count: int):
         lights = self.lights
         current_count = len(lights)
         if count == current_count:
@@ -57,11 +61,11 @@ class User(db.Model, flask_login.UserMixin):
             for light in lights[count:]:
                 self.lights.remove(light)
 
-    def add_message(self, message):
+    def add_message(self, message: Message):
         self.messages.append(message)
 
-    def add_account(self, account):
+    def add_account(self, account: Account):
         self.accounts.append(account)
 
-    def add_task(self, task):
+    def add_task(self, task: Task):
         self.tasks.append(task)

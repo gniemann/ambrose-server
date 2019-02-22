@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import Optional
+
 from . import db
 
 
@@ -10,17 +14,17 @@ class StatusLight(db.Model):
     task = db.relationship('Task', uselist=False)
 
     @property
-    def status(self):
+    def status(self) -> Optional[str]:
         if self.task:
             return self.task.status
         return None
 
     @property
-    def has_changed(self):
+    def has_changed(self) -> Optional[bool]:
         if self.task:
             return self.task.has_changed
         return None
 
     @classmethod
-    def by_id(cls, user_id, slot):
+    def by_id(cls, user_id: int, slot: int) -> Optional[StatusLight]:
         return cls.query.get((user_id, slot))

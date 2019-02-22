@@ -1,7 +1,9 @@
 import pytz
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, FormField, FieldList, HiddenField, SelectField, IntegerField
+from wtforms import StringField, PasswordField, FormField, FieldList, HiddenField, SelectField, IntegerField
 from wtforms.validators import InputRequired, EqualTo
+
+from devops_monitor.models import Message
 
 
 class LoginForm(FlaskForm):
@@ -67,6 +69,9 @@ def create_edit_form(lights, tasks):
 class NewTaskForm(FlaskForm):
     account = SelectField('Select account', coerce=int)
 
+    def __init__(self, *args, **kwargs):
+        super(NewTaskForm, self).__init__(*args, **kwargs)
+
 
 class ApplicationInsightsMetricForm(FlaskForm):
     metric = SelectField('Select metric')
@@ -78,9 +83,28 @@ class ApplicationInsightsMetricForm(FlaskForm):
 class NewMessageForm(FlaskForm):
     type = SelectField('Select task type')
 
+    def __init__(self, *args, **kwargs):
+        super(NewMessageForm, self).__init__(*args, **kwargs)
+        self.type.choices = Message.message_descriptions()
+
 
 class MessageForm(FlaskForm):
+    _registry = {}
+
+    def __init_subclass__(cls, **kwargs):
+        idx = cls.__name__.index('MessageForm')
+        cls._registry[cls.__name__[:idx].lower()] = cls
+
+    @classmethod
+    def new_message_form(cls, message_type, *args, **kwargs):
+        form_type = cls._registry[message_type.lower()]
+        return form_type(*args, **kwargs)
+
     text = StringField('Enter message', render_kw={'required': True})
+
+
+class TextMessageForm(MessageForm):
+    pass
 
 
 class DateTimeMessageForm(MessageForm):
@@ -89,4 +113,8 @@ class DateTimeMessageForm(MessageForm):
 
 
 class TaskMessageForm(MessageForm):
-    task = SelectField('Select task', coerce=int)
+    task_id = SelectField('Select task', coerce=int)
+
+    def __init__(self, *args, user, **kwargs):
+        super(TaskMessageForm, self).__init__(*args, **kwargs)
+        self.task_id.choices = [(t.id, t.name) for t in user.tasks]
