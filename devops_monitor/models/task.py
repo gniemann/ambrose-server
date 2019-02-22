@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from typing import Optional, Any
+from typing import Optional, Any, List, Tuple
 
 from . import db
 
 
 class Task(db.Model):
+    _registry = {}
     id = db.Column(db.Integer, primary_key=True)
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -19,6 +20,14 @@ class Task(db.Model):
     _prev_value = db.Column(db.String)
     last_update = db.Column(db.DateTime)
     has_changed = db.Column(db.Boolean)
+
+    def __init_subclass__(cls, **kwargs):
+        idx = cls.__name__.index('Task')
+        cls._registry[cls.__name__[:idx].lower] = cls
+
+    @classmethod
+    def descriptions(cls) -> List[Tuple[str, str]]:
+        return [(key, val.description) for key, val in cls._registry.items()]
 
     @classmethod
     def by_id(cls, task_id: int) -> Optional[Task]:
@@ -69,7 +78,7 @@ class DevOpsTask:
     pipeline = db.Column(db.String)
 
 
-class DevOpsBuildPipeline(Task, DevOpsTask, StatusTask):
+class DevOpsBuildTask(Task, DevOpsTask, StatusTask):
     __tablename__ = 'devops_build_pipeline'
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'), primary_key=True)
 
@@ -96,7 +105,7 @@ class DevOpsBuildPipeline(Task, DevOpsTask, StatusTask):
                self.definition_id == other.definition_id
 
 
-class DevOpsReleaseEnvironment(Task, DevOpsTask, StatusTask):
+class DevOpsReleaseTask(Task, DevOpsTask, StatusTask):
     __tablename__ = 'devops_release_environment'
 
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'), primary_key=True)

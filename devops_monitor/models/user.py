@@ -4,8 +4,7 @@ from typing import Optional
 
 import flask_login
 
-from devops_monitor.models.light import StatusLight
-from . import db, DevOpsAccount, Task, Message, Account
+from . import db, StatusLight, Task, Message, Account, DevOpsAccount
 
 
 class User(db.Model, flask_login.UserMixin):

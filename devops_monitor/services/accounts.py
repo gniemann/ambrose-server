@@ -7,7 +7,7 @@ from cryptography.fernet import Fernet
 from application_insights import ApplicationInsightsService
 from devops import DevOpsService
 from devops_monitor.common import db_transaction
-from devops_monitor.models import DevOpsAccount, DevOpsBuildPipeline, DevOpsReleaseEnvironment, Account, \
+from devops_monitor.models import DevOpsAccount, DevOpsBuildTask, DevOpsReleaseTask, Account, \
     ApplicationInsightsAccount, ApplicationInsightMetricTask, User
 from .exceptions import UnauthorizedAccessException
 
@@ -113,7 +113,7 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
 
             # build tasks to add
             for task in new_build_tasks.difference(current_build_tasks):
-                self.account.add_task(DevOpsBuildPipeline(
+                self.account.add_task(DevOpsBuildTask(
                     project=task.project,
                     definition_id=task.definition_id,
                     pipeline=task.name
@@ -125,7 +125,7 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
 
             # release tasks to add
             for task in new_release_tasks.difference(current_release_tasks):
-                self.account.add_task(DevOpsReleaseEnvironment(
+                self.account.add_task(DevOpsReleaseTask(
                     project=task.project,
                     definition_id=task.definition_id,
                     pipeline=task.name,

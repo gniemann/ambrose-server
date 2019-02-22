@@ -7,4 +7,5 @@ migrate = Migrate()
 from .task import *
 from .message import *
 from .account import *
+from .light import *
 from .user import *

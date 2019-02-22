@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Tuple, List, Optional, Any
 
 from . import db
-from .task import Task, DevOpsReleaseEnvironment, DevOpsBuildPipeline
+from .task import Task, DevOpsReleaseTask, DevOpsBuildTask
 
 
 class Account(db.Model):
@@ -27,7 +27,7 @@ class Account(db.Model):
         cls._registry[cls.__name__[:idx].lower()] = cls
 
     @classmethod
-    def account_descriptions(cls) -> List[Tuple[str, str]]:
+    def descriptions(cls) -> List[Tuple[str, str]]:
         return [(key, val.description) for key, val in cls._registry.items()]
 
     @classmethod
@@ -72,12 +72,12 @@ class DevOpsAccount(Account):
                     self.tasks.remove(t)
 
     @property
-    def build_tasks(self) -> List[DevOpsBuildPipeline]:
-        return [t for t in self.tasks if isinstance(t, DevOpsBuildPipeline)]
+    def build_tasks(self) -> List[DevOpsBuildTask]:
+        return [t for t in self.tasks if isinstance(t, DevOpsBuildTask)]
 
     @property
-    def release_tasks(self) -> List[DevOpsReleaseEnvironment]:
-        return [t for t in self.tasks if isinstance(t, DevOpsReleaseEnvironment)]
+    def release_tasks(self) -> List[DevOpsReleaseTask]:
+        return [t for t in self.tasks if isinstance(t, DevOpsReleaseTask)]
 
 
 class ApplicationInsightsAccount(Account):

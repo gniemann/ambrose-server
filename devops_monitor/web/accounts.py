@@ -1,24 +1,19 @@
+from cryptography.fernet import Fernet
 from flask import Blueprint, render_template, redirect, url_for, abort, request
 
 from devops_monitor.common import cipher_required
-from devops_monitor.models import DevOpsAccount, ApplicationInsightsAccount
+from devops_monitor.models import DevOpsAccount, ApplicationInsightsAccount, User
 from devops_monitor.services import DevOpsAccountService, UnauthorizedAccessException, AuthService
 from devops_monitor.services.accounts import ApplicationInsightsAccountService, AccountService
-from devops_monitor.web import DevOpsAccountForm
-from devops_monitor.web.forms import NewAccountForm, ApplicationInsightsAccountForm, ApplicationInsightsMetricForm
+from devops_monitor.web.forms import NewAccountForm, ApplicationInsightsMetricForm, AccountForm
 
 accounts_bp = Blueprint('accounts', __name__, template_folder='templates/accounts')
 
 
 @accounts_bp.route('/', methods=['GET', 'POST'])
 @AuthService.auth_required
-def index(user):
+def index(user: User):
     form = NewAccountForm()
-
-    form.type.choices = [
-        ('devops', 'Azure DevOps'),
-        ('application_insights', 'Application Insights')
-    ]
 
     if form.validate_on_submit():
         account_type = form.type.data
@@ -30,8 +25,8 @@ def index(user):
 @accounts_bp.route('/<account_type>', methods=['GET', 'POST'])
 @AuthService.auth_required
 @cipher_required
-def new_account(account_type, user, cipher):
-    form = new_account_form(account_type)
+def new_account(account_type: str, user: User, cipher: Fernet):
+    form = AccountForm.new_account_form(account_type)
 
     if form.validate_on_submit():
         create_new_account(form, user, cipher, account_type)
@@ -40,15 +35,6 @@ def new_account(account_type, user, cipher):
     display_account_type = account_type.replace('_', ' ').capitalize()
     return render_template('new_account.html', form=form, account_type=display_account_type,
                            account_url=url_for('.new_account', account_type=account_type))
-
-
-def new_account_form(account_type):
-    if account_type == 'devops':
-        return DevOpsAccountForm()
-    if account_type == 'application_insights':
-        return ApplicationInsightsAccountForm()
-
-    abort(404)
 
 
 def create_new_account(form, user, cipher, account_type):

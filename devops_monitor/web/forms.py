@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import pytz
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, FormField, FieldList, HiddenField, SelectField, IntegerField
 from wtforms.validators import InputRequired, EqualTo
 
-from devops_monitor.models import Message
+from devops_monitor.models import Message, Account
 
 
 class LoginForm(FlaskForm):
@@ -20,15 +22,32 @@ class RegisterForm(FlaskForm):
 class NewAccountForm(FlaskForm):
     type = SelectField('Select new account type')
 
+    def __init__(self, *args, **kwargs):
+        super(NewAccountForm, self).__init__(*args, **kwargs)
+        self.type.choices = Account.descriptions()
 
-class DevOpsAccountForm(FlaskForm):
+
+class AccountForm(FlaskForm):
+    _register = {}
+
+    def __init_subclass__(cls, **kwargs):
+        idx = cls.__name__.index('AccountForm')
+        cls._register[cls.__name__[:idx].lower()] = cls
+
+    @classmethod
+    def new_account_form(cls, account_type: str, *args, **kwargs) -> NewAccountForm:
+        form_type = cls._register[account_type.lower()]
+        return form_type(*args, **kwargs)
+
+
+class DevOpsAccountForm(AccountForm):
     username = StringField('Username', [InputRequired()], render_kw={'required': True})
     organization = StringField('Organization', [InputRequired()], render_kw={'required': True})
     token = StringField('DevOps Personal Access Token', [InputRequired()], render_kw={'required': True})
     nickname = StringField('Nickname')
 
 
-class ApplicationInsightsAccountForm(FlaskForm):
+class ApplicationInsightsAccountForm(AccountForm):
     application_id = StringField('Application ID', [InputRequired()], render_kw={'required': True})
     api_key = StringField('API Key', [InputRequired()], render_kw={'required': True})
 
@@ -68,9 +87,6 @@ def create_edit_form(lights, tasks):
 
 class NewTaskForm(FlaskForm):
     account = SelectField('Select account', coerce=int)
-
-    def __init__(self, *args, **kwargs):
-        super(NewTaskForm, self).__init__(*args, **kwargs)
 
 
 class ApplicationInsightsMetricForm(FlaskForm):
