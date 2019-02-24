@@ -1,9 +1,10 @@
 import functools
 import inspect
-from typing import Callable
+from typing import Callable, Optional
 
 import flask_bcrypt as bcrypt
 import flask_login
+from flask_jwt_extended import get_jwt_identity, create_access_token
 
 from devops_monitor.models import User
 from devops_monitor.services import UserService
@@ -48,3 +49,16 @@ class AuthService:
     @classmethod
     def login_user(cls, user: User):
         flask_login.login_user(user)
+
+    @classmethod
+    def current_user(cls):
+        return flask_login.current_user
+
+    @classmethod
+    def current_api_user(cls) -> Optional[User]:
+        username = get_jwt_identity()
+        return User.by_username(username)
+
+    @classmethod
+    def jwt(cls, user):
+        return create_access_token(identity=user.username)

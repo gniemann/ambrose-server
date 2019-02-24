@@ -8,7 +8,7 @@ from application_insights import ApplicationInsightsService
 from devops import DevOpsService
 from devops_monitor.common import db_transaction
 from devops_monitor.models import DevOpsAccount, DevOpsBuildTask, DevOpsReleaseTask, Account, \
-    ApplicationInsightsAccount, ApplicationInsightMetricTask, User
+    ApplicationInsightsAccount, ApplicationInsightsMetricTask, User
 from .exceptions import UnauthorizedAccessException
 
 BuildTask = namedtuple('BuildTask', 'project definition_id name type')
@@ -16,17 +16,20 @@ ReleaseTask = namedtuple('ReleaseTask', 'project definition_id name environment 
 
 
 class AccountService:
+    _model_registry = {}
     _registry = {}
 
     def __init_subclass__(cls, model: Type[Account], **kwargs):
         super(AccountService, cls).__init_subclass__(**kwargs)
-        cls._registry[model.__name__] = cls
+        cls._model_registry[model.__name__] = cls
+        idx = cls.__name__.index('AccountService')
+        cls._registry[cls.__name__[:idx].lower()] = cls
 
     def __new__(cls, account: Optional[Account], cipher: Optional[Fernet] = None):
         if not account:
             return super().__new__(cls)
 
-        service_type = cls._registry[account.__class__.__name__]
+        service_type = cls._model_registry[account.__class__.__name__]
         return super().__new__(service_type)
 
     def __init__(self, account: Optional[Account], cipher: Optional[Fernet] = None):
@@ -51,6 +54,12 @@ class AccountService:
 
     def get_task_statuses(self):
         pass
+
+    @classmethod
+    def create_account(cls, account_type: str, cipher: Fernet, user: User, *args, **kwargs) -> Account:
+        service_type = cls._registry[account_type.lower()]
+        service = service_type(None, cipher)
+        return service.new_account(user, *args, **kwargs)
 
 
 class DevOpsAccountService(AccountService, model=DevOpsAccount):
@@ -216,7 +225,7 @@ class ApplicationInsightsAccountService(AccountService, model=ApplicationInsight
 
     def add_metric(self, metric: str, nickname: str):
         with db_transaction():
-            self.account.add_task(ApplicationInsightMetricTask(
+            self.account.add_task(ApplicationInsightsMetricTask(
                 metric=metric,
                 nickname=nickname
             ))
@@ -224,7 +233,7 @@ class ApplicationInsightsAccountService(AccountService, model=ApplicationInsight
     def get_task_statuses(self):
         insights = ApplicationInsightsService(self.account.application_id, self._decrypt(self.account.api_key))
         with db_transaction():
-            for task in [t for t in self.account.tasks if isinstance(t, ApplicationInsightMetricTask)]:
+            for task in [t for t in self.account.tasks if isinstance(t, ApplicationInsightsMetricTask)]:
                 metric = insights.get_metric(task.metric, aggregation=task.aggregation, timespan=task.timespan)
                 if metric:
                     task.last_update = datetime.now()

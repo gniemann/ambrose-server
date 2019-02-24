@@ -68,3 +68,6 @@ class User(db.Model, flask_login.UserMixin):
 
     def add_task(self, task: Task):
         self.tasks.append(task)
+
+    def remove_message(self, message):
+        self.messages.remove(message)

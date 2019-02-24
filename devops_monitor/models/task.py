@@ -136,7 +136,7 @@ class DevOpsReleaseTask(Task, DevOpsTask, StatusTask):
                self.environment_id == other.environment_id
 
 
-class ApplicationInsightMetricTask(Task):
+class ApplicationInsightsMetricTask(Task):
     __tablename__ = 'application_insight_metric'
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'), primary_key=True)
 
@@ -160,3 +160,11 @@ class ApplicationInsightMetricTask(Task):
     __mapper_args__ = {
         'polymorphic_identity': 'application_insight_metric',
     }
+
+    @classmethod
+    def choices(cls):
+        return [
+            ('requests/count', 'Request count'),
+            ('requests/duration', 'Request duration'),
+            ('requests/failed', 'Failed requests')
+        ]

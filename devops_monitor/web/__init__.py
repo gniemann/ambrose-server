@@ -11,7 +11,8 @@ web_bp = Blueprint('web', __name__, template_folder='templates')
 @web_bp.route('/')
 @AuthService.auth_required
 def index(user):
-    return render_template('index.html', lights=user.lights, messages=user.messages)
+    token = AuthService.jwt(user)
+    return render_template('index.html', lights=user.lights, messages=user.messages, jwt=token)
 
 
 @web_bp.route('/login', methods=['GET', 'POST'])

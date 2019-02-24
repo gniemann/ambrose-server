@@ -19,9 +19,13 @@ class UserService:
 
         return user
 
-    def add_message(self, message):
+    def _add_message(self, message):
         with db_transaction():
-            self.user.add_message(TextMessage(text=message))
+            self.user.add_message(message)
+        return message
+
+    def add_message(self, text):
+        return self._add_message(TextMessage(text=text))
 
     def update_lights(self, data):
         with db_transaction():
@@ -35,17 +39,15 @@ class UserService:
                 self.user.set_task_for_light(task, light_data['slot'])
 
     def add_datetime_message(self, format_string, date_format, timezone):
-        with db_transaction():
-            self.user.add_message(DateTimeMessage(
-                text=format_string,
-                dateformat=date_format,
-                timezone=timezone
-            ))
+        return self._add_message(DateTimeMessage(
+            text=format_string,
+            dateformat=date_format,
+            timezone=timezone
+        ))
 
     def add_task_message(self, task_id, format_string):
         task = Task.by_id(task_id)
-        with db_transaction():
-            self.user.add_message(TaskMessage(text=format_string, task=task))
+        return self._add_message(TaskMessage(text=format_string, task=task))
 
     def get_message(self, message_id):
         message = Message.by_id(message_id)
@@ -59,7 +61,9 @@ class UserService:
             message.update(data)
 
     def create_message(self, message_type, data):
-        message = Message.new_message(message_type, data)
+        return self._add_message(Message.new_message(message_type, data))
 
+    def delete_message(self, message_id: int):
+        message = self.get_message(message_id)
         with db_transaction():
-            self.user.add_message(message)
+            self.user.remove_message(message)

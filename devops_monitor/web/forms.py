@@ -5,7 +5,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, FormField, FieldList, HiddenField, SelectField, IntegerField
 from wtforms.validators import InputRequired, EqualTo
 
-from devops_monitor.models import Message, Account
+from devops_monitor.models import Message, Account, ApplicationInsightsMetricTask
 
 
 class LoginForm(FlaskForm):
@@ -94,6 +94,10 @@ class ApplicationInsightsMetricForm(FlaskForm):
     aggregation = SelectField("Select aggregation", choices=[('avg', 'Average'), ('sum', 'Sum'), ('min', 'Min'), ('max', 'Max'), ('count', 'Count')])
     timespan = StringField('Timespan')
     nickname = StringField('Nickname')
+
+    def __init__(self, *args, **kwargs):
+        super(ApplicationInsightsMetricForm, self).__init__(*args, **kwargs)
+        self.metric.choices = ApplicationInsightsMetricTask.choices()
 
 
 class NewMessageForm(FlaskForm):

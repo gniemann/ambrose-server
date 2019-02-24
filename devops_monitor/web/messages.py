@@ -1,5 +1,4 @@
 from flask import Blueprint, render_template, url_for, redirect
-
 from devops_monitor.services import AuthService
 from devops_monitor.web.forms import NewMessageForm, MessageForm
 
@@ -14,7 +13,8 @@ def index(user):
     if form.validate_on_submit():
         return redirect(url_for('.new_message', message_type=form.type.data))
 
-    return render_template('messages.html', form=form, messages=user.messages)
+    token = AuthService.jwt(user)
+    return render_template('messages.html', form=form, messages=user.messages, jwt=token)
 
 
 @messages_bp.route('/new/<message_type>', methods=['GET', 'POST'])

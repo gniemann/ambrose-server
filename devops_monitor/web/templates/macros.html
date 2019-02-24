@@ -25,18 +25,30 @@
     </form>
 {%- endmacro %}
 
-{% macro message_list(messages) -%}
+{% macro message_list(messages, jwt) -%}
     <ul class="list-group">
     {% for msg in messages %}
-        <li class="list-group-item">
+        <li class="list-group-item" id="{{ msg.id }}">
         <div class="d-flex justify-content-between">
             <div>{{ msg.value }}</div>
             <div class="btn-group" role="group">
                 <a href="{{ url_for('messages.edit_message', message_id=msg.id) }}" class="btn btn-outline-secondary">Edit</a>
-                <a class="btn btn-outline-danger">Delete</a>
+                <a class="btn btn-outline-danger" onclick="deleteMessage({{ msg.id }})">Delete</a>
             </div>
         </div>
         </li>
     {% endfor %}
-
+    <script>
+    function deleteMessage(message_id) {
+        var req = new XMLHttpRequest();
+        req.open("DELETE",  "{{ url_for('api.messages') }}" + message_id);
+        req.setRequestHeader('Authorization', 'Bearer {{ jwt }}');
+        req.onload = function() {
+            if (req.status >= 200 && req.status < 400) {
+                location.reload(true);
+            }
+        }
+        req.send();
+    }
+    </script>
 {% endmacro %}

@@ -16,3 +16,4 @@ marshmallow-oneofschema
 python-dateutil
 Faker
 pytz
+flask-jwt-extended

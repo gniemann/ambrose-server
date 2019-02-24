@@ -6,7 +6,7 @@ from config import Config
 import devops_monitor
 from devops_monitor import db
 from devops_monitor.models import TextMessage
-from devops_monitor.services import DevOpsAccountService
+from devops_monitor.services import DevOpsAccountService, ApplicationInsightsAccountService
 
 
 class TestConfig(Config):
@@ -70,6 +70,18 @@ def devops_account(user, faker, token, cipher):
     db.session.delete(account)
     db.session.commit()
 
+@pytest.fixture(scope='module')
+def appinsights_account(user, faker, cipher):
+    account = ApplicationInsightsAccountService(None, cipher).new_account(
+        user,
+        faker.sha1(),
+        faker.sha1()
+    )
+
+    yield account
+
+    db.session.delete(account)
+    db.session.commit()
 
 @pytest.fixture(scope='module')
 def text_message(user, faker):

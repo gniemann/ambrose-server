@@ -29,7 +29,7 @@ def new_account(account_type: str, user: User, cipher: Fernet):
     form = AccountForm.new_account_form(account_type)
 
     if form.validate_on_submit():
-        create_new_account(form, user, cipher, account_type)
+        AccountService.create_account(account_type, cipher, user, **form.data)
         return redirect(url_for('.index'))
 
     display_account_type = account_type.replace('_', ' ').capitalize()
@@ -37,32 +37,10 @@ def new_account(account_type: str, user: User, cipher: Fernet):
                            account_url=url_for('.new_account', account_type=account_type))
 
 
-def create_new_account(form, user, cipher, account_type):
-    if account_type == 'devops':
-        new_devops_account(form, user, cipher)
-    elif account_type == 'application_insights':
-        new_app_insights_account(form, user, cipher)
-
-
-def new_devops_account(form, user, cipher):
-    DevOpsAccountService(None, cipher).new_account(
-        user,
-        form.username.data,
-        form.organization.data,
-        form.token.data,
-        form.nickname.data
-    )
-
-
-def new_app_insights_account(form, user, cipher):
-    ApplicationInsightsAccountService(None, cipher) \
-        .new_account(user, form.application_id.data, form.api_key.data)
-
-
-@accounts_bp.route('/accounts/<account_id>/tasks', methods=['GET', 'POST'])
+@accounts_bp.route('/<int:account_id>/tasks', methods=['GET', 'POST'])
 @AuthService.auth_required
 @cipher_required
-def account_tasks(account_id, user, cipher):
+def account_tasks(account_id: int, user, cipher):
     account = None
     try:
         account = AccountService.get_account(account_id, user)
@@ -100,11 +78,6 @@ def devops_account_tasks(account, cipher):
 
 def app_insights_account_tasks(account):
     new_metric_form = ApplicationInsightsMetricForm()
-    new_metric_form.metric.choices = [
-        ('requests/count', 'Request count'),
-        ('requests/duration', 'Request duration'),
-        ('requests/failed', 'Failed requests')
-    ]
 
     if new_metric_form.validate_on_submit():
         ApplicationInsightsAccountService(account).add_metric(
