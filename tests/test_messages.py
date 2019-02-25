@@ -4,7 +4,7 @@ from devops_monitor.models import DateTimeMessage, TextMessage, TaskMessage
 
 
 def test_datetime_message_task():
-    task = DateTimeMessage(text='Current time is {}', dateformat='%b %m, %M%M')
+    task = DateTimeMessage(text='Current time is {datetime}', dateformat='%b %m, %M%M')
 
     assert 'Current time is' in task.value
 

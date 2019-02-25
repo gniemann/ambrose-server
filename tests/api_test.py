@@ -22,11 +22,10 @@ def test_login(client, user, password):
     assert resp.json is not None
     assert resp.json.get('access_token') is not None
 
-@pytest.fixture(scope='function')
-def message(user):
-    return UserService(user).add_message('Hello message')
-
-def test_delete_message(client, access_token, message):
+def test_delete_message(client, user, access_token):
+    message = TextMessage(text='Hello', user_id=user.id)
+    db.session.add(message)
+    db.session.commit()
     message_id = message.id
 
     resp = client.delete('/api/messages/{}'.format(message_id), headers={'Authorization': 'Bearer {}'.format(access_token)})
@@ -35,10 +34,10 @@ def test_delete_message(client, access_token, message):
     assert Message.by_id(message_id) is None
 
 def test_delete_task(client, user, access_token):
-    with client:
-        task = ApplicationInsightsMetricTask(metric='requests/count')
-        user.tasks.append(task)
-        db.session.commit()
+
+    task = ApplicationInsightsMetricTask(metric='requests/count', user=user)
+    db.session.add(task)
+    db.session.commit()
     task_id = task.id
 
     resp = client.delete('/api/tasks/{}'.format(task_id), headers={'Authorization': 'Bearer {}'.format(access_token)})
