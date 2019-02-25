@@ -18,7 +18,14 @@
     <tr>
         <td>{{ task.name }}</td>
         <td>{{ task.type }}</td>
-        <td><a href="" class="btn btn-outline-secondary">Edit</a> </td>
+        <td>
+            <div class="d-flex justify-content-between">
+                <div class="btn-group">
+                    <a href="" class="btn btn-outline-secondary">Edit</a>
+                    <a class="btn btn-outline-danger" onclick="deleteTask({{ task.id }})">Delete</a>
+                </div>
+            </div>
+        </td>
     </tr>
     {% endfor %}
     </tbody>
@@ -27,4 +34,17 @@
 <h3>Create New Task</h3>
 {{ macros.render_form(form, url_for('.index'), 'Add Task') }}
 
+<script>
+function deleteTask(task_id) {
+    var req = new XMLHttpRequest();
+    req.open("DELETE",  "{{ url_for('api.tasks') }}" + task_id);
+    req.setRequestHeader('Authorization', 'Bearer {{ jwt }}');
+    req.onload = function() {
+        if (req.status >= 200 && req.status < 400) {
+            location.reload(true);
+        }
+    };
+    req.send();
+}
+</script>
 {% endblock %}

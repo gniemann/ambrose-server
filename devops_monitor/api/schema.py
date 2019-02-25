@@ -6,12 +6,6 @@ from flask import jsonify
 from marshmallow import Schema, fields
 
 
-class TaskSchema(Schema):
-    name = fields.String()
-    status = fields.String()
-    has_changed = fields.Boolean()
-
-
 class ColorSchema(Schema):
     red = fields.Integer()
     green = fields.Integer()
@@ -32,19 +26,43 @@ class StatusSchema(Schema):
     messages = fields.List(fields.String())
 
 
+class MessageSchema(Schema):
+    id = fields.Integer()
+    type = fields.String()
+    value = fields.String()
+    text = fields.String()
+
+
+class LoginSchema(Schema):
+    username = fields.String()
+    password = fields.String()
+
+
+class AccessTokenSchema(Schema):
+    access_token = fields.String()
+
+
+class TaskSchema(Schema):
+    id = fields.Integer()
+    name = fields.String()
+    value = fields.String()
+    prev_value = fields.String()
+    has_changed = fields.Boolean()
+
+
 def with_schema(schema: Union[Type[Schema], Schema]) -> Callable[[Callable], Callable]:
     def decorator(func):
         @functools.wraps(func)
         def inner(*args, **kwargs):
             retval = func(*args, **kwargs)
 
+            many = isinstance(retval, abc.MutableSequence)
             if not isinstance(schema, Schema):
-                many = isinstance(retval, abc.MutableSequence)
-                converter = schema(many=many)
+                converter = schema()
             else:
                 converter = schema
 
-            return jsonify(converter.dump(retval))
+            return jsonify(converter.dump(retval, many=many))
 
         return inner
 

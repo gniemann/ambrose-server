@@ -16,4 +16,5 @@ def index(user):
         account_id = new_task_form.account.data
         return redirect(url_for('accounts.account_tasks', account_id=account_id))
 
-    return render_template('tasks.html', tasks=user.tasks, form=new_task_form)
+    token = AuthService.jwt(user)
+    return render_template('tasks.html', tasks=user.tasks, form=new_task_form, jwt=token)

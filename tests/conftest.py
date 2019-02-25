@@ -6,7 +6,7 @@ from config import Config
 import devops_monitor
 from devops_monitor import db
 from devops_monitor.models import TextMessage
-from devops_monitor.services import DevOpsAccountService, ApplicationInsightsAccountService
+from devops_monitor.services import DevOpsAccountService, ApplicationInsightsAccountService, UserService
 
 
 class TestConfig(Config):
@@ -29,15 +29,18 @@ def client(app):
     return app.test_client()
 
 
+@pytest.fixture(scope='session')
+def password(faker):
+    return faker.password()
+
 @pytest.fixture(scope='module')
-def user(app):
-    user = devops_monitor.models.User(username='test@test.com')
-    devops_monitor.db.session.add(user)
-    devops_monitor.db.session.commit()
+def user(app, faker, password):
+    user = UserService.create_user(faker.email(), password)
 
     yield user
 
     devops_monitor.db.session.delete(user)
+    devops_monitor.db.session.commit()
 
 
 @pytest.fixture(scope='session')

@@ -130,12 +130,3 @@ def test_post_new_appinsights_metric(client, user, appinsights_account, faker):
     assert new_task in appinsights_account.tasks
     assert new_task in user.tasks
 
-@pytest.mark.usefixtures('authenticated_user')
-def test_delete_message(client, user):
-    message = UserService(user).add_message('Hello, world!')
-    message_id = message.id
-
-    resp = client.delete('/api/messages/{}'.format(message_id))
-
-    assert resp.status_code == 204
-    assert Message.by_id(message_id) is None

@@ -1,3 +1,5 @@
+from typing import Any, Mapping
+
 import flask_bcrypt as bcrypt
 
 from devops_monitor.common import db_transaction
@@ -10,7 +12,7 @@ class UserService:
         self.user = user
 
     @classmethod
-    def create_user(cls, username, password):
+    def create_user(cls, username: str, password: str) -> User:
         pw_hash = bcrypt.generate_password_hash(password).decode('utf-8')
         user = User(username=username, password=pw_hash)
 
@@ -19,15 +21,19 @@ class UserService:
 
         return user
 
-    def _add_message(self, message):
+    def _add_message(self, message: Message) -> Message:
         with db_transaction():
             self.user.add_message(message)
         return message
 
-    def add_message(self, text):
+    def _delete(self, obj):
+        with db_transaction() as session:
+            session.delete(obj)
+
+    def add_message(self, text: str):
         return self._add_message(TextMessage(text=text))
 
-    def update_lights(self, data):
+    def update_lights(self, data: Mapping[str, Any]):
         with db_transaction():
             if data['num_lights'] != len(self.user.lights):
                 self.user.resize_lights(data['num_lights'])
@@ -38,32 +44,40 @@ class UserService:
                 task = Task.by_id(task_id) if task_id >= 0 else None
                 self.user.set_task_for_light(task, light_data['slot'])
 
-    def add_datetime_message(self, format_string, date_format, timezone):
+    def add_datetime_message(self, format_string: str, date_format: str, timezone: str) -> Message:
         return self._add_message(DateTimeMessage(
             text=format_string,
             dateformat=date_format,
             timezone=timezone
         ))
 
-    def add_task_message(self, task_id, format_string):
+    def add_task_message(self, task_id: int, format_string: str) -> Message:
         task = Task.by_id(task_id)
         return self._add_message(TaskMessage(text=format_string, task=task))
 
-    def get_message(self, message_id):
+    def get_message(self, message_id: int) -> Message:
         message = Message.by_id(message_id)
         if message not in self.user.messages:
             raise UnauthorizedAccessException()
 
         return message
 
-    def update_message(self, message, data):
+    def update_message(self, message: Message, data: Mapping[str, Any]):
         with db_transaction():
             message.update(data)
 
-    def create_message(self, message_type, data):
+    def create_message(self, message_type: str, data: Mapping[str, Any]):
         return self._add_message(Message.new_message(message_type, data))
 
     def delete_message(self, message_id: int):
-        message = self.get_message(message_id)
-        with db_transaction():
-            self.user.remove_message(message)
+        self._delete(self.get_message(message_id))
+
+    def get_task(self, task_id) -> Task:
+        task = Task.by_id(task_id)
+        if task not in self.user.tasks:
+            raise UnauthorizedAccessException()
+
+        return task
+
+    def delete_task(self, task_id: int):
+        self._delete(self.get_task(task_id))
