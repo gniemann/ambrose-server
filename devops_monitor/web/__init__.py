@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, abort, redirect, url_for
 
+from devops_monitor.models import User
 from devops_monitor.services import UserService, UserCredentialMismatchException, AuthService
 from .forms import LoginForm, RegisterForm, DevOpsAccountForm, create_edit_form, NewTaskForm
 from .tasks import tasks_bp
@@ -10,7 +11,7 @@ web_bp = Blueprint('web', __name__, template_folder='templates')
 
 @web_bp.route('/')
 @AuthService.auth_required
-def index(user):
+def index(user: User):
     token = AuthService.jwt(user)
     return render_template('index.html', lights=user.lights, messages=user.messages, jwt=token)
 
@@ -44,14 +45,14 @@ def register():
 
 @web_bp.route('/logout')
 @AuthService.auth_required
-def logout(user):
+def logout():
     AuthService.logout()
     return redirect(url_for('.login'))
 
 
 @web_bp.route('/edit', methods=['GET', 'POST'])
 @AuthService.auth_required
-def edit(user, user_service):
+def edit(user: User, user_service: UserService):
     edit_form = create_edit_form(user.lights, user.tasks)
 
     if edit_form.validate_on_submit():
