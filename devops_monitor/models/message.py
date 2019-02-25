@@ -34,7 +34,7 @@ class Message(db.Model):
 
     @property
     def value(self) -> str:
-        return self.text
+        return self.text.format(**self._substitutions())
 
     def __str__(self):
         return self.value
@@ -53,8 +53,32 @@ class Message(db.Model):
     }
 
     def update(self, data: Mapping[str, Any]):
-        self.text = data.get('text', self.text)
+        new_text = data.get('text')
+        if new_text is not None:
+            self.text = self._sanatize_text(new_text)
 
+    def _sanatize_text(self, text: str) -> str:
+        default = ''
+        sub_vars = self.class_variables()
+        if len(sub_vars) > 0:
+            default = sub_vars[0]
+
+        return text.replace('{}', '{' + default + '}')
+
+    @classmethod
+    def class_variables(cls):
+        return []
+
+    @property
+    def variables(self):
+        return self.class_variables()
+
+    def _substitutions(self):
+        return {var: getattr(self, var) for var in self.variables}
+
+    @classmethod
+    def class_variables_for(cls, message_type):
+        return cls._registry[message_type.lower()].class_variables()
 
 class TextMessage(Message):
     __tablename__ = 'text_message'
@@ -77,12 +101,6 @@ class DateTimeMessage(Message):
     dateformat = db.Column(db.String, default=default_format)
     timezone = db.Column(db.String)
 
-    @property
-    def value(self) -> str:
-        tz = dateutil.tz.gettz(self.timezone)
-        now = datetime.now(tz=tz)
-        return self.text.format(now.strftime(self.dateformat))
-
     __mapper_args__ = {
         'polymorphic_identity': 'datetime_message',
     }
@@ -90,6 +108,17 @@ class DateTimeMessage(Message):
     def update(self, data: Mapping[str, Any]):
         super(DateTimeMessage, self).update(data)
         self.dateformat = data.get('dateformat', self.dateformat)
+
+    @classmethod
+    def class_variables(cls):
+        return super().class_variables() + ['datetime']
+
+    def _substitutions(self):
+        tz = dateutil.tz.gettz(self.timezone)
+        now = datetime.now(tz=tz)
+        return {
+            'datetime': now.strftime(self.dateformat)
+        }
 
 
 class TaskMessage(Message):
@@ -107,12 +136,21 @@ class TaskMessage(Message):
         if self.task is None:
             return 'Invalid'
 
-        return self.text.format(self.task.value)
+        return super().value
 
     __mapper_args__ = {
         'polymorphic_identity': 'task_message',
     }
 
+    _task_variables = ['value', 'name', 'prev_value', 'has_changed', 'last_update']
+
     def update(self, data: Mapping[str, Any]):
         super(TaskMessage, self).update(data)
         self.task_id = data.get('task_id', self.task_id)
+
+    @classmethod
+    def class_variables(cls):
+        return super().class_variables() + cls._task_variables
+
+    def _substitutions(self):
+        return {var: getattr(self.task, var) for var in self._task_variables}

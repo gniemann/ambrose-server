@@ -9,6 +9,7 @@ from .messages import messages_bp
 
 web_bp = Blueprint('web', __name__, template_folder='templates')
 
+
 @web_bp.route('/')
 @AuthService.auth_required
 def index(user: User):

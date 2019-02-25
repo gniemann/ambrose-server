@@ -11,6 +11,14 @@
     Edit Message
 {% endif %}
 </h2>
+    {% if variables|count > 0 %}
+        <p>The following variables are usable in the message</p>
+        <ul>
+        {% for var in variables %}
+        <li>{{ '{' ~ var ~'}' }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
     {% if is_new %}
 {{ macros.render_form(form, message_url, 'Create Message') }}
 {% else %}
