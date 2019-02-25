@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+from typing import Type
+
 import pytz
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, FormField, FieldList, HiddenField, SelectField, IntegerField
 from wtforms.validators import InputRequired, EqualTo
 
-from devops_monitor.models import Message, Account, ApplicationInsightsMetricTask
+from devops_monitor.models import Message, Account, ApplicationInsightsMetricTask, Task
 
 
 class LoginForm(FlaskForm):
@@ -89,7 +91,21 @@ class NewTaskForm(FlaskForm):
     account = SelectField('Select account', coerce=int)
 
 
-class ApplicationInsightsMetricForm(FlaskForm):
+class TaskForm(FlaskForm):
+    _model_registry = {}
+    nickname = StringField('Nickname')
+
+    def __init_subclass__(cls, **kwargs):
+        cls._model_registry[cls._model.__name__] = cls
+
+    @classmethod
+    def form_for_task(cls, task, *args, **kwargs):
+        form_type = cls._model_registry.get(task.__class__.__name__, cls)
+        return form_type(*args, obj=task, **kwargs)
+
+
+class ApplicationInsightsMetricForm(TaskForm):
+    _model = ApplicationInsightsMetricTask
     metric = SelectField('Select metric')
     aggregation = SelectField("Select aggregation", choices=[('avg', 'Average'), ('sum', 'Sum'), ('min', 'Min'), ('max', 'Max'), ('count', 'Count')])
     timespan = StringField('Timespan')
@@ -120,6 +136,7 @@ class MessageForm(FlaskForm):
         form_type = cls._registry[message_type.lower()]
         return form_type(*args, **kwargs)
 
+    nickname = StringField('Nickname')
     text = StringField('Enter message', render_kw={'required': True})
 
 

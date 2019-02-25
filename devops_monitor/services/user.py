@@ -63,6 +63,9 @@ class UserService:
         return message
 
     def update_message(self, message: Message, data: Mapping[str, Any]):
+        if message not in self.user.messages:
+            raise UnauthorizedAccessException
+
         with db_transaction():
             message.update(data)
 
@@ -81,3 +84,10 @@ class UserService:
 
     def delete_task(self, task_id: int):
         self._delete(self.get_task(task_id))
+
+    def update_task(self, task: Task, data: Mapping[str, Any]):
+        if task not in self.user.tasks:
+            raise UnauthorizedAccessException
+
+        with db_transaction():
+            task.update(data)

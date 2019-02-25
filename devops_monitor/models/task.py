@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, Any, List, Tuple
+from typing import Optional, Any, List, Tuple, Mapping
 
 from . import db
 
@@ -60,6 +60,9 @@ class Task(db.Model):
         'polymorphic_identity': 'task',
         'polymorphic_on': _type
     }
+
+    def update(self, data: Mapping[str, Any]):
+        pass
 
 
 class StatusTask:
@@ -168,3 +171,10 @@ class ApplicationInsightsMetricTask(Task):
             ('requests/duration', 'Request duration'),
             ('requests/failed', 'Failed requests')
         ]
+
+    def update(self, data):
+        super().update(data)
+        self.metric = data.get('metric', self.metric)
+        self.nickname = data.get('nickname', self.nickname)
+        self.aggregation = data.get('aggregation', self.aggregation)
+        self.timespan = data.get('timespan', self.timespan)

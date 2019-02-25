@@ -223,11 +223,13 @@ class ApplicationInsightsAccountService(AccountService, model=ApplicationInsight
             self.account = account
             return account
 
-    def add_metric(self, metric: str, nickname: str):
+    def add_metric(self, metric: str, nickname: str, aggregation: str, timespan: str):
         with db_transaction():
             self.account.add_task(ApplicationInsightsMetricTask(
                 metric=metric,
-                nickname=nickname
+                nickname=nickname,
+                aggregation=aggregation,
+                timespan=timespan
             ))
 
     def get_task_statuses(self):

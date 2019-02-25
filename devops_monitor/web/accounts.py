@@ -81,7 +81,9 @@ def app_insights_account_tasks(account: Account):
     if new_metric_form.validate_on_submit():
         ApplicationInsightsAccountService(account).add_metric(
             new_metric_form.metric.data,
-            new_metric_form.nickname.data
+            new_metric_form.nickname.data,
+            new_metric_form.aggregation.data,
+            new_metric_form.timespan.data
         )
 
         return redirect(url_for('.index'))

@@ -21,7 +21,7 @@
         <td>
             <div class="d-flex justify-content-between">
                 <div class="btn-group">
-                    <a href="" class="btn btn-outline-secondary">Edit</a>
+                    <a href="{{ url_for('.task', task_id=task.id) }}" class="btn btn-outline-secondary">Edit</a>
                     <a class="btn btn-outline-danger" onclick="deleteTask({{ task.id }})">Delete</a>
                 </div>
             </div>

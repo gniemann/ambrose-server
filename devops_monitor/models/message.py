@@ -15,6 +15,7 @@ class Message(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     _type = db.Column(db.String)
     text = db.Column(db.String)
+    nickname = db.Column(db.String)
 
     def __init_subclass__(cls, **kwargs):
         idx = cls.__name__.index('Message')
@@ -47,6 +48,10 @@ class Message(db.Model):
     def type(self) -> str:
         return self._type.split('_')[0]
 
+    @property
+    def name(self) -> str:
+        return self.nickname if self.nickname else self.value
+
     __mapper_args__ = {
         'polymorphic_identity': 'message',
         'polymorphic_on': _type
@@ -56,6 +61,8 @@ class Message(db.Model):
         new_text = data.get('text')
         if new_text is not None:
             self.text = self._sanatize_text(new_text)
+
+        self.nickname = data.get('nickname', self.nickname)
 
     def _sanatize_text(self, text: str) -> str:
         default = ''

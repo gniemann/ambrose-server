@@ -30,7 +30,7 @@
     {% for msg in messages %}
         <li class="list-group-item" id="{{ msg.id }}">
         <div class="d-flex justify-content-between">
-            <div>{{ msg.value }}</div>
+            <div>{{ msg.name }}</div>
             <div class="btn-group" role="group">
                 <a href="{{ url_for('messages.edit_message', message_id=msg.id) }}" class="btn btn-outline-secondary">Edit</a>
                 <a class="btn btn-outline-danger" onclick="deleteMessage({{ msg.id }})">Delete</a>
