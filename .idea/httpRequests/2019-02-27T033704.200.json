@@ -1,0 +1,80 @@
+{
+  "lights": [
+    {
+      "primary_color": {
+        "blue": 0,
+        "green": 255,
+        "red": 0
+      },
+      "type": "steady"
+    },
+    {
+      "primary_color": {
+        "blue": 0,
+        "green": 255,
+        "red": 0
+      },
+      "type": "steady"
+    },
+    {
+      "primary_color": {
+        "blue": 0,
+        "green": 255,
+        "red": 0
+      },
+      "type": "steady"
+    },
+    {
+      "primary_color": {
+        "blue": 0,
+        "green": 255,
+        "red": 0
+      },
+      "type": "steady"
+    },
+    {
+      "primary_color": {
+        "blue": 0,
+        "green": 255,
+        "red": 0
+      },
+      "type": "steady"
+    },
+    {
+      "primary_color": {
+        "blue": 0,
+        "green": 255,
+        "red": 0
+      },
+      "type": "steady"
+    },
+    {
+      "primary_color": {
+        "blue": 0,
+        "green": 255,
+        "red": 0
+      },
+      "type": "steady"
+    },
+    {
+      "primary_color": {
+        "blue": 0,
+        "green": 255,
+        "red": 0
+      },
+      "type": "steady"
+    },
+    {
+      "primary_color": {
+        "blue": 0,
+        "green": 255,
+        "red": 0
+      },
+      "type": "steady"
+    }
+  ],
+  "messages": [
+    "AVERAGE REQUEST 391 MS. PREVIOUSLY 310",
+    "LAST UPDATED AT 1537 EST"
+  ]
+}

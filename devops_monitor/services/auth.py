@@ -17,7 +17,7 @@ class UserCredentialMismatchException(Exception):
 class AuthService:
     @classmethod
     def login(cls, username: str, password: str) -> User:
-        user = User.by_username(username)
+        user = User.by_username(username.lower())
         if not user or not bcrypt.check_password_hash(user.password, password):
             raise UserCredentialMismatchException()
 

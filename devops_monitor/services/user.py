@@ -14,7 +14,7 @@ class UserService:
     @classmethod
     def create_user(cls, username: str, password: str) -> User:
         pw_hash = bcrypt.generate_password_hash(password).decode('utf-8')
-        user = User(username=username, password=pw_hash)
+        user = User(username=username.lower(), password=pw_hash)
 
         with db_transaction() as session:
             session.add(user)

@@ -20,7 +20,7 @@ def request_loader(request) -> Optional[User]:
     if not request.authorization:
         return None
 
-    user = User.by_username(request.authorization.username)
+    user = User.by_username(request.authorization.username.lower())
     if user and bcrypt.check_password_hash(user.password, request.authorization.password):
         return user
 
