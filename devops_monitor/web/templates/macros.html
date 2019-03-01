@@ -1,3 +1,22 @@
+{% macro render_field(field, with_errors) -%}
+    <div class="form-group row">
+        {{ field.label(class='col-sm-2 col-form-label') }}
+        <div class="col-sm-4">
+            {% if with_errors %}
+                {% if field.errors %}
+                    {{  field(class='form-control is-invalid') }}
+                    <div class="invalid-feedback">{{ field.errors[0] }}</div>
+                {% else %}
+                    {{  field(class='form-control is-valid') }}
+                    <div class="valid-feedback">Looks good!</div>
+                {% endif %}
+            {% else %}
+                {{  field(class='form-control') }}
+            {% endif %}
+        </div>
+    </div>
+{% endmacro %}
+
 {% macro render_form(form, action, submit) -%}
     <form method="POST" action="{{ action }}">
         {{ form.hidden_tag() }}
@@ -6,41 +25,11 @@
                 <fieldset class="form-group">
                     <legend>{{ field.label.text }}</legend>
                     {% for subfield in field.entries %}
-                       <div class="form-group row">
-                            {{ subfield.label(class='col-sm-2 col-form-label') }}
-                            <div class="col-sm-4">
-                                {% if form.errors %}
-                                    {% if subfield.errors %}
-                                        {{  subfield(class='form-control is-invalid') }}
-                                        <div class="invalid-feedback">{{ subfield.errors[0] }}</div>
-                                    {% else %}
-                                        {{  subfield(class='form-control is-valid') }}
-                                        <div class="valid-feedback">Looks good!</div>
-                                    {% endif %}
-                                {% else %}
-                                    {{  subfield(class='form-control') }}
-                                {% endif %}
-                            </div>
-                        </div>
+                       {{ render_field(subfield, form.errors) }}
                     {% endfor %}
                 </fieldset>
             {% else %}
-                <div class="form-group row">
-                    {{ field.label(class='col-sm-2 col-form-label') }}
-                    <div class="col-sm-4">
-                        {% if form.errors %}
-                            {% if field.errors %}
-                                {{  field(class='form-control is-invalid') }}
-                                <div class="invalid-feedback">{{ field.errors[0] }}</div>
-                            {% else %}
-                                {{  field(class='form-control is-valid') }}
-                                <div class="valid-feedback">Looks good!</div>
-                            {% endif %}
-                        {% else %}
-                            {{  field(class='form-control') }}
-                        {% endif %}
-                    </div>
-                </div>
+                {{ render_field(field, form.errors) }}
             {% endif %}
         {% endfor %}
         <input type="submit" value="{{ submit }}" class="btn btn-primary">
