@@ -155,3 +155,7 @@ class TaskMessageForm(MessageForm):
     def __init__(self, *args, user, **kwargs):
         super(TaskMessageForm, self).__init__(*args, **kwargs)
         self.task_id.choices = [(t.id, t.name) for t in user.tasks]
+
+
+class RandomMessageForm(MessageForm):
+    messages = FieldList(StringField('Text'), 'Random Messages', min_entries=10)

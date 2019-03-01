@@ -1,6 +1,6 @@
 import pytest
 
-from devops_monitor.models import DateTimeMessage, TextMessage, TaskMessage
+from devops_monitor.models import DateTimeMessage, TextMessage, TaskMessage, RandomMessage
 
 
 def test_datetime_message_task():
@@ -14,7 +14,13 @@ def test_datetime_message_task():
     (DateTimeMessage, 'datetime'),
     (TaskMessage, 'task')
 ])
-
 def test_message_type(task_class, expected):
     task = task_class()
     assert task.type == expected
+
+
+def test_random_message():
+    message = RandomMessage(text='{message}')
+    message.messages.append('a')
+
+    assert message.value == 'a'

@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import random
 from datetime import datetime
 from typing import Tuple, Optional, Mapping, Any
 
 import dateutil
+from sqlalchemy.ext.associationproxy import association_proxy
 
 from . import db
 
@@ -65,11 +67,7 @@ class Message(db.Model):
         self.nickname = data.get('nickname', self.nickname)
 
     def _sanatize_text(self, text: str) -> str:
-        default = ''
-        sub_vars = self.class_variables()
-        if len(sub_vars) > 0:
-            default = sub_vars[0]
-
+        default = self.variables[0] if len(self.variables) > 0 else ''
         return text.replace('{}', '{' + default + '}')
 
     @classmethod
@@ -161,3 +159,40 @@ class TaskMessage(Message):
 
     def _substitutions(self):
         return {var: getattr(self.task, var) for var in self._task_variables}
+
+
+class RandomMessage(Message):
+    __tablename__ = 'random_message'
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'random_message',
+    }
+
+    description = 'Random message'
+
+    message_id = db.Column(db.Integer, db.ForeignKey('message.id'), primary_key=True)
+
+    _messages = db.relationship('RandomMessageChoice', )
+    messages = association_proxy('_messages', 'text', creator=lambda msg: RandomMessageChoice(text=msg))
+
+    @classmethod
+    def class_variables(cls):
+        return super().class_variables() + ['message']
+
+    def _substitutions(self):
+        return {'message': random.choice(self.messages) }
+
+    def update(self, data: Mapping[str, Any]):
+        super().update(data)
+        self.messages.clear()
+        for msg in (m for m in data.get('messages', []) if len(m) > 0):
+            self.messages.append(msg)
+
+
+class RandomMessageChoice(db.Model):
+    __tablename__ = 'random_message_choice'
+    id = db.Column(db.Integer, primary_key=True)
+
+    message_id = db.Column(db.Integer, db.ForeignKey('random_message.message_id'))
+
+    text = db.Column(db.String)

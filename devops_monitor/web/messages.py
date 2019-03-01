@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, url_for, redirect
+from flask import Blueprint, render_template, url_for, redirect, abort
 
 from devops_monitor.models import User, Message
 from devops_monitor.services import AuthService, UserService
@@ -43,6 +43,9 @@ def new_message(message_type: str, user: User, user_service: UserService):
 @AuthService.auth_required
 def edit_message(message_id: int, user: User, user_service: UserService):
     message = user_service.get_message(message_id)
+
+    if message is None:
+        abort(404)
 
     form = MessageForm.new_message_form(message.type, user=user, obj=message)
     if form.validate_on_submit():
