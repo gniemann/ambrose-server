@@ -2,9 +2,11 @@ from cryptography.fernet import Fernet
 from flask import Blueprint, render_template, redirect, url_for, abort, request
 
 from devops_monitor.common import cipher_required
-from devops_monitor.models import DevOpsAccount, ApplicationInsightsAccount, User, Account
-from devops_monitor.services import DevOpsAccountService, UnauthorizedAccessException, AuthService, ApplicationInsightsAccountService, AccountService
-from .forms import NewAccountForm, ApplicationInsightsMetricForm, AccountForm
+from devops_monitor.models import DevOpsAccount, ApplicationInsightsAccount, User, Account, GitHubAccount
+from devops_monitor.services import DevOpsAccountService, UnauthorizedAccessException, AuthService, \
+    ApplicationInsightsAccountService, AccountService
+from devops_monitor.services.accounts import GitHubAccountService
+from .forms import NewAccountForm, ApplicationInsightsMetricForm, AccountForm, GitHubRepoStatusForm
 
 accounts_bp = Blueprint('accounts', __name__, template_folder='templates/accounts')
 
@@ -28,7 +30,10 @@ def new_account(account_type: str, user: User, cipher: Fernet):
     form = AccountForm.new_account_form(account_type)
 
     if form.validate_on_submit():
-        AccountService.create_account(account_type, cipher, user, **form.data)
+        data = form.data
+        data.pop('csrf_token', None)
+
+        AccountService.create_account(account_type, cipher, user, **data)
         return redirect(url_for('.index'))
 
     display_account_type = account_type.replace('_', ' ').capitalize()
@@ -52,8 +57,11 @@ def account_tasks(account_id: int, user: User, cipher: Fernet):
     if isinstance(account, ApplicationInsightsAccount):
         return app_insights_account_tasks(account)
 
+    if isinstance(account, GitHubAccount):
+        return github_account_tasks(account, cipher)
 
-def devops_account_tasks(account: Account, cipher: Fernet):
+
+def devops_account_tasks(account: DevOpsAccount, cipher: Fernet):
     account_service = DevOpsAccountService(account, cipher)
     if request.method == 'POST':
         # TODO: WTForms to clean this up (somehow)
@@ -75,7 +83,7 @@ def devops_account_tasks(account: Account, cipher: Fernet):
     return render_template('devops_account_tasks.html', tasks=tasks, current_tasks=current_tasks, account_id=account.id)
 
 
-def app_insights_account_tasks(account: Account):
+def app_insights_account_tasks(account: ApplicationInsightsAccount):
     new_metric_form = ApplicationInsightsMetricForm()
 
     if new_metric_form.validate_on_submit():
@@ -89,3 +97,14 @@ def app_insights_account_tasks(account: Account):
         return redirect(url_for('.index'))
 
     return render_template('app_insights_account_tasks.html', form=new_metric_form, account_id=account.id)
+
+
+def github_account_tasks(account: GitHubAccount, cipher: Fernet):
+    form = GitHubRepoStatusForm()
+
+    if form.validate_on_submit():
+        GitHubAccountService(account, cipher).add_repo_task(form.repo.data, form.nickname.data)
+
+        return redirect(url_for('.index'))
+
+    return render_template('github_account_tasks.html', form=form, account_id=account.id)

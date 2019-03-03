@@ -3,12 +3,13 @@ from datetime import datetime
 from typing import Type, Optional, AnyStr, Set, Any, Mapping, Union, List
 
 from cryptography.fernet import Fernet
+from github import Github
 
 from application_insights import ApplicationInsightsService
 from devops import DevOpsService
 from devops_monitor.common import db_transaction
 from devops_monitor.models import DevOpsAccount, DevOpsBuildTask, DevOpsReleaseTask, Account, \
-    ApplicationInsightsAccount, ApplicationInsightsMetricTask, User
+    ApplicationInsightsAccount, ApplicationInsightsMetricTask, User, GitHubAccount, GitHubRepositoryStatusTask
 from .exceptions import UnauthorizedAccessException
 
 BuildTask = namedtuple('BuildTask', 'project definition_id name type')
@@ -61,19 +62,25 @@ class AccountService:
         service = service_type(None, cipher)
         return service.new_account(user, *args, **kwargs)
 
+    def _new_account(self, *args, **kwargs) -> Account:
+        pass
 
-class DevOpsAccountService(AccountService, model=DevOpsAccount):
-    def new_account(self, user: User, username: str, organization: str, token: str, nickname: str) -> DevOpsAccount:
+    def new_account(self, user: User, *args, **kwargs) -> Account:
         with db_transaction():
-            account = DevOpsAccount(
-                username=username,
-                organization=organization,
-                token=self._encrypt(token),
-                nickname=nickname
-            )
+            account = self._new_account(*args, **kwargs)
             user.add_account(account)
             self.account = account
             return account
+
+
+class DevOpsAccountService(AccountService, model=DevOpsAccount):
+    def _new_account(self, username: str, organization: str, token: str, nickname: str) -> DevOpsAccount:
+        return DevOpsAccount(
+            username=username,
+            organization=organization,
+            token=self._encrypt(token),
+            nickname=nickname
+        )
 
     @property
     def build_tasks(self) -> Set[BuildTask]:
@@ -213,15 +220,12 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
 
 
 class ApplicationInsightsAccountService(AccountService, model=ApplicationInsightsAccount):
-    def new_account(self, user: User, application_id: str, api_key: str) -> ApplicationInsightsAccount:
-        with db_transaction():
-            account = ApplicationInsightsAccount(
-                application_id=application_id,
-                api_key=self._encrypt(api_key)
-            )
-            user.add_account(account)
-            self.account = account
-            return account
+    def _new_account(self, application_id: str, api_key: str, nickname: str) -> ApplicationInsightsAccount:
+        return ApplicationInsightsAccount(
+            application_id=application_id,
+            api_key=self._encrypt(api_key),
+            nickname=nickname
+        )
 
     def add_metric(self, metric: str, nickname: str, aggregation: str, timespan: str):
         with db_transaction():
@@ -242,3 +246,46 @@ class ApplicationInsightsAccountService(AccountService, model=ApplicationInsight
                     task.value = metric.value
                     task.start = metric.start
                     task.end = metric.end
+
+
+class GitHubAccountService(AccountService, model=GitHubAccount):
+    def _new_account(self, token: str, nickname: str) -> GitHubAccount:
+        return GitHubAccount(token=self._encrypt(token), nickname=nickname)
+
+    def add_repo_task(self, repo_name: str, nickname: str):
+        owner, name = repo_name.split('/')
+
+        with db_transaction():
+            self.account.add_task(GitHubRepositoryStatusTask(owner=owner, repo_name=name))
+
+    def get_task_statuses(self):
+        github_user = Github(self._decrypt(self.account.token)).get_user()
+
+        with db_transaction():
+            for task in self.account.tasks:
+                if task.owner == github_user.login:
+                    repo = github_user.get_repo(task.repo_name)
+                else:
+                    org = [org for org in github_user.get_orgs() if org.login == task.owner][0]
+                    repo = org.get_repo(task.repo_name)
+
+                prs = list(repo.get_pulls())
+                task.last_update = datetime.now()
+                task.pr_count = len(prs)
+
+                if len(prs) == 0:
+                    task.status = 'no_open_prs'
+                else:
+                    for pr in prs:
+                        if not pr.mergeable:
+                            task.status = 'prs_with_issues'
+                            break
+                        reviews = list(pr.get_reviews())
+                        if len(reviews) == 0:
+                            task.status = 'prs_need_review'
+                            break
+                        if 'CHANGES_REQUESTED' in [review.state for review in reviews]:
+                            task.status = 'prs_with_issues'
+                            break
+                    else:
+                        task.status = 'open_prs'

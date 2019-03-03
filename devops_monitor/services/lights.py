@@ -56,6 +56,14 @@ class LightService:
             return BLUE
         elif status == 'pending_approval':
             return MAGENTA
+        elif status == 'no_open_prs':
+            return GREEN
+        elif status == 'prs_with_issues':
+            return RED
+        elif status == 'open_prs':
+            return BLUE
+        elif status == 'prs_need_review':
+            return BLUE
         else:
             return OFF
 
@@ -68,8 +76,14 @@ class LightService:
         primary_color = cls.color_for_status(status)
 
         # queued, in_progress and pending_approval always are the same regardless of has_changed (to ensure they persist between updates
-        if status == 'queued' or status == 'inprogress' or status == 'pending_approval':
+        # same with prs needing review
+        if status == 'queued' or \
+                status == 'inprogress' or \
+                status == 'pending_approval' or \
+                status == 'prs_need_review':
             secondary_color = cls.color_for_status(task.prev_value)
+            if secondary_color == primary_color:
+                secondary_color = OFF
             return BlinkingLight(primary_color, 4, secondary_color, 4)
 
         # all others are different based on has_changed

@@ -78,7 +78,8 @@ def appinsights_account(user, faker, cipher):
     account = ApplicationInsightsAccountService(None, cipher).new_account(
         user,
         faker.sha1(),
-        faker.sha1()
+        faker.sha1(),
+        faker.word()
     )
 
     yield account

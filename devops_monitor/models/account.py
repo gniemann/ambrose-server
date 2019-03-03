@@ -92,3 +92,15 @@ class ApplicationInsightsAccount(Account):
     __mapper_args__ = {
         'polymorphic_identity': 'application_insights_account'
     }
+
+
+class GitHubAccount(Account):
+    __tablename__ = 'github_account'
+    __mapper_args__ = {
+        'polymorphic_identity': 'github_account'
+    }
+    description = 'GitHub'
+
+    account_id = db.Column(db.Integer, db.ForeignKey('account.id'), primary_key=True)
+
+    token = db.Column(db.String)

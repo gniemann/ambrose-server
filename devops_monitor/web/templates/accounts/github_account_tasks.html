@@ -4,7 +4,7 @@
 {% block title %}Setup Application Insights Tasks{% endblock %}
 
 {% block content %}
-<h1 class="text-center">Setup Application Insights Tasks</h1>
+<h1 class="text-center">Setup GitHub Tasks</h1>
 
-{{ macros.render_form(form, url_for('.account_tasks', account_id=account_id), 'Add Metric') }}
+{{ macros.render_form(form, url_for('.account_tasks', account_id=account_id), 'Add Task') }}
 {% endblock %}

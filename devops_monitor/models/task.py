@@ -178,3 +178,21 @@ class ApplicationInsightsMetricTask(Task):
         self.nickname = data.get('nickname', self.nickname)
         self.aggregation = data.get('aggregation', self.aggregation)
         self.timespan = data.get('timespan', self.timespan)
+
+
+class GitHubRepositoryStatusTask(Task, StatusTask):
+    __tablename__ = 'github_repoistory_status'
+    __mapper_args__ = {
+        'polymorphic_identity': 'github_repository_status',
+    }
+
+    task_id = db.Column(db.Integer, db.ForeignKey('task.id'), primary_key=True)
+
+    owner = db.Column(db.String)
+    repo_name = db.Column(db.String)
+
+    pr_count = db.Column(db.Integer)
+
+    @property
+    def repo(self):
+        return '{}/{}'.format(self.owner, self.repo_name)

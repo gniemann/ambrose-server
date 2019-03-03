@@ -17,3 +17,4 @@ python-dateutil
 Faker
 pytz
 flask-jwt-extended
+PyGithub

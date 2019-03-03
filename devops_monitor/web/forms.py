@@ -7,7 +7,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, FormField, FieldList, HiddenField, SelectField, IntegerField
 from wtforms.validators import InputRequired, EqualTo
 
-from devops_monitor.models import Message, Account, ApplicationInsightsMetricTask, Task
+from devops_monitor.models import Message, Account, ApplicationInsightsMetricTask, Task, GitHubRepositoryStatusTask
 
 
 class LoginForm(FlaskForm):
@@ -32,6 +32,8 @@ class NewAccountForm(FlaskForm):
 class AccountForm(FlaskForm):
     _register = {}
 
+    nickname = StringField('Nickname')
+
     def __init_subclass__(cls, **kwargs):
         idx = cls.__name__.index('AccountForm')
         cls._register[cls.__name__[:idx].lower()] = cls
@@ -46,13 +48,15 @@ class DevOpsAccountForm(AccountForm):
     username = StringField('Username', [InputRequired()], render_kw={'required': True})
     organization = StringField('Organization', [InputRequired()], render_kw={'required': True})
     token = StringField('DevOps Personal Access Token', [InputRequired()], render_kw={'required': True})
-    nickname = StringField('Nickname')
 
 
 class ApplicationInsightsAccountForm(AccountForm):
     application_id = StringField('Application ID', [InputRequired()], render_kw={'required': True})
     api_key = StringField('API Key', [InputRequired()], render_kw={'required': True})
 
+
+class GitHubAccountForm(AccountForm):
+    token = StringField('Personal Access Token', [InputRequired()], render_kw={'required': True})
 
 def create_edit_form(lights, tasks):
     task_choices = [(t.id, t.name) for t in tasks]
@@ -114,6 +118,11 @@ class ApplicationInsightsMetricForm(TaskForm):
     def __init__(self, *args, **kwargs):
         super(ApplicationInsightsMetricForm, self).__init__(*args, **kwargs)
         self.metric.choices = ApplicationInsightsMetricTask.choices()
+
+
+class GitHubRepoStatusForm(TaskForm):
+    _model = GitHubRepositoryStatusTask
+    repo = StringField('Repository name')
 
 
 class NewMessageForm(FlaskForm):
