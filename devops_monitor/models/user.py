@@ -4,7 +4,7 @@ from typing import Optional
 
 import flask_login
 
-from . import db, StatusLight, Task, Message, Account, DevOpsAccount
+from . import db, StatusLight, Task, Message, Account, DevOpsAccount, Gauge
 
 
 class User(db.Model, flask_login.UserMixin):
@@ -18,6 +18,7 @@ class User(db.Model, flask_login.UserMixin):
     messages = db.relationship('Message', cascade='all, delete, delete-orphan')
 
     lights = db.relationship('StatusLight', cascade='all, delete, delete-orphan')
+    gauges = db.relationship('Gauge', cascade='all, delete, delete-orphan')
 
     @classmethod
     def by_username(cls, username: str) -> Optional[User]:
@@ -69,5 +70,8 @@ class User(db.Model, flask_login.UserMixin):
     def add_task(self, task: Task):
         self.tasks.append(task)
 
-    def remove_message(self, message):
+    def remove_message(self, message: Message):
         self.messages.remove(message)
+
+    def add_gauge(self, gauge: Gauge):
+        self.gauges.append(gauge)

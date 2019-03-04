@@ -21,9 +21,13 @@ class LightSchema(Schema):
     repeat = fields.Integer(missing=None)
 
 
+class GaugeSchema(Schema):
+    position = fields.Float()
+
 class StatusSchema(Schema):
     lights = fields.Nested(LightSchema, many=True)
     messages = fields.List(fields.String())
+    gauges = fields.Nested(GaugeSchema, many=True)
 
 
 class MessageSchema(Schema):

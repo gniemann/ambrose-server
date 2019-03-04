@@ -4,6 +4,7 @@ import flask_bcrypt as bcrypt
 
 from devops_monitor.common import db_transaction
 from devops_monitor.models import User, Task, DateTimeMessage, TextMessage, TaskMessage, Message
+from devops_monitor.models.gauge import Gauge
 from devops_monitor.services import UnauthorizedAccessException
 
 
@@ -91,3 +92,7 @@ class UserService:
 
         with db_transaction():
             task.update(data)
+
+    def add_gauge(self, task_id: int, min_val: int, max_val: int, nickname: str):
+        with db_transaction():
+            self.user.add_gauge(Gauge(min_val=min_val, max_val=max_val, task_id=task_id, nickname=nickname))

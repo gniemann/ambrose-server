@@ -6,6 +6,7 @@ from .forms import LoginForm, RegisterForm, DevOpsAccountForm, create_edit_form,
 from .tasks import tasks_bp
 from .accounts import accounts_bp
 from .messages import messages_bp
+from .gauges import gauges_bp
 
 web_bp = Blueprint('web', __name__, template_folder='templates')
 

@@ -36,7 +36,8 @@ def get_status(user: User, cipher: Fernet) -> Dict[str, Any]:
 
     return {
         "lights": LightService.lights_for_user(user),
-        "messages": [m.value.upper() for m in user.messages]
+        "messages": [m.value for m in user.messages],
+        'gauges': user.gauges
     }
 
 @api_bp.route('/login', methods=['POST'])

@@ -8,4 +8,5 @@ from .task import *
 from .message import *
 from .account import *
 from .light import *
+from .gauge import *
 from .user import *

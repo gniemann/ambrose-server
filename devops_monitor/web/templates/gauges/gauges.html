@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+{% set active_page = "gauges" %}
+{% block title %}Configure Gauges{% endblock %}
+
+{% block content %}
+<h1 class="text-center">Configure Gauges</h1>
+
+<table class="table">
+<thead>
+<tr>
+    <th scope="col">Name</th>
+    <th scope="col">Min Value</th>
+    <th scope="col">Max Value</th>
+    <th scope="col">Gauge Position</th>
+</tr>
+</thead>
+    <tbody>
+    {% for gauge in gauges %}
+    <tr>
+        <td>{{ gauge.name }}</td>
+        <td>{{ gauge.min_val }}</td>
+        <td>{{ gauge.max_val }}</td>
+        <td>{{ gauge.position }}</td>
+        <td>
+            <div class="d-flex justify-content-between">
+                <div class="btn-group">
+                    <a href="" class="btn btn-outline-secondary">Edit</a>
+                    <a class="btn btn-outline-danger" onclick="">Delete</a>
+                </div>
+            </div>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<h3>Create New Task</h3>
+{{ macros.render_form(form, url_for('.index'), 'Add Gauge') }}
+
+{% endblock %}
