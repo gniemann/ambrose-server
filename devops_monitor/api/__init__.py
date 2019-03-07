@@ -1,3 +1,4 @@
+from concurrent import futures
 from typing import Any, Dict
 
 from cryptography.fernet import Fernet
@@ -31,8 +32,13 @@ register_api(Tasks, 'tasks', pk='task_id')
 @AuthService.auth_required
 @cipher_required
 def get_status(user: User, cipher: Fernet) -> Dict[str, Any]:
-    for account in user.accounts:
-        AccountService(account, cipher).get_task_statuses()
+    with futures.ThreadPoolExecutor() as executor:
+        futs = []
+        for account in user.accounts:
+            service = AccountService(account, cipher)
+            futs.append(executor.submit(lambda: service.get_task_statuses()))
+
+        done, not_done = futures.wait(futs)
 
     return {
         "lights": LightService.lights_for_user(user),
