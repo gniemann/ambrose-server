@@ -276,17 +276,22 @@ class GitHubAccountService(AccountService, model=GitHubAccount):
                 if len(prs) == 0:
                     task.status = 'no_open_prs'
                 else:
+                    prs_with_issues = False
+                    prs_need_review = False
                     for pr in prs:
                         if not pr.mergeable:
-                            task.status = 'prs_with_issues'
+                            prs_with_issues = True
                             break
                         reviews = list(pr.get_reviews())
                         if 'CHANGES_REQUESTED' in [review.state for review in reviews]:
-                            task.status = 'prs_with_issues'
+                            prs_with_issues = True
                             break
                         if len(reviews) == 0:
-                            task.status = 'prs_need_review'
-                            break
+                            prs_need_review = True
 
+                    if prs_with_issues:
+                        task.status = 'prs_with_issues'
+                    elif prs_need_review:
+                        task.status = 'prs_need_review'
                     else:
                         task.status = 'open_prs'
