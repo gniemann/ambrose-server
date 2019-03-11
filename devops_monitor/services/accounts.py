@@ -281,11 +281,12 @@ class GitHubAccountService(AccountService, model=GitHubAccount):
                             task.status = 'prs_with_issues'
                             break
                         reviews = list(pr.get_reviews())
-                        if len(reviews) == 0:
-                            task.status = 'prs_need_review'
-                            break
                         if 'CHANGES_REQUESTED' in [review.state for review in reviews]:
                             task.status = 'prs_with_issues'
                             break
+                        if len(reviews) == 0:
+                            task.status = 'prs_need_review'
+                            break
+
                     else:
                         task.status = 'open_prs'
