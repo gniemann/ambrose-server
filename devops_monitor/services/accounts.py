@@ -72,6 +72,8 @@ class AccountService:
             self.account = account
             return account
 
+    def edit_account(self, *args, **kwargs):
+        pass
 
 class DevOpsAccountService(AccountService, model=DevOpsAccount):
     def _new_account(self, username: str, organization: str, token: str, nickname: str) -> DevOpsAccount:
@@ -81,6 +83,13 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
             token=self._encrypt(token),
             nickname=nickname
         )
+
+    def edit_account(self, username: str, organization: str, token: str, nickname: str):
+        with db_transaction():
+            self.account.username = username
+            self.account.organization = organization
+            self.account.nickname = nickname
+            self.account.token = self._encrypt(token)
 
     @property
     def build_tasks(self) -> Set[BuildTask]:
@@ -227,6 +236,12 @@ class ApplicationInsightsAccountService(AccountService, model=ApplicationInsight
             nickname=nickname
         )
 
+    def edit_account(self, application_id: str, api_key: str, nickname: str):
+        with db_transaction():
+            self.account.application_id = application_id
+            self.account.nickname = nickname
+            self.account.api_key = self._encrypt(api_key)
+
     def add_metric(self, metric: str, nickname: str, aggregation: str, timespan: str):
         with db_transaction():
             self.account.add_task(ApplicationInsightsMetricTask(
@@ -251,6 +266,11 @@ class ApplicationInsightsAccountService(AccountService, model=ApplicationInsight
 class GitHubAccountService(AccountService, model=GitHubAccount):
     def _new_account(self, token: str, nickname: str) -> GitHubAccount:
         return GitHubAccount(token=self._encrypt(token), nickname=nickname)
+
+    def edit_account(self, token: str, nickname: str):
+        with db_transaction():
+            self.account.nickname = nickname
+            self.account.token = self._encrypt(token)
 
     def add_repo_task(self, repo_name: str, nickname: str):
         owner, name = repo_name.split('/')

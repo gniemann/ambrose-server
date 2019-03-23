@@ -41,6 +41,28 @@ def new_account(account_type: str, user: User, cipher: Fernet):
                            account_url=url_for('.new_account', account_type=account_type))
 
 
+@accounts_bp.route('/<int:account_id>', methods=['GET', 'POST'])
+@AuthService.auth_required
+@cipher_required
+def account(account_id: int, user: User, cipher: Fernet):
+    account = None
+    try:
+        account = AccountService.get_account(account_id, user)
+    except UnauthorizedAccessException:
+        abort(403)
+
+    form = AccountForm.edit_account_form(account)
+
+    if form.validate_on_submit():
+        data = form.data
+        data.pop('csrf_token', None)
+        AccountService(account, cipher).edit_account(**data)
+
+        return redirect(url_for('.index'))
+
+    return render_template('edit_account.html', form=form, account_id=account_id)
+
+
 @accounts_bp.route('/<int:account_id>/tasks', methods=['GET', 'POST'])
 @AuthService.auth_required
 @cipher_required

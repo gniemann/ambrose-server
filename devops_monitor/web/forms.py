@@ -39,10 +39,16 @@ class AccountForm(FlaskForm):
         cls._register[cls.__name__[:idx].lower()] = cls
 
     @classmethod
-    def new_account_form(cls, account_type: str, *args, **kwargs) -> NewAccountForm:
+    def new_account_form(cls, account_type: str, *args, **kwargs) -> AccountForm:
         form_type = cls._register[account_type.lower()]
         return form_type(*args, **kwargs)
 
+    @classmethod
+    def edit_account_form(cls, account: Account, *args, **kwargs) -> AccountForm:
+        idx = account.__class__.__name__.index('Account')
+        account_type = account.__class__.__name__[:idx].lower()
+        form_type = cls._register[account_type]
+        return form_type(*args, obj=account, **kwargs)
 
 class DevOpsAccountForm(AccountForm):
     username = StringField('Username', [InputRequired()], render_kw={'required': True})

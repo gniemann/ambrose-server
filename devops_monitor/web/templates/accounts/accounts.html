@@ -19,6 +19,8 @@
         <td>{{ account.type }}</td>
         <td>{{ account.nickname }}</td>
         <td><a href="{{ url_for('.account_tasks', account_id=account.id) }} " class="btn btn-primary">Configure tasks</a></td>
+        <td><a href="{{ url_for('.account', account_id=account.id) }}" class="btn btn-secondary">Edit</a> </td>
+        <td><a href="" class="btn btn-danger">Delete</a></td>
     </tr>
     {% endfor %}
     </tbody>

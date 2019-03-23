@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+{% set active_page = "accounts" %}
+{% block title %}Edit Account{% endblock %}
+
+{% block content %}
+<h2 class="text-capitalize text-centered">Edit Account</h2>
+{{ macros.render_form(form, url_for('.account', account_id=account_id), 'Submit') }}
+
+{% endblock %}
