@@ -1,8 +1,9 @@
 from concurrent import futures
+from concurrent.futures.thread import ThreadPoolExecutor
 from typing import Any, Dict
 
 from cryptography.fernet import Fernet
-from flask import Blueprint, request, abort
+from flask import Blueprint, request, abort, current_app
 
 from devops_monitor.common import cipher_required
 from devops_monitor.models import User
@@ -32,8 +33,16 @@ register_api(Tasks, 'tasks', pk='task_id')
 @AuthService.auth_required
 @cipher_required
 def get_status(user: User, cipher: Fernet) -> Dict[str, Any]:
-    for account in user.accounts:
-        AccountService(account, cipher).get_task_statuses()
+    tasks = []
+    with ThreadPoolExecutor() as executor:
+        for account in user.accounts:
+            tasks.append(executor.submit(lambda: AccountService(account, cipher).get_task_statuses()))
+
+    futures.wait(tasks)
+    for task, account in zip(tasks, user.accounts):
+        exception = task.exception()
+        if exception:
+            current_app.logger.warning('An exception was raised while retrieving statuses for account {}'.format(account.nickname), exc_info=exception)
 
     return {
         "lights": LightService.lights_for_user(user),
