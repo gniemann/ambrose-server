@@ -76,11 +76,9 @@ class LightService:
         primary_color = cls.color_for_status(status)
 
         # queued, in_progress and pending_approval always are the same regardless of has_changed (to ensure they persist between updates
-        # same with prs needing review
         if status == 'queued' or \
                 status == 'inprogress' or \
-                status == 'pending_approval' or \
-                status == 'prs_need_review':
+                status == 'pending_approval':
             secondary_color = cls.color_for_status(task.prev_value)
             if secondary_color == primary_color:
                 secondary_color = OFF
