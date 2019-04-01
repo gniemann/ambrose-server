@@ -1,3 +1,4 @@
+import celery
 from flask import Flask
 from flask_jwt_extended import JWTManager
 
@@ -5,8 +6,20 @@ from .models import db, migrate
 from .common import login_manager
 from .api import api_bp
 from .web import web_bp, tasks_bp, accounts_bp, messages_bp, gauges_bp
+from .tasks import celery_app
 
 jwt = JWTManager()
+
+def make_celery(app):
+    celery_app.conf.update(BROKER_URL=app.config['CELERY_BROKER_URL'])
+
+    class FlaskTask(celery.Task):
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return self.run(*args, **kwargs)
+
+    celery_app.Task = FlaskTask
+    return celery_app
 
 def build_app(config):
     app = Flask('devops_monitor')
