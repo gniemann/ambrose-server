@@ -1,11 +1,10 @@
 from typing import Any, Dict
 
-from cryptography.fernet import Fernet
-from flask import Blueprint, request, abort, current_app
+from flask import Blueprint, request, abort
 
-from devops_monitor.common import cipher_required
 from devops_monitor.models import User
-from devops_monitor.services import LightService, AccountService, AuthService, UserCredentialMismatchException
+from devops_monitor.services import LightService, AuthService, UserCredentialMismatchException, \
+    UserService
 from .schema import TaskSchema, StatusSchema, with_schema, LoginSchema, AccessTokenSchema
 from .messages import Messages
 from .tasks import Tasks
@@ -29,21 +28,15 @@ register_api(Tasks, 'tasks', pk='task_id')
 @api_bp.route('/status')
 @with_schema(StatusSchema)
 @AuthService.auth_required
-@cipher_required
-def get_status(user: User, cipher: Fernet) -> Dict[str, Any]:
-    for account in user.accounts:
-        try:
-            AccountService(account, cipher).get_task_statuses()
-        except:
-            current_app.logger.warning(
-                'An exception was raised while retrieving statuses for account {}'.format(account.nickname),
-                exc_info=True)
-
-    return {
+def get_status(user: User, user_service: UserService) -> Dict[str, Any]:
+    retval = {
         "lights": LightService.lights_for_user(user),
         "messages": [m.value for m in user.messages],
         'gauges': user.gauges
     }
+
+    user_service.mark_tasks_viewed()
+    return retval
 
 @api_bp.route('/login', methods=['POST'])
 @with_schema(AccessTokenSchema)

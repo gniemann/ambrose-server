@@ -96,3 +96,8 @@ class UserService:
     def add_gauge(self, task_id: int, min_val: int, max_val: int, nickname: str):
         with db_transaction():
             self.user.add_gauge(Gauge(min_val=min_val, max_val=max_val, task_id=task_id, nickname=nickname))
+
+    def mark_tasks_viewed(self):
+        with db_transaction():
+            for task in self.user.tasks:
+                task.has_changed = False

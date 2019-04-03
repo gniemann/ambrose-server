@@ -34,6 +34,10 @@ class Account(db.Model):
     def by_id(cls, account_id: int) -> Optional[Account]:
         return cls.query.get(account_id)
 
+    @classmethod
+    def all(cls) -> List[Account]:
+        return cls.query.all()
+
     @property
     def name(self) -> str:
         return self.nickname if self.nickname else self.type

@@ -47,8 +47,8 @@ class Task(db.Model):
 
     @value.setter
     def value(self, new_value: str):
-        self.has_changed = new_value != self._value
-        if self.has_changed:
+        if new_value != self._value:
+            self.has_changed = True
             self._prev_value = self._value
             self._value = new_value
 
