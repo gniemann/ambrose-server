@@ -12,7 +12,8 @@ from devops_monitor.services import LightService
     ('prs_need_review', (0, 0, 255)),
     ('prs_with_issues', (255, 0, 0)),
     ('open_prs', (0, 0, 255)),
-    ('no_open_prs', (0, 255, 0))
+    ('no_open_prs', (0, 255, 0)),
+    ('canceled', (255, 0, 0))
 ])
 def test_color_for_status(status, expected):
     assert LightService.color_for_status(status) == expected
@@ -25,12 +26,12 @@ def test_color_for_status(status, expected):
     ('queued', True, 'blinking'),
     ('inprogress', False, 'blinking'),
     ('inprogress', True, 'blinking'),
-    ('pending_approval', False, 'blinking'),
-    ('pending_approval', True, 'blinking'),
+    ('pending_approval', False, 'steady'),
+    ('pending_approval', True, 'initially_blinking'),
     ('failed', False, 'steady'),
     ('failed', True, 'initially_blinking'),
-    ('prs_need_review', True, 'blinking'),
-    ('prs_need_review', False, 'blinking')
+    ('prs_need_review', True, 'initially_blinking'),
+    ('prs_need_review', False, 'steady')
 ])
 def test_light_for_task(value, has_changed, expected_type):
     task = Task(_value=value, has_changed=has_changed)

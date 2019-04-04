@@ -50,7 +50,7 @@ class LightService:
         status = status.lower()
         if status == 'succeeded':
             return GREEN
-        elif status == 'failed':
+        elif status == 'failed' or status == 'canceled':
             return RED
         elif status == 'queued' or status == 'inprogress':
             return BLUE
@@ -77,8 +77,7 @@ class LightService:
 
         # queued, in_progress and pending_approval always are the same regardless of has_changed (to ensure they persist between updates
         if status == 'queued' or \
-                status == 'inprogress' or \
-                status == 'pending_approval':
+                status == 'inprogress':
             secondary_color = cls.color_for_status(task.prev_value)
             if secondary_color == primary_color:
                 secondary_color = OFF
