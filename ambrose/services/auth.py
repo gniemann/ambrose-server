@@ -6,8 +6,8 @@ import flask_bcrypt as bcrypt
 import flask_login
 from flask_jwt_extended import get_jwt_identity, create_access_token
 
-from devops_monitor.models import User
-from devops_monitor.services import UserService
+from ambrose.models import User
+from ambrose.services import UserService
 
 
 class UserCredentialMismatchException(Exception):

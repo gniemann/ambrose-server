@@ -4,7 +4,7 @@ import flask_login
 import flask_bcrypt as bcrypt
 from flask import abort
 
-from devops_monitor.models import User
+from ambrose.models import User
 
 login_manager = flask_login.LoginManager()
 login_manager.login_view = 'web.login'

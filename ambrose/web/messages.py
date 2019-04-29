@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, url_for, redirect, abort
 
-from devops_monitor.models import User, Message
-from devops_monitor.services import AuthService, UserService
+from ambrose.models import User, Message
+from ambrose.services import AuthService, UserService
 from .forms import NewMessageForm, MessageForm
 
 messages_bp = Blueprint('messages', __name__, template_folder='templates/messages')

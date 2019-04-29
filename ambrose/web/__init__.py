@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, abort, redirect, url_for
 
-from devops_monitor.models import User
-from devops_monitor.services import UserService, UserCredentialMismatchException, AuthService
+from ambrose.models import User
+from ambrose.services import UserService, UserCredentialMismatchException, AuthService
 from .forms import LoginForm, RegisterForm, DevOpsAccountForm, create_edit_form, NewTaskForm
 from .tasks import tasks_bp
 from .accounts import accounts_bp

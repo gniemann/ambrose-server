@@ -2,10 +2,10 @@ from typing import Any, Mapping
 
 import flask_bcrypt as bcrypt
 
-from devops_monitor.common import db_transaction
-from devops_monitor.models import User, Task, DateTimeMessage, TextMessage, TaskMessage, Message
-from devops_monitor.models.gauge import Gauge
-from devops_monitor.services import UnauthorizedAccessException
+from ambrose.common import db_transaction
+from ambrose.models import User, Task, DateTimeMessage, TextMessage, TaskMessage, Message
+from ambrose.models.gauge import Gauge
+from ambrose.services import UnauthorizedAccessException
 
 
 class UserService:

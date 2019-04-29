@@ -22,7 +22,7 @@ def make_celery(app):
     return celery_app
 
 def build_app(config):
-    app = Flask('devops_monitor')
+    app = Flask('ambrose')
     app.config.from_object(config)
 
     db.init_app(app)

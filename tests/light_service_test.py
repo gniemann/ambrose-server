@@ -1,7 +1,7 @@
 import pytest
 
-from devops_monitor.models import Task
-from devops_monitor.services import LightService
+from ambrose.models import Task
+from ambrose.services import LightService
 
 @pytest.mark.parametrize('status, expected', [
     ('Succeeded', (0, 255, 0)),

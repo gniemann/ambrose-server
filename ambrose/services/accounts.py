@@ -7,8 +7,8 @@ from github import Github
 
 from application_insights import ApplicationInsightsService
 from devops import DevOpsService
-from devops_monitor.common import db_transaction
-from devops_monitor.models import DevOpsAccount, DevOpsBuildTask, DevOpsReleaseTask, Account, \
+from ambrose.common import db_transaction
+from ambrose.models import DevOpsAccount, DevOpsBuildTask, DevOpsReleaseTask, Account, \
     ApplicationInsightsAccount, ApplicationInsightsMetricTask, User, GitHubAccount, GitHubRepositoryStatusTask
 from .exceptions import UnauthorizedAccessException
 

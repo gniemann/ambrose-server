@@ -2,8 +2,8 @@ from flask import jsonify, abort
 from flask.views import MethodView
 from flask_jwt_extended import jwt_required
 
-from devops_monitor.api import TaskSchema
-from devops_monitor.services import AuthService, UserService
+from ambrose.api import TaskSchema
+from ambrose.services import AuthService, UserService
 
 
 class Tasks(MethodView):

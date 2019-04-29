@@ -1,6 +1,6 @@
 import pytest
 
-from devops_monitor.models import DateTimeMessage, TextMessage, TaskMessage, RandomMessage
+from ambrose.models import DateTimeMessage, TextMessage, TaskMessage, RandomMessage
 
 
 def test_datetime_message_task():

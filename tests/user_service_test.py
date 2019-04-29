@@ -1,8 +1,8 @@
 import flask_login
 import pytest
 
-from devops_monitor.models import User, db
-from devops_monitor.services import UserService, AuthService
+from ambrose.models import User, db
+from ambrose.services import UserService, AuthService
 
 
 @pytest.fixture(scope='module')

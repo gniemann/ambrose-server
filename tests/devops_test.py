@@ -1,13 +1,13 @@
 import pytest
 
-import devops_monitor
-from devops_monitor.models import DevOpsAccount, ApplicationInsightsAccount, ApplicationInsightsMetricTask, Message
-from devops_monitor.services import UserService
+import ambrose
+from ambrose.models import DevOpsAccount, ApplicationInsightsAccount, ApplicationInsightsMetricTask, Message
+from ambrose.services import UserService
 
 
 @pytest.fixture()
 def authenticated_user(user):
-    @devops_monitor.login_manager.request_loader
+    @ambrose.login_manager.request_loader
     def load_user_from_request(request):
         return user
         

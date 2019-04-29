@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for
 
-from devops_monitor.models import User
-from devops_monitor.services import AuthService, UserService
+from ambrose.models import User
+from ambrose.services import AuthService, UserService
 from .forms import NewTaskForm, TaskForm
 
 tasks_bp = Blueprint('tasks', __name__, template_folder='templates/tasks')

@@ -3,8 +3,8 @@ import string
 
 import pytest
 
-import devops_monitor
-from devops_monitor.models import Task
+import ambrose
+from ambrose.models import Task
 
 
 @pytest.fixture(scope='module')
@@ -16,7 +16,7 @@ def randomize():
 def test_resize_lights(user):
     for size in [random.randint(0, 20) for _ in range(100)]:
         user.resize_lights(size)
-        devops_monitor.db.session.commit()
+        ambrose.db.session.commit()
 
         assert len(user.lights) == size
         for idx, light in enumerate(user.lights):

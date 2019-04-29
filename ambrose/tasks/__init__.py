@@ -2,8 +2,8 @@ import celery
 from cryptography.fernet import Fernet
 from flask import current_app
 
-from devops_monitor.models import Account
-from devops_monitor.services import AccountService
+from ambrose.models import Account
+from ambrose.services import AccountService
 
 celery_app = celery.Celery()
 

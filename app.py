@@ -1,8 +1,8 @@
-import devops_monitor
+import ambrose
 from config import Config
 
-app = devops_monitor.build_app(Config)
-celery = devops_monitor.make_celery(app)
+app = ambrose.build_app(Config)
+celery = ambrose.make_celery(app)
 
 if __name__ == '__main__':
     app.run()

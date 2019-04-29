@@ -2,8 +2,8 @@ from typing import Any, Dict
 
 from flask import Blueprint, request, abort
 
-from devops_monitor.models import User
-from devops_monitor.services import LightService, AuthService, UserCredentialMismatchException, \
+from ambrose.models import User
+from ambrose.services import LightService, AuthService, UserCredentialMismatchException, \
     UserService
 from .schema import TaskSchema, StatusSchema, with_schema, LoginSchema, AccessTokenSchema
 from .messages import Messages

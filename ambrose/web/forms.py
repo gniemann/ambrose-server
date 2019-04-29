@@ -7,7 +7,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, FormField, FieldList, HiddenField, SelectField, IntegerField
 from wtforms.validators import InputRequired, EqualTo
 
-from devops_monitor.models import Message, Account, ApplicationInsightsMetricTask, Task, GitHubRepositoryStatusTask
+from ambrose.models import Message, Account, ApplicationInsightsMetricTask, Task, GitHubRepositoryStatusTask
 
 
 class LoginForm(FlaskForm):

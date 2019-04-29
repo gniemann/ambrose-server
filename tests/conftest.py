@@ -3,10 +3,10 @@ from cryptography.fernet import Fernet
 from faker import Faker
 
 from config import Config
-import devops_monitor
-from devops_monitor import db
-from devops_monitor.models import TextMessage
-from devops_monitor.services import DevOpsAccountService, ApplicationInsightsAccountService, UserService
+import ambrose
+from ambrose import db
+from ambrose.models import TextMessage
+from ambrose.services import DevOpsAccountService, ApplicationInsightsAccountService, UserService
 
 
 class TestConfig(Config):
@@ -18,9 +18,9 @@ class TestConfig(Config):
 
 @pytest.fixture(scope='module')
 def app():
-    app = devops_monitor.build_app(TestConfig)
+    app = ambrose.build_app(TestConfig)
     with app.app_context():
-        devops_monitor.db.create_all()
+        ambrose.db.create_all()
         yield app
 
 
@@ -39,8 +39,8 @@ def user(app, faker, password):
 
     yield user
 
-    devops_monitor.db.session.delete(user)
-    devops_monitor.db.session.commit()
+    ambrose.db.session.delete(user)
+    ambrose.db.session.commit()
 
 
 @pytest.fixture(scope='session')

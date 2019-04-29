@@ -1,7 +1,7 @@
 import pytest
 
-from devops_monitor.models import Message, TextMessage, ApplicationInsightsMetricTask, db, Task
-from devops_monitor.services import AuthService
+from ambrose.models import Message, TextMessage, ApplicationInsightsMetricTask, db, Task
+from ambrose.services import AuthService
 
 
 @pytest.fixture(scope='module')

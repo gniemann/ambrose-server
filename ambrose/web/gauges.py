@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template
 
-from devops_monitor.models import User
-from devops_monitor.services import AuthService, UserService
-from devops_monitor.web.forms import GaugeForm
+from ambrose.models import User
+from ambrose.services import AuthService, UserService
+from ambrose.web.forms import GaugeForm
 
 gauges_bp = Blueprint('gauges', __name__, template_folder='templates/gauges')
 

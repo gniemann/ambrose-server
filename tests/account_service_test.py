@@ -1,7 +1,7 @@
 import pytest
 
-from devops_monitor.models import DevOpsAccount, ApplicationInsightsAccount
-from devops_monitor.services import DevOpsAccountService, ApplicationInsightsAccountService, AccountService
+from ambrose.models import DevOpsAccount, ApplicationInsightsAccount
+from ambrose.services import DevOpsAccountService, ApplicationInsightsAccountService, AccountService
 
 
 def test_new_account(devops_account, token):
