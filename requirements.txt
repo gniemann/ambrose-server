@@ -19,4 +19,4 @@ pytz
 flask-jwt-extended
 PyGithub
 Celery
-redis
+redisq

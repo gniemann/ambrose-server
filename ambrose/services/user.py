@@ -3,7 +3,7 @@ from typing import Any, Mapping
 import flask_bcrypt as bcrypt
 
 from ambrose.common import db_transaction
-from ambrose.models import User, Task, DateTimeMessage, TextMessage, TaskMessage, Message
+from ambrose.models import User, Task, DateTimeMessage, TextMessage, TaskMessage, Message, Device
 from ambrose.models.gauge import Gauge
 from ambrose.services import UnauthorizedAccessException
 
@@ -96,6 +96,22 @@ class UserService:
     def add_gauge(self, task_id: int, min_val: int, max_val: int, nickname: str):
         with db_transaction():
             self.user.add_gauge(Gauge(min_val=min_val, max_val=max_val, task_id=task_id, nickname=nickname))
+
+    def add_device(self, name: str) -> Device:
+        with db_transaction():
+            device = Device(name=name)
+            self.user.add_device(device)
+            return device
+
+    def get_device(self, device_id):
+        device = Device.by_id(device_id)
+        if device not in self.user.devices:
+            raise UnauthorizedAccessException
+
+        return device
+
+    def delete_device(self, device_id):
+        self._delete(self.get_device(device_id))
 
     def mark_tasks_viewed(self):
         with db_transaction():

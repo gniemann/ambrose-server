@@ -2,7 +2,7 @@ from cryptography.fernet import Fernet
 from flask import Blueprint, render_template, redirect, url_for, abort, request
 
 from ambrose.common import cipher_required
-from ambrose.models import DevOpsAccount, ApplicationInsightsAccount, User, Account, GitHubAccount
+from ambrose.models import DevOpsAccount, ApplicationInsightsAccount, User, GitHubAccount
 from ambrose.services import DevOpsAccountService, UnauthorizedAccessException, AuthService, \
     ApplicationInsightsAccountService, AccountService
 from ambrose.services.accounts import GitHubAccountService

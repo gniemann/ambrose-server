@@ -1,13 +1,34 @@
 import functools
 import inspect
-from typing import Callable, Optional
+from typing import Callable, Optional, Union
 
 import flask_bcrypt as bcrypt
 import flask_login
-from flask_jwt_extended import get_jwt_identity, create_access_token
+from flask_jwt_extended import get_jwt_identity, create_access_token, JWTManager, get_current_user
 
-from ambrose.models import User
+from ambrose.models import User, Device
 from ambrose.services import UserService
+
+jwt = JWTManager()
+
+
+@jwt.user_identity_loader
+def id_for_jwt(identity: Union[User, Device]):
+    if hasattr(identity, 'username'):
+        return identity.username
+    if hasattr(identity, 'device_uuid'):
+        return identity.device_uuid
+
+
+@jwt.user_loader_callback_loader
+def user_from_jwt(identity):
+    # the token is for either a device UUID or a username
+    # try the device first, if its not a device, try the username next
+    device = Device.by_uuid(identity)
+    if device:
+        return device.user
+
+    return User.by_username(identity)
 
 
 class UserCredentialMismatchException(Exception):
@@ -56,9 +77,8 @@ class AuthService:
 
     @classmethod
     def current_api_user(cls) -> Optional[User]:
-        username = get_jwt_identity()
-        return User.by_username(username)
+        return get_current_user()
 
     @classmethod
-    def jwt(cls, user):
-        return create_access_token(identity=user.username)
+    def jwt(cls, entity: Union[User, Device]):
+        return create_access_token(identity=entity)

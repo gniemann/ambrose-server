@@ -5,7 +5,7 @@ from typing import Callable
 from cryptography.fernet import Fernet
 from flask import current_app
 
-from ambrose import db
+from ambrose.models import db
 from .login import login_manager
 
 
