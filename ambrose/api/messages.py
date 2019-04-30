@@ -18,12 +18,6 @@ class Messages(MethodView):
             retval = MessageSchema.dump(msg)
         return jsonify(retval)
 
-    def post(self):
-        pass
-
-    def put(self, message_id):
-        pass
-
     def delete(self, message_id):
         user = AuthService.current_api_user()
         if not user:

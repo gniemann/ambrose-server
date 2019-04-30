@@ -1,9 +1,11 @@
-from flask import jsonify, abort
+from flask import jsonify, abort, Blueprint
 from flask.views import MethodView
 from flask_jwt_extended import jwt_required
 
 from ambrose.api import TaskSchema
 from ambrose.services import AuthService, UserService
+
+api_tasks_bp = Blueprint('devices_api', __name__)
 
 
 class Tasks(MethodView):
@@ -18,12 +20,6 @@ class Tasks(MethodView):
             retval = TaskSchema.dump(msg)
             
         return jsonify(retval)
-
-    def post(self):
-        pass
-
-    def put(self, task_id):
-        pass
 
     def delete(self, task_id):
         user = AuthService.current_api_user()

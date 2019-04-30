@@ -4,7 +4,8 @@ from typing import Type
 
 import pytz
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, FormField, FieldList, HiddenField, SelectField, IntegerField
+from wtforms import StringField, PasswordField, FormField, FieldList, HiddenField, SelectField, IntegerField, \
+    BooleanField
 from wtforms.validators import InputRequired, EqualTo
 
 from ambrose.models import Message, Account, ApplicationInsightsMetricTask, Task, GitHubRepositoryStatusTask
@@ -17,7 +18,9 @@ class LoginForm(FlaskForm):
 
 class RegisterForm(FlaskForm):
     username = StringField('Username', [InputRequired()], render_kw={'required': True})
-    password = PasswordField('Password', [InputRequired(), EqualTo('confirm_password', message='Passwords did not match')], render_kw={'required': True})
+    password = PasswordField('Password',
+                             [InputRequired(), EqualTo('confirm_password', message='Passwords did not match')],
+                             render_kw={'required': True})
     confirm_password = PasswordField('Confirm Password', render_kw={'required': True})
 
 
@@ -50,6 +53,7 @@ class AccountForm(FlaskForm):
         form_type = cls._register[account_type]
         return form_type(*args, obj=account, **kwargs)
 
+
 class DevOpsAccountForm(AccountForm):
     username = StringField('Username', [InputRequired()], render_kw={'required': True})
     organization = StringField('Organization', [InputRequired()], render_kw={'required': True})
@@ -63,6 +67,7 @@ class ApplicationInsightsAccountForm(AccountForm):
 
 class GitHubAccountForm(AccountForm):
     token = StringField('Personal Access Token', [InputRequired()], render_kw={'required': True})
+
 
 def create_edit_form(lights, tasks):
     task_choices = [(t.id, t.name) for t in tasks]
@@ -117,7 +122,9 @@ class TaskForm(FlaskForm):
 class ApplicationInsightsMetricForm(TaskForm):
     _model = ApplicationInsightsMetricTask
     metric = SelectField('Select metric')
-    aggregation = SelectField("Select aggregation", choices=[('avg', 'Average'), ('sum', 'Sum'), ('min', 'Min'), ('max', 'Max'), ('count', 'Count')])
+    aggregation = SelectField("Select aggregation",
+                              choices=[('avg', 'Average'), ('sum', 'Sum'), ('min', 'Min'), ('max', 'Max'),
+                                       ('count', 'Count')])
     timespan = StringField('Timespan')
     nickname = StringField('Nickname')
 
@@ -161,7 +168,8 @@ class TextMessageForm(MessageForm):
 
 class DateTimeMessageForm(MessageForm):
     dateformat = StringField('Enter datetime format')
-    timezone = SelectField('Select display timezone', choices=[(tz, tz) for tz in pytz.all_timezones if tz.startswith('US')])
+    timezone = SelectField('Select display timezone',
+                           choices=[(tz, tz) for tz in pytz.all_timezones if tz.startswith('US')])
 
 
 class TaskMessageForm(MessageForm):
@@ -185,3 +193,61 @@ class GaugeForm(FlaskForm):
     def __init__(self, *args, user, **kwargs):
         super().__init__(*args, **kwargs)
         self.task_id.choices = [(t.id, t.name) for t in user.tasks]
+
+
+class ReleaseFields(FlaskForm):
+    class Meta(FlaskForm.Meta):
+        csrf = False
+
+    project = HiddenField()
+    pipeline = HiddenField()
+    environment = HiddenField()
+    environment_id = HiddenField()
+    definition_id = HiddenField()
+    monitored = BooleanField()
+    uses_webhook = BooleanField()
+
+
+class BuildFields(FlaskForm):
+    class Meta(FlaskForm.Meta):
+        csrf = False
+
+    definition_id = HiddenField()
+    project = HiddenField()
+    pipeline = HiddenField()
+    monitored = BooleanField()
+
+
+class DevOpsTaskForm(FlaskForm):
+    builds = FieldList(FormField(BuildFields))
+    releases = FieldList(FormField(ReleaseFields))
+
+    @classmethod
+    def build(cls, all_tasks, current_build_tasks, current_release_tasks):
+        release_data = []
+        build_data = []
+        for task in all_tasks:
+            if task.type == 'release':
+                release_data.append({
+                    'project': task.project,
+                    'pipeline': task.name,
+                    'environment': task.environment,
+                    'environment_id': task.environment_id,
+                    'definition_id': task.definition_id,
+                    'monitored': task in current_release_tasks,
+                    'uses_webhook': task.uses_webhook
+                })
+            if task.type == 'build':
+                build_data.append({
+                    'project': task.project,
+                    'definition_id': task.definition_id,
+                    'pipeline': task.name,
+                    'monitored': task in current_build_tasks
+                })
+
+        form_data = {
+            'builds': build_data,
+            'releases': release_data
+        }
+
+        return DevOpsTaskForm(data=form_data)

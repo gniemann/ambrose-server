@@ -165,3 +165,20 @@ class DevOpsBuildDefinitions(DevOpsJSON):
 
     def __iter__(self) -> Iterable[JSONObject]:
         return iter(self.builds)
+
+
+class DevOpsReleaseWebHook(DevOpsJSON):
+    def __init__(self, json: Mapping[str, Any]):
+        super(DevOpsReleaseWebHook, self).__init__(json['resource'])
+
+    @property
+    def status(self):
+        return format_status(self.environment.status)
+
+    @property
+    def definition_id(self):
+        return self.environment.releaseDefinition.id
+
+    @property
+    def environment_id(self):
+        return self.environment.definitionEnvironmentId
