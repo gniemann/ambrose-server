@@ -4,7 +4,7 @@ from typing import Callable, Optional, Union
 
 import flask_bcrypt as bcrypt
 import flask_login
-from flask_jwt_extended import get_jwt_identity, create_access_token, JWTManager
+from flask_jwt_extended import get_jwt_identity, create_access_token, JWTManager, get_current_user
 
 from ambrose.models import User, Device
 from ambrose.services import UserService
@@ -14,9 +14,9 @@ jwt = JWTManager()
 
 @jwt.user_identity_loader
 def id_for_jwt(identity: Union[User, Device]):
-    if isinstance(identity, User):
+    if hasattr(identity, 'username'):
         return identity.username
-    if isinstance(identity, Device):
+    if hasattr(identity, 'device_uuid'):
         return identity.device_uuid
 
 
@@ -77,7 +77,7 @@ class AuthService:
 
     @classmethod
     def current_api_user(cls) -> Optional[User]:
-        return get_jwt_identity()
+        return get_current_user()
 
     @classmethod
     def jwt(cls, entity: Union[User, Device]):

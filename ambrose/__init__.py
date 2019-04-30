@@ -1,6 +1,7 @@
 import celery
 from flask import Flask
 
+from ambrose.web.devices import devices_bp
 from .models import db, migrate
 from .common import login_manager
 from .api import api_bp
@@ -34,5 +35,6 @@ def build_app(config):
     app.register_blueprint(accounts_bp, url_prefix='/web/accounts')
     app.register_blueprint(messages_bp, url_prefix='/web/messages')
     app.register_blueprint(gauges_bp, url_prefix='/web/gauges')
+    app.register_blueprint(devices_bp, url_prefix='/web/devices')
 
     return app

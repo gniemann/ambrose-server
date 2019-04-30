@@ -15,5 +15,9 @@ class Device(db.Model):
     user = db.relationship('User', uselist=False, back_populates='devices')
 
     @classmethod
+    def by_id(cls, device_id):
+        return cls.query.get(device_id)
+
+    @classmethod
     def by_uuid(cls, device_uuid: str) -> Optional[Device]:
         return cls.query.filter_by(device_uuid=device_uuid).one_or_none()

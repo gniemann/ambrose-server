@@ -1,3 +1,116 @@
+DELETE http://localhost:5000/api/devices/2
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NTY2MzQxNzYsIm5iZiI6MTU1NjYzNDE3NiwianRpIjoiMjg0NGU0NDgtMmM3OC00Y2U4LWIzNDEtNzlkZTJlMDJlZWNhIiwiZXhwIjoxNTU2NjM1MDc2LCJpZGVudGl0eSI6ImdyZWcubmllbWFubkB3aWxsb3d0cmVlYXBwcy5jb20iLCJmcmVzaCI6ZmFsc2UsInR5cGUiOiJhY2Nlc3MifQ.73NMK7YD3JAcxGXd3ck4caMQuukQa5HnFXtZlutzM1Y
+
+###
+
+DELETE http://localhost:5000/api/devices/2
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NTY2MzQxNzYsIm5iZiI6MTU1NjYzNDE3NiwianRpIjoiMjg0NGU0NDgtMmM3OC00Y2U4LWIzNDEtNzlkZTJlMDJlZWNhIiwiZXhwIjoxNTU2NjM1MDc2LCJpZGVudGl0eSI6ImdyZWcubmllbWFubkB3aWxsb3d0cmVlYXBwcy5jb20iLCJmcmVzaCI6ZmFsc2UsInR5cGUiOiJhY2Nlc3MifQ.73NMK7YD3JAcxGXd3ck4caMQuukQa5HnFXtZlutzM1Y
+
+###
+
+DELETE http://localhost:5000/api/devices/2
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NTY2MzQxNzYsIm5iZiI6MTU1NjYzNDE3NiwianRpIjoiMjg0NGU0NDgtMmM3OC00Y2U4LWIzNDEtNzlkZTJlMDJlZWNhIiwiZXhwIjoxNTU2NjM1MDc2LCJpZGVudGl0eSI6ImdyZWcubmllbWFubkB3aWxsb3d0cmVlYXBwcy5jb20iLCJmcmVzaCI6ZmFsc2UsInR5cGUiOiJhY2Nlc3MifQ.73NMK7YD3JAcxGXd3ck4caMQuukQa5HnFXtZlutzM1Y
+
+<> 2019-04-30T102446.500.html
+
+###
+
+DELETE http://localhost:5000/api/devices/2
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NTY2MzQxNzYsIm5iZiI6MTU1NjYzNDE3NiwianRpIjoiMjg0NGU0NDgtMmM3OC00Y2U4LWIzNDEtNzlkZTJlMDJlZWNhIiwiZXhwIjoxNTU2NjM1MDc2LCJpZGVudGl0eSI6ImdyZWcubmllbWFubkB3aWxsb3d0cmVlYXBwcy5jb20iLCJmcmVzaCI6ZmFsc2UsInR5cGUiOiJhY2Nlc3MifQ.73NMK7YD3JAcxGXd3ck4caMQuukQa5HnFXtZlutzM1Y
+
+<> 2019-04-30T102317.500.html
+
+###
+
+POST http://localhost:5000/api/login
+Accept: application/json
+Content-Type: application/json
+
+{
+"username": "greg.niemann@willowtreeapps.com",
+"password": "password"
+
+}
+
+<> 2019-04-30T102256.200.json
+
+###
+
+POST http://localhost:5000/api/login
+Accept: application/json
+Content-Type: application/json
+
+{
+"username": "greg.niemann@willowtreeapps.com",
+"password": "password"
+
+}
+
+###
+
+POST http://localhost:5000/api/login
+Accept: application/json
+Content-Type: application/json
+
+{
+"username": "greg.niemann@willowtreeapps.com",
+"password": "password"
+
+}
+
+<> 2019-04-30T101427.200.json
+
+###
+
+POST http://localhost:5000/api/login
+Accept: application/json
+Content-Type: application/json
+
+{
+"username": "greg.niemann@willowtreeapps.com",
+"password": "password"
+
+}
+
+<> 2019-04-30T101342.200.json
+
+###
+
+DELETE http://localhost:5000/api/devices/2
+Authorization: Bearer {{auth_token}}
+
+<> 2019-04-30T101243.422.json
+
+###
+
+DELETE http://localhost:5000/api/devices/2
+Authorization: Bearer {{auth_token}}
+
+<> 2019-04-30T100815.422.json
+
+###
+
+DELETE http://localhost:5000/api/devices/2
+Authorization: Bearer {{auth_token}}
+
+<> 2019-04-30T100711.422.json
+
+###
+
+POST http://localhost:5000/api/login
+Accept: application/json
+Content-Type: application/json
+
+{
+"username": "greg.niemann@willowtreeapps.com",
+"password": "password"
+
+}
+
+<> 2019-04-30T100706.200.json
+
+###
+
 POST http://localhost:5000/api/devices/register
 Authorization: Basic greg.niemann@willowtreeapps.com password
 Content-Type: application/json
@@ -416,100 +529,6 @@ Authorization: Basic greg.niemann@willowtreeapps.com password
 Accept: application/json
 
 <> 2019-02-21T010338.500.html
-
-###
-
-GET http://localhost:5000/api/status
-Authorization: Basic greg.niemann@willowtreeapps.com password
-Accept: application/json
-
-<> 2019-02-21T010205.500.html
-
-###
-
-GET http://localhost:5000/api/status
-Authorization: Basic greg.niemann@willowtreeapps.com password
-Accept: application/json
-
-###
-
-GET http://localhost:5000/api/status
-Authorization: Basic greg.niemann@willowtreeapps.com password
-Accept: application/json
-
-<> 2019-02-21T010026.500.html
-
-###
-
-GET http://localhost:5000/api/status
-Authorization: Basic greg.niemann@willowtreeapps.com password
-Accept: application/json
-
-<> 2019-02-20T092945.200.json
-
-###
-
-GET http://localhost:5000/api/tasks/
-Authorization: Basic greg.niemann@willowtreeapps.com password
-Accept: application/json
-
-<> 2019-02-20T071917.200.json
-
-###
-
-GET http://localhost:5000/api/tasks/
-Authorization: Basic greg.niemann@willowtreeapps.com password
-Accept: application/json
-
-<> 2019-02-20T071855.500.html
-
-###
-
-GET http://localhost:5000/api/status
-Authorization: Basic greg.niemann@willowtreeapps.com password
-Accept: application/json
-
-<> 2019-02-20T071839.200.json
-
-###
-
-GET http://localhost:5000/api/status
-Authorization: Basic greg.niemann@willowtreeapps.com password
-Accept: application/json
-
-<> 2019-02-20T071758.500.html
-
-###
-
-GET http://localhost:5000/api/status
-Authorization: Basic greg.niemann@willowtreeapps.com password
-Accept: application/json
-
-<> 2019-02-20T071745.500.html
-
-###
-
-GET http://localhost:5000/api/status
-Authorization: Basic greg.niemann@willowtreeapps.com password
-Accept: application/json
-
-<> 2019-02-20T070818.200.json
-
-###
-
-GET http://localhost:5000/api/tasks/
-Authorization: Basic greg.niemann@willowtreeapps.com password
-Accept: application/json
-
-<> 2019-02-20T070357.500.html
-
-###
-
-GET http://localhost:5000/api/tasks/
-Authorization: Basic greg.niemann@willowtreeapps.com password
-Accept: application/json
-
-<> 2019-02-20T070048.500.html
 
 ###
 

@@ -10,7 +10,7 @@
 <div class="container">
 
 {% if current_user.is_authenticated %}
-{% set nav_bar = [(url_for('web.index'), 'dashboard', 'Dashboard'), (url_for('tasks.index'), 'tasks', 'Tasks'), (url_for('accounts.index'), 'accounts', 'Accounts'), (url_for('messages.index'), 'messages', 'Messages'), (url_for('gauges.index'), 'gauges', 'Gauges'), (url_for('web.logout'), 'logout', 'Logout')] -%}
+{% set nav_bar = [(url_for('web.index'), 'dashboard', 'Dashboard'), (url_for('tasks.index'), 'tasks', 'Tasks'), (url_for('accounts.index'), 'accounts', 'Accounts'), (url_for('messages.index'), 'messages', 'Messages'), (url_for('devices.index'), 'devices', 'Devices'), (url_for('gauges.index'), 'gauges', 'Gauges'), (url_for('web.logout'), 'logout', 'Logout')] -%}
 <ul class="nav nav-tabs justify-content-end">
     {% for href, page, title in nav_bar %}
   <li class="nav-item">

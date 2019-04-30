@@ -103,6 +103,16 @@ class UserService:
             self.user.add_device(device)
             return device
 
+    def get_device(self, device_id):
+        device = Device.by_id(device_id)
+        if device not in self.user.devices:
+            raise UnauthorizedAccessException
+
+        return device
+
+    def delete_device(self, device_id):
+        self._delete(self.get_device(device_id))
+
     def mark_tasks_viewed(self):
         with db_transaction():
             for task in self.user.tasks:

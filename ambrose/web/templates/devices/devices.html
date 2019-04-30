@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+{% set active_page = "devices" %}
+{% block title %}Manage Devices{% endblock %}
+
+{% block content %}
+<h1 class="text-center">Manage Devices</h1>
+
+<table class="table">
+<thead>
+<tr>
+    <th scope="col">Name</th>
+</tr>
+</thead>
+    <tbody>
+    {% for device in devices %}
+    <tr>
+        <td>{{ device.name }}</td>
+        <td>
+            <a class="btn btn-outline-danger" onclick="deleteDevice({{ device.id }})">Delete</a>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<script>
+function deleteDevice(device_id) {
+    var req = new XMLHttpRequest();
+    req.open('DELETE', "{{ url_for('api.devices') }}" + device_id);
+    req.setRequestHeader('Authorization', 'Bearer {{ jwt }}');
+    req.onload = function () {
+        if (req.status >= 200 && req.status < 400) {
+            location.reload(true);
+        }
+    };
+    req.send();
+}
+</script>
+
+{% endblock %}

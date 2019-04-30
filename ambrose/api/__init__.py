@@ -2,6 +2,7 @@ from typing import Any, Dict
 
 from flask import Blueprint, request, abort
 
+from ambrose.api.devices import Devices
 from ambrose.models import User
 from ambrose.services import LightService, AuthService, UserCredentialMismatchException, \
     UserService
@@ -24,6 +25,7 @@ def register_api(view, endpoint, pk='id', pk_type='int'):
 
 register_api(Messages, 'messages', pk='message_id')
 register_api(Tasks, 'tasks', pk='task_id')
+register_api(Devices, 'devices', pk='device_id')
 
 
 @api_bp.route('/status')
