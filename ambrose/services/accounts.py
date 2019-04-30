@@ -75,6 +75,7 @@ class AccountService:
     def edit_account(self, *args, **kwargs):
         pass
 
+
 class DevOpsAccountService(AccountService, model=DevOpsAccount):
     def _new_account(self, username: str, organization: str, token: str, nickname: str) -> DevOpsAccount:
         return DevOpsAccount(
@@ -226,6 +227,19 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
                 for env in [r for r in releases if r.project == project and r.definition_id == definition]:
                     env.status = statuses.status_for_environment(env.environment_id)
                     env.last_update = update_time
+
+    def update_release_with_data(self, project_id, updates):
+        definition_id = updates.environment.releaseDefinition.id
+        environment_id = updates.environment.definitionEnvironmentId
+        task = DevOpsReleaseTask.query.filter_by(project=project_id, definition_id=definition_id,
+                                                 environment_id=environment_id).one_or_none()
+
+        if task is None or task not in self.account.tasks:
+            raise UnauthorizedAccessException
+
+        with db_transaction():
+            task.status = updates.environment.status
+            task.last_update = datetime.now()
 
 
 class ApplicationInsightsAccountService(AccountService, model=ApplicationInsightsAccount):

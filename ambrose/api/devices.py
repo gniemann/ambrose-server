@@ -16,11 +16,3 @@ class Devices(MethodView):
         UserService(user).delete_device(device_id)
         return 'No content', 204
 
-    def get(self, device_id):
-        pass
-
-    def post(self, device_id):
-        pass
-
-    def put(self, device_id):
-        pass

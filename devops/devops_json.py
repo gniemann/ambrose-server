@@ -165,3 +165,8 @@ class DevOpsBuildDefinitions(DevOpsJSON):
 
     def __iter__(self) -> Iterable[JSONObject]:
         return iter(self.builds)
+
+
+class DevOpsReleaseWebHook(DevOpsJSON):
+    def __init__(self, json: Mapping[str, Any]):
+        super(DevOpsReleaseWebHook, self).__init__(json['resource'])
