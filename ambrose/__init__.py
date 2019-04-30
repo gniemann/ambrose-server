@@ -1,14 +1,12 @@
 import celery
 from flask import Flask
-from flask_jwt_extended import JWTManager
 
 from .models import db, migrate
 from .common import login_manager
 from .api import api_bp
 from .web import web_bp, tasks_bp, accounts_bp, messages_bp, gauges_bp
 from .tasks import celery_app
-
-jwt = JWTManager()
+from .services import jwt
 
 def make_celery(app):
     celery_app.conf.update(BROKER_URL=app.config['CELERY_BROKER_URL'])

@@ -25,6 +25,7 @@ def register_api(view, endpoint, pk='id', pk_type='int'):
 register_api(Messages, 'messages', pk='message_id')
 register_api(Tasks, 'tasks', pk='task_id')
 
+
 @api_bp.route('/status')
 @with_schema(StatusSchema)
 @AuthService.auth_required
@@ -38,6 +39,7 @@ def get_status(user: User, user_service: UserService) -> Dict[str, Any]:
     user_service.mark_tasks_viewed()
     return retval
 
+
 @api_bp.route('/login', methods=['POST'])
 @with_schema(AccessTokenSchema)
 def login():
@@ -47,8 +49,18 @@ def login():
     except UserCredentialMismatchException:
         abort(401)
 
-    retval = {
+    return {
         'access_token': AuthService.jwt(user)
     }
 
-    return retval
+
+@api_bp.route('/devices/register', methods=['POST'])
+@AuthService.auth_required
+@with_schema(AccessTokenSchema)
+def register_device(user_service: UserService):
+    name = request.json['name']
+    device = user_service.add_device(name)
+
+    return {
+        'access_token': AuthService.jwt(device)
+    }

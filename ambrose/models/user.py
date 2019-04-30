@@ -4,6 +4,7 @@ from typing import Optional
 
 import flask_login
 
+from ambrose.models.device import Device
 from . import db, StatusLight, Task, Message, Account, DevOpsAccount, Gauge
 
 
@@ -19,6 +20,7 @@ class User(db.Model, flask_login.UserMixin):
 
     lights = db.relationship('StatusLight', cascade='all, delete, delete-orphan')
     gauges = db.relationship('Gauge', cascade='all, delete, delete-orphan')
+    devices = db.relationship('Device', cascade='all, delete, delete-orphan', back_populates='user')
 
     @classmethod
     def by_username(cls, username: str) -> Optional[User]:
@@ -75,3 +77,6 @@ class User(db.Model, flask_login.UserMixin):
 
     def add_gauge(self, gauge: Gauge):
         self.gauges.append(gauge)
+
+    def add_device(self, device: Device):
+        self.devices.append(device)
