@@ -1,12 +1,23 @@
 import pytest
 
+import ambrose
 from ambrose.models import Message, TextMessage, ApplicationInsightsMetricTask, db, Task
-from ambrose.services import AuthService
+from ambrose.services import AuthService, UserService
 
 
 @pytest.fixture(scope='function')
 def access_token(client, user):
     return AuthService.jwt(user)
+
+
+@pytest.fixture(scope='function')
+def user(app, faker, password):
+    user = UserService.create_user(faker.email(), password)
+
+    yield user
+
+    ambrose.db.session.delete(user)
+    ambrose.db.session.commit()
 
 
 def test_login(client, user, password):
