@@ -4,7 +4,7 @@ from ambrose.models import Message, TextMessage, ApplicationInsightsMetricTask, 
 from ambrose.services import AuthService
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='function')
 def access_token(client, user):
     return AuthService.jwt(user)
 

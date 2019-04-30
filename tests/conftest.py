@@ -33,7 +33,7 @@ def client(app):
 def password(faker):
     return faker.password()
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='function')
 def user(app, faker, password):
     user = UserService.create_user(faker.email(), password)
 
@@ -58,7 +58,7 @@ def cipher():
     return Fernet(Fernet.generate_key())
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='function')
 def devops_account(user, faker, token, cipher):
     account = DevOpsAccountService(None, cipher).new_account(
         user,
@@ -73,7 +73,7 @@ def devops_account(user, faker, token, cipher):
     db.session.delete(account)
     db.session.commit()
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='function')
 def appinsights_account(user, faker, cipher):
     account = ApplicationInsightsAccountService(None, cipher).new_account(
         user,
@@ -87,7 +87,7 @@ def appinsights_account(user, faker, cipher):
     db.session.delete(account)
     db.session.commit()
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='function')
 def text_message(user, faker):
     msg = TextMessage(text=faker.sentence())
     user.add_message(msg)
