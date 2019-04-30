@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Type
+from typing import List, Iterable
 
 import pytz
 from flask_wtf import FlaskForm
@@ -8,7 +8,8 @@ from wtforms import StringField, PasswordField, FormField, FieldList, HiddenFiel
     BooleanField
 from wtforms.validators import InputRequired, EqualTo
 
-from ambrose.models import Message, Account, ApplicationInsightsMetricTask, Task, GitHubRepositoryStatusTask
+from ambrose.models import Message, Account, ApplicationInsightsMetricTask, Task, GitHubRepositoryStatusTask, \
+    StatusLight
 
 
 class LoginForm(FlaskForm):
@@ -33,6 +34,12 @@ class NewAccountForm(FlaskForm):
 
 
 class AccountForm(FlaskForm):
+    """
+    Base class for account edit/creation form. This class keeps track of its subclasses (which must have a name
+    ending in 'AccountForm') and uses that information to create the correct subclass.
+
+    The two class methods new_account_form and edit_account_form are factory methods for creating forms.
+    """
     _register = {}
 
     nickname = StringField('Nickname')
@@ -43,11 +50,23 @@ class AccountForm(FlaskForm):
 
     @classmethod
     def new_account_form(cls, account_type: str, *args, **kwargs) -> AccountForm:
+        """
+        Abstract factory method that creates an empty form for the given account_type
+
+        :param account_type: describes the type of account, ie 'DevOps'
+        :return: an appropriate subclass of AccountForm for the account_type
+        """
         form_type = cls._register[account_type.lower()]
         return form_type(*args, **kwargs)
 
     @classmethod
     def edit_account_form(cls, account: Account, *args, **kwargs) -> AccountForm:
+        """
+        Abstract factory method that creates and populates a form for the given account. THe account is passed as the 'obj' parameter to the form constructor.
+
+        :param account: The account requiring a form
+        :return: An AccountForm subclass, populated with the account
+        """
         idx = account.__class__.__name__.index('Account')
         account_type = account.__class__.__name__[:idx].lower()
         form_type = cls._register[account_type]
@@ -69,7 +88,13 @@ class GitHubAccountForm(AccountForm):
     token = StringField('Personal Access Token', [InputRequired()], render_kw={'required': True})
 
 
-def create_edit_form(lights, tasks):
+def create_edit_form(lights: List[StatusLight], tasks: List[Task]) -> FlaskForm:
+    """
+    Creates the edit light form, given a set of lights and tasks
+    :param lights: An iterable of the current StatusLights
+    :param tasks: An iterable of the current tasks.
+    :return: An EditForm for editing the light configuration
+    """
     task_choices = [(t.id, t.name) for t in tasks]
     task_choices.insert(0, (-1, 'None'))
 
@@ -107,6 +132,9 @@ class NewTaskForm(FlaskForm):
 
 
 class TaskForm(FlaskForm):
+    """
+    Base class for (most) Task edit/creation forms. This class maintains a registry of its subclasses and provices an abstract factory method for generating the correct form given a task.
+    """
     _model_registry = {}
     nickname = StringField('Nickname')
 
@@ -115,6 +143,12 @@ class TaskForm(FlaskForm):
 
     @classmethod
     def form_for_task(cls, task, *args, **kwargs):
+        """
+        Abstract factory method for creating the correct TaskForm subclass for a given task.
+
+        :param task: The task requiring a form
+        :return: A TaskForm subvlass, populated with the data from task
+        """
         form_type = cls._model_registry.get(task.__class__.__name__, cls)
         return form_type(*args, obj=task, **kwargs)
 
@@ -147,6 +181,10 @@ class NewMessageForm(FlaskForm):
 
 
 class MessageForm(FlaskForm):
+    """
+    Base class for message edit/creation forms. This class maintains a registry of its subclasses and
+    provides an abstract factory method for generating them.
+    """
     _registry = {}
 
     def __init_subclass__(cls, **kwargs):
@@ -154,7 +192,12 @@ class MessageForm(FlaskForm):
         cls._registry[cls.__name__[:idx].lower()] = cls
 
     @classmethod
-    def new_message_form(cls, message_type, *args, **kwargs):
+    def new_message_form(cls, message_type: str, *args, **kwargs):
+        """
+        Abstract factory method for creating MessageForms based on a type
+        :param message_type: A string describing the message
+        :return: A MessageForm for the required type
+        """
         form_type = cls._registry[message_type.lower()]
         return form_type(*args, **kwargs)
 
@@ -195,35 +238,47 @@ class GaugeForm(FlaskForm):
         self.task_id.choices = [(t.id, t.name) for t in user.tasks]
 
 
-class ReleaseFields(FlaskForm):
-    class Meta(FlaskForm.Meta):
-        csrf = False
-
-    project = HiddenField()
-    pipeline = HiddenField()
-    environment = HiddenField()
-    environment_id = HiddenField()
-    definition_id = HiddenField()
-    monitored = BooleanField()
-    uses_webhook = BooleanField()
-
-
-class BuildFields(FlaskForm):
-    class Meta(FlaskForm.Meta):
-        csrf = False
-
-    definition_id = HiddenField()
-    project = HiddenField()
-    pipeline = HiddenField()
-    monitored = BooleanField()
-
-
 class DevOpsTaskForm(FlaskForm):
+    """
+    Form for configuring DevOps build and release tasks for a given DevOps account.
+    The form has 2 exposed fields, builds and releases. Each is a list of the inner forms,
+     ReleaseFields and BuildFields. A factory method allows building a form from data.
+     As a FlaskForm, this form will pre-populate itself based on request form data, if available.
+    """
+
+    class ReleaseFields(FlaskForm):
+        class Meta(FlaskForm.Meta):
+            csrf = False
+
+        project = HiddenField()
+        pipeline = HiddenField()
+        environment = HiddenField()
+        environment_id = HiddenField()
+        definition_id = HiddenField()
+        monitored = BooleanField()
+        uses_webhook = BooleanField()
+
+    class BuildFields(FlaskForm):
+        class Meta(FlaskForm.Meta):
+            csrf = False
+
+        definition_id = HiddenField()
+        project = HiddenField()
+        pipeline = HiddenField()
+        monitored = BooleanField()
+
     builds = FieldList(FormField(BuildFields))
     releases = FieldList(FormField(ReleaseFields))
 
     @classmethod
-    def build(cls, all_tasks, current_build_tasks, current_release_tasks):
+    def build(cls, all_tasks: Iterable, current_build_tasks: Iterable, current_release_tasks: Iterable):
+        """
+        Factory method for building a populated form.
+        :param all_tasks: A consolidated list of all tasks
+        :param current_build_tasks: A collection of currently monitored build tasks
+        :param current_release_tasks: A collection of currently monitored release tasks
+        :return: A DevOpsTaskForm populated with the input data
+        """
         release_data = []
         build_data = []
         for task in all_tasks:
