@@ -229,16 +229,13 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
                     env.last_update = update_time
 
     def update_release_with_data(self, project_id, updates):
-        definition_id = updates.environment.releaseDefinition.id
-        environment_id = updates.environment.definitionEnvironmentId
-        task = DevOpsReleaseTask.query.filter_by(project=project_id, definition_id=definition_id,
-                                                 environment_id=environment_id).one_or_none()
+        task = DevOpsReleaseTask.query.filter_by(project=project_id, definition_id=updates.definition_id, environment_id=updates.environment_id).one_or_none()
 
         if task is None or task not in self.account.tasks:
             raise UnauthorizedAccessException
 
         with db_transaction():
-            task.status = updates.environment.status
+            task.status = updates.status
             task.last_update = datetime.now()
 
 
