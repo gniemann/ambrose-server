@@ -1,7 +1,7 @@
 import pytest
 
 import ambrose
-from ambrose.models import Message, TextMessage, ApplicationInsightsMetricTask, db, Task
+from ambrose.models import Message, TextMessage, ApplicationInsightsMetricTask, db, Task, Device
 from ambrose.services import AuthService, UserService
 
 
@@ -55,3 +55,25 @@ def test_delete_task(client, user, access_token):
     resp = client.delete('/api/tasks/{}'.format(task_id), headers={'Authorization': 'Bearer {}'.format(access_token)})
     assert resp.status_code == 204
     assert Task.by_id(task_id) is None
+
+
+def test_delete_device(client, user, access_token):
+    device = Device(name='my device', user=user)
+    db.session.add(device)
+    db.session.commit()
+    device_id = device.id
+
+    resp = client.delete('/api/devices/{}'.format(device_id), headers={'Authorization': 'Bearer {}'.format(access_token)})
+    assert resp.status_code == 204
+    assert Device.by_id(device_id) is None
+
+def test_register_device(client, user , password):
+    data = {
+        'name': 'My Device'
+    }
+
+    resp = client.post('/api/devices/register', json=data)
+
+    assert resp.status_code == 200
+    assert resp.json is not None
+    assert resp.json.get('access_token') is not None
