@@ -87,11 +87,17 @@ def devops_account_tasks(account: DevOpsAccount, cipher: Fernet):
     account_service = DevOpsAccountService(account, cipher)
     if request.method == 'POST':
         # TODO: WTForms to clean this up (somehow)
-        task_data = {task: dict() for task in [key for key, val in request.form.items() if val == 'on']}
+        task_data = {task: dict() for task in [key for key, val in request.form.items() if not '_' in key and val == 'on']}
 
         for task in task_data:
             raw_properties = [val for val in request.form if val.startswith(task + '_')]
             task_data[task] = {prop.split('_', maxsplit=1)[1]: request.form[prop] for prop in raw_properties}
+
+            for key, val in task_data[task].items():
+                if val == 'on':
+                    task_data[task][key] = True
+                if val == 'off':
+                    task_data[task][key] = False
 
         account_service.update_tasks(task_data)
 
@@ -100,6 +106,11 @@ def devops_account_tasks(account: DevOpsAccount, cipher: Fernet):
     current_build_tasks = account_service.build_tasks
     current_release_tasks = account_service.release_tasks
     tasks = account_service.list_all_tasks()
+
+    for t in current_release_tasks:
+        for other in (task for task in tasks if task.type == 'release'):
+            if other == t:
+                other.uses_webhook = t.uses_webhook
 
     current_tasks = current_build_tasks.union(current_release_tasks)
     return render_template('devops_account_tasks.html', tasks=tasks, current_tasks=current_tasks, account_id=account.id)

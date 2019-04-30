@@ -20,6 +20,7 @@ class Task(db.Model):
     _prev_value = db.Column(db.String)
     last_update = db.Column(db.DateTime)
     has_changed = db.Column(db.Boolean)
+    uses_webhook = db.Column(db.Boolean, default=False)
 
     def __init_subclass__(cls, **kwargs):
         idx = cls.__name__.index('Task')

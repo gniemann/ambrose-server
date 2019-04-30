@@ -17,7 +17,9 @@ class LoginForm(FlaskForm):
 
 class RegisterForm(FlaskForm):
     username = StringField('Username', [InputRequired()], render_kw={'required': True})
-    password = PasswordField('Password', [InputRequired(), EqualTo('confirm_password', message='Passwords did not match')], render_kw={'required': True})
+    password = PasswordField('Password',
+                             [InputRequired(), EqualTo('confirm_password', message='Passwords did not match')],
+                             render_kw={'required': True})
     confirm_password = PasswordField('Confirm Password', render_kw={'required': True})
 
 
@@ -50,6 +52,7 @@ class AccountForm(FlaskForm):
         form_type = cls._register[account_type]
         return form_type(*args, obj=account, **kwargs)
 
+
 class DevOpsAccountForm(AccountForm):
     username = StringField('Username', [InputRequired()], render_kw={'required': True})
     organization = StringField('Organization', [InputRequired()], render_kw={'required': True})
@@ -63,6 +66,7 @@ class ApplicationInsightsAccountForm(AccountForm):
 
 class GitHubAccountForm(AccountForm):
     token = StringField('Personal Access Token', [InputRequired()], render_kw={'required': True})
+
 
 def create_edit_form(lights, tasks):
     task_choices = [(t.id, t.name) for t in tasks]
@@ -117,7 +121,9 @@ class TaskForm(FlaskForm):
 class ApplicationInsightsMetricForm(TaskForm):
     _model = ApplicationInsightsMetricTask
     metric = SelectField('Select metric')
-    aggregation = SelectField("Select aggregation", choices=[('avg', 'Average'), ('sum', 'Sum'), ('min', 'Min'), ('max', 'Max'), ('count', 'Count')])
+    aggregation = SelectField("Select aggregation",
+                              choices=[('avg', 'Average'), ('sum', 'Sum'), ('min', 'Min'), ('max', 'Max'),
+                                       ('count', 'Count')])
     timespan = StringField('Timespan')
     nickname = StringField('Nickname')
 
@@ -161,7 +167,8 @@ class TextMessageForm(MessageForm):
 
 class DateTimeMessageForm(MessageForm):
     dateformat = StringField('Enter datetime format')
-    timezone = SelectField('Select display timezone', choices=[(tz, tz) for tz in pytz.all_timezones if tz.startswith('US')])
+    timezone = SelectField('Select display timezone',
+                           choices=[(tz, tz) for tz in pytz.all_timezones if tz.startswith('US')])
 
 
 class TaskMessageForm(MessageForm):

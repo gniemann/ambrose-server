@@ -7,6 +7,7 @@ from ambrose.services import AuthService, UserService
 
 api_tasks_bp = Blueprint('devices_api', __name__)
 
+
 class Tasks(MethodView):
     decorators = [jwt_required]
 

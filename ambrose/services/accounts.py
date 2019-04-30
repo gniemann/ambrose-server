@@ -13,7 +13,21 @@ from ambrose.models import DevOpsAccount, DevOpsBuildTask, DevOpsReleaseTask, Ac
 from .exceptions import UnauthorizedAccessException
 
 BuildTask = namedtuple('BuildTask', 'project definition_id name type')
-ReleaseTask = namedtuple('ReleaseTask', 'project definition_id name environment environment_id type')
+# ReleaseTask = namedtuple('ReleaseTask', 'project definition_id name environment environment_id type uses_webhook')
+
+class ReleaseTask:
+    def __init__(self, **kwargs):
+        self.type = 'release'
+        for key, val in kwargs.items():
+            self.__setattr__(key, val)
+
+    def __eq__(self, other):
+        return other.project == self.project and \
+               other.definition_id == self.definition_id and \
+               other.environment_id == self.environment_id
+
+    def __hash__(self):
+        return hash(self.project + str(self.definition_id) + str(self.environment_id))
 
 
 class AccountService:
@@ -109,7 +123,7 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
             name=t.pipeline,
             environment=t.environment,
             environment_id=t.environment_id,
-            type='release'
+            uses_webhook=t.uses_webhook
         ) for t in self.account.release_tasks}
 
     def update_tasks(self, data: Mapping[str, Any]):
@@ -126,7 +140,7 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
             name=properties['name'],
             environment=properties['environment'],
             environment_id=int(properties['environment_id']),
-            type='release'
+            uses_webhook=properties.get('use_webhook', False)
         ) for key, properties in data.items() if key.startswith('release')}
 
         current_build_tasks = self.build_tasks
@@ -156,7 +170,8 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
                     definition_id=task.definition_id,
                     pipeline=task.name,
                     environment=task.environment,
-                    environment_id=task.environment_id
+                    environment_id=task.environment_id,
+                    uses_webhook=task.uses_webhook
                 ))
 
     def get_service(self) -> DevOpsService:
@@ -181,7 +196,7 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
                             name=release.name,
                             environment=environment.name,
                             environment_id=int(environment.id),
-                            type='release'
+                            uses_webhook=False
                         ))
 
             build_list = service.list_build_definitions(project)
@@ -217,7 +232,8 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
                     build.last_update = update_time
 
     def update_release_statuses(self):
-        releases = self.account.release_tasks
+        # filter out the releases that use web hooks
+        releases = [r for r in self.account.release_tasks if not r.uses_webhook]
         service = self.get_service()
 
         with db_transaction():
