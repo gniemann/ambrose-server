@@ -13,7 +13,7 @@ from ambrose.models import DevOpsAccount, DevOpsBuildTask, DevOpsReleaseTask, Ac
 from .exceptions import UnauthorizedAccessException
 
 BuildTask = namedtuple('BuildTask', 'project definition_id name type')
-# ReleaseTask = namedtuple('ReleaseTask', 'project definition_id name environment environment_id type uses_webhook')
+
 
 class ReleaseTask:
     def __init__(self, **kwargs):
@@ -126,54 +126,6 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
             uses_webhook=t.uses_webhook
         ) for t in self.account.release_tasks}
 
-    def update_tasks(self, data: Mapping[str, Any]):
-        new_build_tasks = {BuildTask(
-            project=properties['project'],
-            definition_id=int(properties['definition_id']),
-            name=properties['name'],
-            type='build'
-        ) for key, properties in data.items() if key.startswith('build')}
-
-        new_release_tasks = {ReleaseTask(
-            project=properties['project'],
-            definition_id=int(properties['definition_id']),
-            name=properties['name'],
-            environment=properties['environment'],
-            environment_id=int(properties['environment_id']),
-            uses_webhook=properties.get('use_webhook', False)
-        ) for key, properties in data.items() if key.startswith('release')}
-
-        current_build_tasks = self.build_tasks
-        current_release_tasks = self.release_tasks
-
-        with db_transaction():
-            # build tasks to remove
-            for task in current_build_tasks.difference(new_build_tasks):
-                self.account.remove_task(task)
-
-            # build tasks to add
-            for task in new_build_tasks.difference(current_build_tasks):
-                self.account.add_task(DevOpsBuildTask(
-                    project=task.project,
-                    definition_id=task.definition_id,
-                    pipeline=task.name
-                ))
-
-            # release tasks to remove
-            for task in current_release_tasks.difference(new_release_tasks):
-                self.account.remove_task(task)
-
-            # release tasks to add
-            for task in new_release_tasks.difference(current_release_tasks):
-                self.account.add_task(DevOpsReleaseTask(
-                    project=task.project,
-                    definition_id=task.definition_id,
-                    pipeline=task.name,
-                    environment=task.environment,
-                    environment_id=task.environment_id,
-                    uses_webhook=task.uses_webhook
-                ))
-
     def get_service(self) -> DevOpsService:
         token = self._decrypt(self.account.token)
         return DevOpsService(self.account.username, token, self.account.organization)
@@ -253,6 +205,57 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
         with db_transaction():
             task.status = updates.status
             task.last_update = datetime.now()
+
+    def update_build_tasks(self, data: List[Mapping[str, Any]]):
+        new_build_tasks = {BuildTask(
+            project=t['project'],
+            definition_id=t['definition_id'],
+            name=t['pipeline'],
+            type='build'
+        ) for t in data}
+
+        current_build_tasks = self.build_tasks
+
+        with db_transaction():
+            # build tasks to remove
+            for task in current_build_tasks.difference(new_build_tasks):
+                self.account.remove_task(task)
+
+            # build tasks to add
+            for task in new_build_tasks.difference(current_build_tasks):
+                self.account.add_task(DevOpsBuildTask(
+                    project=task.project,
+                    definition_id=task.definition_id,
+                    pipeline=task.name
+                ))
+
+    def update_release_tasks(self, data: List[Mapping[str, Any]]):
+        new_release_tasks = {ReleaseTask(
+            project=t['project'],
+            definition_id=int(t['definition_id']),
+            name=t['pipeline'],
+            environment=t['environment'],
+            environment_id=int(t['environment_id']),
+            uses_webhook=t.get('use_webhook', False)
+        ) for t in data}
+
+        current_release_tasks = self.release_tasks
+
+        with db_transaction():
+            # release tasks to remove
+            for task in current_release_tasks.difference(new_release_tasks):
+                self.account.remove_task(task)
+
+            # release tasks to add
+            for task in new_release_tasks.difference(current_release_tasks):
+                self.account.add_task(DevOpsReleaseTask(
+                    project=task.project,
+                    definition_id=task.definition_id,
+                    pipeline=task.name,
+                    environment=task.environment,
+                    environment_id=task.environment_id,
+                    uses_webhook=task.uses_webhook
+                ))
 
 
 class ApplicationInsightsAccountService(AccountService, model=ApplicationInsightsAccount):

@@ -6,8 +6,8 @@
 {% block content %}
 <h1 class="text-center">Configure Tasks</h1>
 
-{% if tasks %}
 <form method="POST" action={{ url_for('.account_tasks', account_id=account_id) }}>
+{{ form.hidden_tag() }}
 
 <h4>Build Tasks</h4>
 <table class="table">
@@ -19,15 +19,12 @@
     </tr>
     </thead>
     <tbody>
-    {% for task in tasks|selectattr('type', 'eq', 'build') %}
-        <input type="hidden" name="build{{ loop.index0 }}_definition_id" value="{{ task.definition_id }}">
-        <input type="hidden" name="build{{ loop.index0 }}_project" value="{{ task.project }}">
-        <input type="hidden" name="build{{ loop.index0 }}_name" value="{{ task.name }}">
-
+    {% for build in form.builds %}
+        {{ build.hidden_tag() }}
         <tr>
-            <td><input type="checkbox" name="build{{ loop.index0 }}" {% if task in current_tasks %}checked{% endif %}></td>
-            <td>{{ task.project }}</td>
-            <td>{{ task.name }}</td>
+            <td>{{ build.monitored() }}</td>
+            <td>{{ build.project.data }}</td>
+            <td>{{ build.pipeline.data }}</td>
         </tr>
     {% endfor %}
     </tbody>
@@ -45,31 +42,26 @@
     </tr>
     </thead>
     <tbody>
-    {% for task in tasks|selectattr('type', 'eq', 'release') %}
-        <input type="hidden" name="releases{{ loop.index0 }}_project" value="{{ task.project }}">
-        <input type="hidden" name="releases{{ loop.index0 }}_name" value="{{ task.name }}">
-        <input type="hidden" name="releases{{ loop.index0 }}_environment" value="{{ task.environment }}">
-        <input type="hidden" name="releases{{ loop.index0 }}_environment_id" value="{{ task.environment_id }}">
-        <input type="hidden" name="releases{{ loop.index0 }}_definition_id" value="{{ task.definition_id }}">
-
+    {% for release in form.releases %}
+        {{ release.hidden_tag() }}
         <tr>
-            <td><input type="checkbox" name="releases{{ loop.index0 }}" {% if task in current_tasks %}checked{% endif %}></td>
-            <td>{{ task.project }}</td>
-            <td>{{ task.name }}</td>
-            <td>{{ task.environment }}</td>
-            <td><input type="checkbox" name="releases{{ loop.index0 }}_use_webhook" {% if task.uses_webhook %}checked{% endif %}></td>
+        <td>{{ release.monitored() }}</td>
+        <td>{{ release.project.data }}</td>
+        <td>{{ release.pipeline.data }}</td>
+        <td>{{ release.environment.data }}</td>
+        <td>{{ release.uses_webhook() }}</td>
         </tr>
-        {% if task.uses_webhook %}
-        <tr>
-        <td colspan="5">Webhook URL: {{ url_for('api.put_task', account_id=account_id, project_id=task.project, _external=True) }}</td>
-        </tr>
+        {% if release.uses_webhook.data %}
+            <tr>
+                <td colspan="5">Webhook URL: {{ url_for('api.put_task', account_id=account_id, project_id=release.project.data, _external=True) }}</td>
+            </tr>
         {% endif %}
     {% endfor %}
+
     </tbody>
 </table>
 
 <input type="submit" value="Update" class="btn btn-primary">
 </form>
-{% endif %}
 
 {% endblock %}
