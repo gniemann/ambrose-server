@@ -11,7 +11,9 @@ jobs:
       - run:
           name: Install dependencies
           command: pip install -r requirements.txt --user
-      - run: echo "Hello, world!"
+      - run:
+          name: Pytest
+          command: python -m pytest
 
 ## Use a package of configuration called an orb, see https://circleci.com/docs/2.0/orb-intro/
 #orbs:

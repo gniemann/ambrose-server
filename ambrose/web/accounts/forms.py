@@ -65,7 +65,9 @@ class DevOpsAccountForm(AccountForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.token.data = '*' * len(self.token.data)
+
+        if self.token.data:
+            self.token.data = '*' * len(self.token.data)
 
 
 class ApplicationInsightsAccountForm(AccountForm):
@@ -75,7 +77,8 @@ class ApplicationInsightsAccountForm(AccountForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.api_key.data = '*' * len(self.api_key.data)
+        if self.api_key.data:
+            self.api_key.data = '*' * len(self.api_key.data)
 
 
 
@@ -84,7 +87,9 @@ class GitHubAccountForm(AccountForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.token.data = '*' * len(self.token.data)
+
+        if self.token.data:
+            self.token.data = '*' * len(self.token.data)
 
 
 class DevOpsTaskForm(FlaskForm):
