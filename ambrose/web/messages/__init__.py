@@ -4,7 +4,7 @@ from ambrose.models import User, Message
 from ambrose.services import AuthService, UserService
 from .forms import NewMessageForm, MessageForm
 
-messages_bp = Blueprint('messages', __name__, template_folder='templates/messages')
+messages_bp = Blueprint('messages', __name__, template_folder='templates')
 
 
 @messages_bp.route('/', methods=['GET', 'POST'])

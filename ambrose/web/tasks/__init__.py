@@ -2,9 +2,9 @@ from flask import Blueprint, render_template, redirect, url_for
 
 from ambrose.models import User
 from ambrose.services import AuthService, UserService
-from .forms import NewTaskForm, TaskForm
+from ambrose.web.forms import NewTaskForm, TaskForm
 
-tasks_bp = Blueprint('tasks', __name__, template_folder='templates/tasks')
+tasks_bp = Blueprint('tasks', __name__, template_folder='templates')
 
 
 @tasks_bp.route('/', methods=['GET', 'POST'])
@@ -23,7 +23,7 @@ def index(user: User):
 
 @tasks_bp.route('/<int:task_id>', methods=['GET', 'POST'])
 @AuthService.auth_required
-def task(task_id: int, user: User, user_service: UserService):
+def task(task_id: int, user_service: UserService):
     task = user_service.get_task(task_id)
     form = TaskForm.form_for_task(task)
 

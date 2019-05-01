@@ -5,10 +5,9 @@ from ambrose.common import cipher_required
 from ambrose.models import User, GitHubAccount, ApplicationInsightsAccount, DevOpsAccount
 from ambrose.services import DevOpsAccountService, UnauthorizedAccessException, AuthService, \
     ApplicationInsightsAccountService, GitHubAccountService, AccountService
-from .forms import NewAccountForm, ApplicationInsightsMetricForm, AccountForm, GitHubRepoStatusForm, \
-    DevOpsTaskForm
+from .forms import NewAccountForm, AccountForm, DevOpsTaskForm, ApplicationInsightsMetricForm, GitHubRepoStatusForm
 
-accounts_bp = Blueprint('accounts', __name__, template_folder='templates/accounts')
+accounts_bp = Blueprint('accounts', __name__, template_folder='templates')
 
 
 @accounts_bp.route('/', methods=['GET', 'POST'])
