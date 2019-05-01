@@ -311,8 +311,12 @@ class GitHubAccountService(AccountService, model=GitHubAccount):
         with db_transaction():
             self.account.add_task(GitHubRepositoryStatusTask(owner=owner, repo_name=name))
 
-    def get_task_statuses(self):
-        tasks_requiring_updates = [t for t in self.account.tasks if not t.uses_webhook]
+    def get_task_statuses(self, update_all=False):
+        if update_all:
+            tasks_requiring_updates = self.account.tasks
+        else:
+            tasks_requiring_updates = [t for t in self.account.tasks if not t.uses_webhook]
+
         if len(tasks_requiring_updates) == 0:
             return
 
@@ -354,8 +358,12 @@ class GitHubAccountService(AccountService, model=GitHubAccount):
                         task.status = 'open_prs'
 
     def update_task(self, task_id: int, data: Mapping[str, Any]):
+        watched_actions = ['opened', 'closed', 'reopened', 'submitted', 'dismissed']
+
+        action = data['action']
         # this is kinda cheating, but for the time being its fine.
-        self.get_task_statuses()
+        if action in watched_actions:
+            self.get_task_statuses(True)
         # task = None
         # for t in self.account.tasks:
         #     if t.repo_name == repo_name:

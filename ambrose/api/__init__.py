@@ -1,8 +1,10 @@
 import inspect
 from typing import Any, Dict
 
+from cryptography.fernet import Fernet
 from flask import Blueprint, request, abort
 
+from ambrose.common import cipher_required
 from ambrose.models import User, Account
 from ambrose.services import LightService, AuthService, UserCredentialMismatchException, \
     UserService, AccountService, DevOpsAccountService, NotFoundException, UnauthorizedAccessException, GitHubAccountService
@@ -98,8 +100,9 @@ def devops_webhook(account_id: int, project_id: str, user: User):
 
 
 @api_bp.route('/account/<int:account_id>/github/<int:task_id>', methods=['POST'])
-def github_webhook(account_id: int, task_id: int):
+@cipher_required
+def github_webhook(account_id: int, task_id: int, cipher: Fernet):
     account = Account.by_id(account_id)
-    GitHubAccountService(account).update_task(task_id, request.json)
+    GitHubAccountService(account, cipher).update_task(task_id, request.json)
 
     return 'OK', 200
