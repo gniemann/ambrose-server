@@ -11,6 +11,9 @@ api_tasks_bp = Blueprint('devices_api', __name__)
 class Tasks(MethodView):
     decorators = [jwt_required]
 
+    def get(self):
+        pass
+
     def get(self, task_id):
         user = AuthService.current_api_user()
         if task_id is None:

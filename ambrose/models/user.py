@@ -4,8 +4,10 @@ from typing import Optional
 
 import flask_login
 
-from ambrose.models.device import Device
-from . import db, StatusLight, Task, Message, Account, DevOpsAccount, Gauge
+from .device import Device
+from . import db, StatusLight, Message, Account, Gauge
+from .task import Task
+from .account import DevOpsAccount
 
 
 class User(db.Model, flask_login.UserMixin):

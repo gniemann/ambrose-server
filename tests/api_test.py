@@ -1,7 +1,7 @@
 import pytest
 
 import ambrose
-from ambrose.models import Message, TextMessage, ApplicationInsightsMetricTask, db, Task, Device
+from ambrose.models import Message, TextMessage, db, Device, Task, ApplicationInsightsMetricTask
 from ambrose.services import AuthService, UserService
 
 

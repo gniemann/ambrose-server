@@ -7,7 +7,7 @@ from flask import Blueprint, request, abort
 from ambrose.common import cipher_required
 from ambrose.models import User, Account
 from ambrose.services import LightService, AuthService, UserCredentialMismatchException, \
-    UserService, AccountService, DevOpsAccountService, NotFoundException, UnauthorizedAccessException, GitHubAccountService
+    UserService, NotFoundException, UnauthorizedAccessException, GitHubAccountService, DevOpsAccountService, AccountService
 from devops import DevOpsReleaseWebHook
 from .schema import TaskSchema, StatusSchema, with_schema, LoginSchema, AccessTokenSchema
 from .messages import Messages

@@ -8,6 +8,9 @@ from ambrose.services import AuthService, UserService
 class Devices(MethodView):
     decorators = [jwt_required]
 
+    def get(self):
+        pass
+
     def delete(self, device_id):
         user = AuthService.current_api_user()
         if not user:

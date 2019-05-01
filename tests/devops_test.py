@@ -1,8 +1,8 @@
 import pytest
 
 import ambrose
-from ambrose.models import DevOpsAccount, ApplicationInsightsAccount, ApplicationInsightsMetricTask, Message
-from ambrose.services import UserService
+from ambrose.models import ApplicationInsightsMetricTask
+from ambrose.models.account import ApplicationInsightsAccount, DevOpsAccount
 
 
 @pytest.fixture()

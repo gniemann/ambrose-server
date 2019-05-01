@@ -3,8 +3,7 @@ from typing import Any, Mapping
 import flask_bcrypt as bcrypt
 
 from ambrose.common import db_transaction
-from ambrose.models import User, Task, DateTimeMessage, TextMessage, TaskMessage, Message, Device
-from ambrose.models.gauge import Gauge
+from ambrose.models import User, DateTimeMessage, TextMessage, TaskMessage, Message, Device, Task, Gauge
 from ambrose.services import UnauthorizedAccessException
 
 

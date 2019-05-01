@@ -8,8 +8,7 @@ from wtforms import StringField, PasswordField, FormField, FieldList, HiddenFiel
     BooleanField
 from wtforms.validators import InputRequired, EqualTo
 
-from ambrose.models import Message, Account, ApplicationInsightsMetricTask, Task, GitHubRepositoryStatusTask, \
-    StatusLight
+from ambrose.models import Message, Account, StatusLight, Task, ApplicationInsightsMetricTask, GitHubRepositoryStatusTask
 
 
 class LoginForm(FlaskForm):
