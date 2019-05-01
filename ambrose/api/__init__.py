@@ -1,17 +1,16 @@
 import inspect
-from pprint import pprint
 from typing import Any, Dict
 
 from flask import Blueprint, request, abort
 
-from ambrose.api.devices import Devices
-from ambrose.models import User, DevOpsReleaseTask
+from ambrose.models import User, Account
 from ambrose.services import LightService, AuthService, UserCredentialMismatchException, \
-    UserService, AccountService, DevOpsAccountService
+    UserService, AccountService, DevOpsAccountService, NotFoundException, UnauthorizedAccessException, GitHubAccountService
 from devops import DevOpsReleaseWebHook
 from .schema import TaskSchema, StatusSchema, with_schema, LoginSchema, AccessTokenSchema
 from .messages import Messages
 from .tasks import Tasks
+from .devices import Devices
 
 api_bp = Blueprint('api', __name__)
 
@@ -84,9 +83,23 @@ def register_device(user_service: UserService):
 
 @api_bp.route('/account/<int:account_id>/devops/<project_id>', methods=['POST'])
 @AuthService.auth_required
-def put_task(account_id: int, project_id: str, user: User):
+def devops_webhook(account_id: int, project_id: str, user: User):
     account = AccountService.get_account(account_id, user)
     updates = DevOpsReleaseWebHook(request.json)
-    DevOpsAccountService(account).update_release_with_data(project_id, updates)
+
+    try:
+        DevOpsAccountService(account).update_release_with_data(project_id, updates)
+    except NotFoundException:
+        abort(404)
+    except UnauthorizedAccessException:
+        abort(403)
+
+    return 'OK', 200
+
+
+@api_bp.route('/account/<int:account_id>/github/<int:task_id>', methods=['POST'])
+def github_webhook(account_id: int, task_id: int):
+    account = Account.by_id(account_id)
+    GitHubAccountService(account).update_task(task_id, request.json)
 
     return 'OK', 200

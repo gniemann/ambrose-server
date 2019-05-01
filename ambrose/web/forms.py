@@ -170,6 +170,7 @@ class ApplicationInsightsMetricForm(TaskForm):
 class GitHubRepoStatusForm(TaskForm):
     _model = GitHubRepositoryStatusTask
     repo = StringField('Repository name')
+    uses_webhook = BooleanField('Use WebHooks')
 
 
 class NewMessageForm(FlaskForm):

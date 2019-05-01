@@ -173,7 +173,7 @@ class ApplicationInsightsMetricTask(Task):
             ('requests/failed', 'Failed requests')
         ]
 
-    def update(self, data):
+    def update(self, data: Mapping[str, Any]):
         super().update(data)
         self.metric = data.get('metric', self.metric)
         self.nickname = data.get('nickname', self.nickname)
@@ -194,6 +194,14 @@ class GitHubRepositoryStatusTask(Task, StatusTask):
 
     pr_count = db.Column(db.Integer)
 
+    @classmethod
+    def by_repo(cls, repo_name):
+        return cls.query.filter_by(repo_name=repo_name).first()
+
     @property
     def repo(self):
         return '{}/{}'.format(self.owner, self.repo_name)
+
+    def update(self, data: Mapping[str, Any]):
+        super().update(data)
+        self.uses_webhook = data.get('uses_webhook', self.uses_webhook)

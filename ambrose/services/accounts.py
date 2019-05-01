@@ -10,7 +10,7 @@ from devops import DevOpsService
 from ambrose.common import db_transaction
 from ambrose.models import DevOpsAccount, DevOpsBuildTask, DevOpsReleaseTask, Account, \
     ApplicationInsightsAccount, ApplicationInsightsMetricTask, User, GitHubAccount, GitHubRepositoryStatusTask
-from .exceptions import UnauthorizedAccessException
+from .exceptions import UnauthorizedAccessException, NotFoundException
 
 BuildTask = namedtuple('BuildTask', 'project definition_id name type')
 
@@ -199,7 +199,10 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
     def update_release_with_data(self, project_id, updates):
         task = DevOpsReleaseTask.query.filter_by(project=project_id, definition_id=updates.definition_id, environment_id=updates.environment_id).one_or_none()
 
-        if task is None or task not in self.account.tasks:
+        if task is None:
+            raise NotFoundException
+
+        if task not in self.account.tasks:
             raise UnauthorizedAccessException
 
         with db_transaction():
@@ -236,7 +239,7 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
             name=t['pipeline'],
             environment=t['environment'],
             environment_id=int(t['environment_id']),
-            uses_webhook=t.get('use_webhook', False)
+            uses_webhook=t['uses_webhook']
         ) for t in data}
 
         current_release_tasks = self.release_tasks
@@ -309,10 +312,14 @@ class GitHubAccountService(AccountService, model=GitHubAccount):
             self.account.add_task(GitHubRepositoryStatusTask(owner=owner, repo_name=name))
 
     def get_task_statuses(self):
+        tasks_requiring_updates = [t for t in self.account.tasks if not t.uses_webhook]
+        if len(tasks_requiring_updates) == 0:
+            return
+
         github_user = Github(self._decrypt(self.account.token)).get_user()
 
         with db_transaction():
-            for task in self.account.tasks:
+            for task in tasks_requiring_updates:
                 if task.owner == github_user.login:
                     repo = github_user.get_repo(task.repo_name)
                 else:
@@ -345,3 +352,16 @@ class GitHubAccountService(AccountService, model=GitHubAccount):
                         task.status = 'prs_need_review'
                     else:
                         task.status = 'open_prs'
+
+    def update_task(self, task_id: int, data: Mapping[str, Any]):
+        # this is kinda cheating, but for the time being its fine.
+        self.get_task_statuses()
+        # task = None
+        # for t in self.account.tasks:
+        #     if t.repo_name == repo_name:
+        #         task = t
+        #         break
+        #
+        # if not task:
+        #     raise NotFoundException
+
