@@ -10,7 +10,7 @@ from devops import DevOpsService
 from ambrose.common import db_transaction
 from ambrose.models import DevOpsAccount, DevOpsBuildTask, DevOpsReleaseTask, Account, \
     ApplicationInsightsAccount, ApplicationInsightsMetricTask, User, GitHubAccount, GitHubRepositoryStatusTask
-from .exceptions import UnauthorizedAccessException
+from .exceptions import UnauthorizedAccessException, NotFoundException
 
 BuildTask = namedtuple('BuildTask', 'project definition_id name type')
 
@@ -199,7 +199,10 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
     def update_release_with_data(self, project_id, updates):
         task = DevOpsReleaseTask.query.filter_by(project=project_id, definition_id=updates.definition_id, environment_id=updates.environment_id).one_or_none()
 
-        if task is None or task not in self.account.tasks:
+        if task is None:
+            raise NotFoundException
+
+        if task not in self.account.tasks:
             raise UnauthorizedAccessException
 
         with db_transaction():
@@ -236,7 +239,7 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
             name=t['pipeline'],
             environment=t['environment'],
             environment_id=int(t['environment_id']),
-            uses_webhook=t.get('use_webhook', False)
+            uses_webhook=t['uses_webhook']
         ) for t in data}
 
         current_release_tasks = self.release_tasks

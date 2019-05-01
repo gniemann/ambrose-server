@@ -1,5 +1,5 @@
 from cryptography.fernet import Fernet
-from flask import Blueprint, render_template, redirect, url_for, abort, request
+from flask import Blueprint, render_template, redirect, url_for, abort
 
 from ambrose.common import cipher_required
 from ambrose.models import DevOpsAccount, ApplicationInsightsAccount, User, GitHubAccount

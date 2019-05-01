@@ -7,7 +7,7 @@ from flask import Blueprint, request, abort
 from ambrose.api.devices import Devices
 from ambrose.models import User, DevOpsReleaseTask
 from ambrose.services import LightService, AuthService, UserCredentialMismatchException, \
-    UserService, AccountService, DevOpsAccountService
+    UserService, AccountService, DevOpsAccountService, NotFoundException, UnauthorizedAccessException
 from devops import DevOpsReleaseWebHook
 from .schema import TaskSchema, StatusSchema, with_schema, LoginSchema, AccessTokenSchema
 from .messages import Messages
@@ -84,9 +84,22 @@ def register_device(user_service: UserService):
 
 @api_bp.route('/account/<int:account_id>/devops/<project_id>', methods=['POST'])
 @AuthService.auth_required
-def put_task(account_id: int, project_id: str, user: User):
+def devops_webhook(account_id: int, project_id: str, user: User):
     account = AccountService.get_account(account_id, user)
     updates = DevOpsReleaseWebHook(request.json)
-    DevOpsAccountService(account).update_release_with_data(project_id, updates)
+
+    try:
+        DevOpsAccountService(account).update_release_with_data(project_id, updates)
+    except NotFoundException:
+        abort(404)
+    except UnauthorizedAccessException:
+        abort(403)
+
+    return 'OK', 200
+
+
+@api_bp.route('/account/<int:account_id>/github/<repo_name>', methods=['POST'])
+def github_webhook(account_id: int, repo_name: str):
+
 
     return 'OK', 200

@@ -53,7 +53,7 @@
         </tr>
         {% if release.uses_webhook.data %}
             <tr>
-                <td colspan="5">Webhook URL: {{ url_for('api.put_task', account_id=account_id, project_id=release.project.data, _external=True) }}</td>
+                <td colspan="5">Webhook URL: {{ url_for('api.devops_webhook', account_id=account_id, project_id=release.project.data, _external=True) }}</td>
             </tr>
         {% endif %}
     {% endfor %}
