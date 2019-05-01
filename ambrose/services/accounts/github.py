@@ -88,7 +88,7 @@ class GitHubAccountService(AccountService, model=GitHubAccount):
                 task.pr_count += 1
                 task.last_update = datetime.now()
 
-                if task.status == 'no_open_prs' or task.status == 'open_prs':
+                if task.pr_count == 1 or task.status == 'no_open_prs' or task.status == 'open_prs':
                     task.tatus = 'prs_need_review'
             return
 
