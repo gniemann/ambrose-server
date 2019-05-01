@@ -1,7 +1,7 @@
 from collections import namedtuple
 from typing import List
 
-from ambrose.models import Task, User
+from ambrose.models import User, Task
 
 Color = namedtuple('Color', 'red green blue')
 

@@ -1,6 +1,6 @@
 import pytest
 
-from ambrose.models import DevOpsAccount, ApplicationInsightsAccount
+from ambrose.models import ApplicationInsightsAccount, DevOpsAccount
 from ambrose.services import DevOpsAccountService, ApplicationInsightsAccountService, AccountService
 
 
