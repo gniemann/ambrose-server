@@ -7,7 +7,6 @@ import flask_login
 from .device import Device
 from . import db, StatusLight, Message, Account, Gauge
 from .task import Task
-from .account import DevOpsAccount
 
 
 class User(db.Model, flask_login.UserMixin):
@@ -31,13 +30,6 @@ class User(db.Model, flask_login.UserMixin):
     @classmethod
     def by_id(cls, user_id: int) -> Optional[User]:
         return cls.query.get(user_id)
-
-    @property
-    def devops_account(self) -> Optional[DevOpsAccount]:
-        for account in self.accounts:
-            if isinstance(account, DevOpsAccount):
-                return account
-        return None
 
     def light_for_slot(self, index: int) -> Optional[StatusLight]:
         return StatusLight.by_id(self.id, index)

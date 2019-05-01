@@ -5,6 +5,7 @@ from github import Github
 
 from ambrose.common import db_transaction
 from ambrose.models import GitHubAccount, GitHubRepositoryStatusTask
+from ambrose.services import NotFoundException, UnauthorizedAccessException
 from ambrose.services.accounts import AccountService
 
 
@@ -49,38 +50,56 @@ class GitHubAccountService(AccountService, model=GitHubAccount):
                 if len(prs) == 0:
                     task.status = 'no_open_prs'
                 else:
-                    prs_with_issues = False
-                    prs_need_review = False
-                    for pr in prs:
-                        if not pr.mergeable:
-                            prs_with_issues = True
-                            break
-                        reviews = list(pr.get_reviews())
-                        if 'CHANGES_REQUESTED' in [review.state for review in reviews]:
-                            prs_with_issues = True
-                            break
-                        if len(reviews) == 0:
-                            prs_need_review = True
+                    task.status = self._status_for_prs(prs)
 
-                    if prs_with_issues:
-                        task.status = 'prs_with_issues'
-                    elif prs_need_review:
-                        task.status = 'prs_need_review'
-                    else:
-                        task.status = 'open_prs'
+    def _status_for_prs(self, prs):
+        prs_need_review = False
+        for pr in prs:
+            if not pr.mergeable:
+                return 'prs_with_issues'
+
+            reviews = list(pr.get_reviews())
+            if 'CHANGES_REQUESTED' in [review.state for review in reviews]:
+                return 'prs_with_issues'
+            if len(reviews) == 0:
+                prs_need_review = True
+
+        return 'prs_need_review' if prs_need_review else 'open_prs'
 
     def update_task(self, task_id: int, data: Mapping[str, Any]):
-        watched_actions = ['opened', 'closed', 'reopened', 'submitted', 'dismissed']
+        task = GitHubRepositoryStatusTask.by_id(task_id)
+        if not task:
+            raise NotFoundException()
+
+        if task not in self.account.tasks:
+            raise UnauthorizedAccessException()
 
         action = data['action']
-        # this is kinda cheating, but for the time being its fine.
-        if action in watched_actions:
-            self.get_task_statuses(True)
-        # task = None
-        # for t in self.account.tasks:
-        #     if t.repo_name == repo_name:
-        #         task = t
-        #         break
-        #
-        # if not task:
-        #     raise NotFoundException
+
+        # there are some that we don't care about - just ignore them
+        unwatched_actions = ['assigned', 'unassigned', 'review_requested', 'review_requested_removed', 'labeled', 'unlabeled', 'ready_for_review', 'locked', 'unlocked']
+        if action in unwatched_actions:
+            return
+
+        # if the action is open and there are no other PRs, increment the count and set the status to
+        # PRs needing review
+        if action == 'opened':
+            with db_transaction():
+                task.pr_count += 1
+                task.last_update = datetime.now()
+
+                if task.status == 'no_open_prs' or task.status == 'open_prs':
+                    task.tatus = 'prs_need_review'
+            return
+
+        # if the action is closed, decrement the count. If there are no more PRs, set the status
+        if action == 'closed':
+            with db_transaction():
+                task.pr_count -= 1
+                if task.pr_count == 0:
+                    task.status = 'no_open_prs'
+                task.last_update = datetime.now()
+            return
+
+        # for right now, just going to punt the rest of them
+        self.get_task_statuses(True)
