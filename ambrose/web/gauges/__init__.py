@@ -2,9 +2,9 @@ from flask import Blueprint, render_template
 
 from ambrose.models import User
 from ambrose.services import AuthService, UserService
-from ambrose.web.forms import GaugeForm
+from .forms import GaugeForm
 
-gauges_bp = Blueprint('gauges', __name__, template_folder='templates/gauges')
+gauges_bp = Blueprint('gauges', __name__, template_folder='templates')
 
 @gauges_bp.route('/', methods=['GET', 'POST'])
 @AuthService.auth_required

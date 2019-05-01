@@ -1,11 +1,10 @@
 import celery
 from flask import Flask
 
-from ambrose.web.devices import devices_bp
 from .models import db, migrate
 from .common import login_manager
 from .api import api_bp
-from .web import web_bp, tasks_bp, accounts_bp, messages_bp, gauges_bp
+from .web import web_bp, tasks_bp, accounts_bp, messages_bp, gauges_bp, devices_bp
 from .tasks import celery_app
 from .services import jwt
 

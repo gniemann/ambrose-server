@@ -2,11 +2,12 @@ from flask import Blueprint, render_template, abort, redirect, url_for
 
 from ambrose.models import User
 from ambrose.services import UserService, UserCredentialMismatchException, AuthService
-from .forms import LoginForm, RegisterForm, DevOpsAccountForm, create_edit_form, NewTaskForm
+from .forms import LoginForm, RegisterForm, create_edit_form
 from .tasks import tasks_bp
 from .accounts import accounts_bp
 from .messages import messages_bp
 from .gauges import gauges_bp
+from .devices import devices_bp
 
 web_bp = Blueprint('web', __name__, template_folder='templates')
 
