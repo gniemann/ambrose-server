@@ -1,17 +1,16 @@
 import inspect
-from pprint import pprint
 from typing import Any, Dict
 
 from flask import Blueprint, request, abort
 
-from ambrose.api.devices import Devices
-from ambrose.models import User, DevOpsReleaseTask
+from ambrose.models import User, Account
 from ambrose.services import LightService, AuthService, UserCredentialMismatchException, \
-    UserService, AccountService, DevOpsAccountService, NotFoundException, UnauthorizedAccessException
+    UserService, AccountService, DevOpsAccountService, NotFoundException, UnauthorizedAccessException, GitHubAccountService
 from devops import DevOpsReleaseWebHook
 from .schema import TaskSchema, StatusSchema, with_schema, LoginSchema, AccessTokenSchema
 from .messages import Messages
 from .tasks import Tasks
+from .devices import Devices
 
 api_bp = Blueprint('api', __name__)
 
@@ -98,8 +97,9 @@ def devops_webhook(account_id: int, project_id: str, user: User):
     return 'OK', 200
 
 
-@api_bp.route('/account/<int:account_id>/github/<repo_name>', methods=['POST'])
-def github_webhook(account_id: int, repo_name: str):
-
+@api_bp.route('/account/<int:account_id>/github/<int:task_id>', methods=['POST'])
+def github_webhook(account_id: int, task_id: int):
+    account = Account.by_id(account_id)
+    GitHubAccountService(account).update_task(task_id, request.json)
 
     return 'OK', 200

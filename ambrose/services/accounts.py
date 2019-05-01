@@ -312,10 +312,14 @@ class GitHubAccountService(AccountService, model=GitHubAccount):
             self.account.add_task(GitHubRepositoryStatusTask(owner=owner, repo_name=name))
 
     def get_task_statuses(self):
+        tasks_requiring_updates = [t for t in self.account.tasks if not t.uses_webhook]
+        if len(tasks_requiring_updates) == 0:
+            return
+
         github_user = Github(self._decrypt(self.account.token)).get_user()
 
         with db_transaction():
-            for task in self.account.tasks:
+            for task in tasks_requiring_updates:
                 if task.owner == github_user.login:
                     repo = github_user.get_repo(task.repo_name)
                 else:
@@ -348,3 +352,16 @@ class GitHubAccountService(AccountService, model=GitHubAccount):
                         task.status = 'prs_need_review'
                     else:
                         task.status = 'open_prs'
+
+    def update_task(self, task_id: int, data: Mapping[str, Any]):
+        # this is kinda cheating, but for the time being its fine.
+        self.get_task_statuses()
+        # task = None
+        # for t in self.account.tasks:
+        #     if t.repo_name == repo_name:
+        #         task = t
+        #         break
+        #
+        # if not task:
+        #     raise NotFoundException
+
