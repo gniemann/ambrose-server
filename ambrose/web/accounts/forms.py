@@ -63,14 +63,28 @@ class DevOpsAccountForm(AccountForm):
     organization = StringField('Organization', [InputRequired()], render_kw={'required': True})
     token = StringField('DevOps Personal Access Token', [InputRequired()], render_kw={'required': True})
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.token.data = '*' * len(self.token.data)
+
 
 class ApplicationInsightsAccountForm(AccountForm):
     application_id = StringField('Application ID', [InputRequired()], render_kw={'required': True})
     api_key = StringField('API Key', [InputRequired()], render_kw={'required': True})
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.api_key.data = '*' * len(self.api_key.data)
+
+
 
 class GitHubAccountForm(AccountForm):
     token = StringField('Personal Access Token', [InputRequired()], render_kw={'required': True})
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.token.data = '*' * len(self.token.data)
 
 
 class DevOpsTaskForm(FlaskForm):

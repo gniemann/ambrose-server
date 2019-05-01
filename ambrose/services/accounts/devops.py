@@ -40,7 +40,9 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
             self.account.username = username
             self.account.organization = organization
             self.account.nickname = nickname
-            self.account.token = self._encrypt(token)
+
+            if len([c for c in token if c != '*']) > 0:
+                self.account.token = self._encrypt(token)
 
     @property
     def build_tasks(self) -> Set[BuildTask]:

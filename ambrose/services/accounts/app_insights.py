@@ -1,3 +1,4 @@
+import itertools
 from datetime import datetime
 
 from ambrose.common import db_transaction
@@ -18,7 +19,9 @@ class ApplicationInsightsAccountService(AccountService, model=ApplicationInsight
         with db_transaction():
             self.account.application_id = application_id
             self.account.nickname = nickname
-            self.account.api_key = self._encrypt(api_key)
+
+            if len([c for c in api_key if c != '*']) > 0:
+                self.account.api_key = self._encrypt(api_key)
 
     def add_metric(self, metric: str, nickname: str, aggregation: str, timespan: str):
         with db_transaction():

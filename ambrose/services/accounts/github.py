@@ -16,7 +16,9 @@ class GitHubAccountService(AccountService, model=GitHubAccount):
     def edit_account(self, token: str, nickname: str):
         with db_transaction():
             self.account.nickname = nickname
-            self.account.token = self._encrypt(token)
+
+            if len([c for c in token if c != '*']) > 0:
+                self.account.token = self._encrypt(token)
 
     def add_repo_task(self, repo_name: str, nickname: str):
         owner, name = repo_name.split('/')
