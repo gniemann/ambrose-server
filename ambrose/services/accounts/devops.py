@@ -1,6 +1,5 @@
-from collections import namedtuple
 from datetime import datetime
-from typing import Set, List, Union, Mapping, Any
+from typing import Set, List, Union, Mapping, Any, Tuple, Iterable
 
 from ambrose.common import db_transaction
 from ambrose.models import DevOpsAccount, DevOpsReleaseTask, DevOpsBuildTask
@@ -8,12 +7,28 @@ from ambrose.services import NotFoundException, UnauthorizedAccessException
 from ambrose.services.accounts import AccountService
 from devops import DevOpsService
 
-BuildTask = namedtuple('BuildTask', 'project definition_id name type')
+
+class BuildTask:
+    def __init__(self, project, definition_id, **kwargs):
+        self.project = project
+        self.definition_id = definition_id
+        self.current = False
+        for key, val in kwargs.items():
+            self.__setattr__(key, val)
+
+    def __eq__(self, other):
+        return self.project == other.project and self.definition_id == other.definition_id
+
+    def __hash__(self):
+        return hash(self.project + str(self.definition_id))
 
 
 class ReleaseTask:
-    def __init__(self, **kwargs):
-        self.type = 'release'
+    def __init__(self, project, definition_id, environment_id, **kwargs):
+        self.project = project
+        self.definition_id = definition_id
+        self.environment_id = environment_id
+        self.current = False
         for key, val in kwargs.items():
             self.__setattr__(key, val)
 
@@ -49,8 +64,8 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
         return {BuildTask(
             project=t.project,
             definition_id=t.definition_id,
-            name=t.pipeline,
-            type='build'
+            pipeline=t.pipeline,
+            current=True
         ) for t in self.account.build_tasks}
 
     @property
@@ -58,48 +73,70 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
         return {ReleaseTask(
             project=t.project,
             definition_id=t.definition_id,
-            name=t.pipeline,
-            environment=t.environment,
             environment_id=t.environment_id,
-            uses_webhook=t.uses_webhook
+            pipeline=t.pipeline,
+            environment=t.environment,
+            uses_webhook=t.uses_webhook,
+            current=True
         ) for t in self.account.release_tasks}
 
     def get_service(self) -> DevOpsService:
         token = self._decrypt(self.account.token)
         return DevOpsService(self.account.username, token, self.account.organization)
 
-    def list_all_tasks(self) -> List[Union[BuildTask, ReleaseTask]]:
-        tasks = []
+    def list_all_tasks(self) -> Tuple[List[BuildTask], List[ReleaseTask]]:
         service = self.get_service()
         project_list = service.list_projects()
         if not project_list:
-            return []  # TODO: raise exception instead
+            return [], []  # TODO: raise exception instead
 
+        builds = set()
+        releases = set()
         for project in [p.name for p in project_list]:
-            release_list = service.list_release_definitions(project)
-            if release_list:
-                for release in release_list:
-                    for environment in release.environments:
-                        tasks.append(ReleaseTask(
-                            project=project,
-                            definition_id=int(release.id),
-                            name=release.name,
-                            environment=environment.name,
-                            environment_id=int(environment.id),
-                            uses_webhook=False
-                        ))
+            builds.update(self._list_builds(service, project))
+            releases.update(self._list_releases(service, project))
 
-            build_list = service.list_build_definitions(project)
-            if build_list:
-                for build in build_list:
-                    tasks.append(BuildTask(
+        return sorted(builds, key=lambda x: (x.project, x.pipeline)), \
+               sorted(releases, key=lambda x: (x.project, x.pipeline, x.environment))
+
+    def _list_releases(self, service: DevOpsService, project: str) -> Set[ReleaseTask]:
+        release_list = service.list_release_definitions(project)
+        if release_list:
+            releases = set()
+            for release in release_list:
+                for environment in release.environments:
+                    releases.add(ReleaseTask(
                         project=project,
-                        definition_id=int(build.id),
-                        name=build.name,
-                        type='build'
+                        definition_id=int(release.id),
+                        environment_id=int(environment.id),
+                        pipeline=release.name,
+                        environment=environment.name,
+                        uses_webhook=False
                     ))
 
-        return tasks
+            # get the release tasks that are current (the intersection of the current task and the retrieved tasks
+            # this ensures that current and webhooks are set appropriately
+            # then get the new releases - the new tasks - the current tasks
+            # add the union of these to the releases
+            current_releases = self.release_tasks.intersection(releases)
+            new_releases = releases.difference(current_releases)
+            return current_releases.union(new_releases)
+
+    def _list_builds(self, service: DevOpsService, project: str) -> Set[BuildTask]:
+        build_list = service.list_build_definitions(project)
+        if build_list:
+            builds = set()
+            for build in build_list:
+                builds.add(BuildTask(
+                    project=project,
+                    definition_id=int(build.id),
+                    pipeline=build.name,
+                ))
+
+            # same process as with releases
+            current_builds = self.build_tasks.intersection(builds)
+            new_builds = builds.difference(current_builds)
+            return current_builds.union(new_builds)
 
     def get_task_statuses(self):
         with db_transaction():
@@ -135,8 +172,7 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
                     env.last_update = update_time
 
     def update_release_with_data(self, project_id, updates):
-        task = DevOpsReleaseTask.query.filter_by(project=project_id, definition_id=updates.definition_id,
-                                                 environment_id=updates.environment_id).one_or_none()
+        task = self.get_release_task(project_id, updates.definition_id, updates.environment_id)
 
         if task is None:
             raise NotFoundException()
@@ -148,11 +184,20 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
             task.status = updates.status
             task.last_update = datetime.now()
 
-    def update_build_tasks(self, data: List[Mapping[str, Any]]):
+    def get_release_task(self, project_id: str, definition_id: str, environment_id: str):
+        task = DevOpsReleaseTask.query.filter_by(project_id=project_id, definition_id=definition_id,
+                                                 environment_id=int(environment_id)).one_or_none()
+
+        if not task or task not in self.account.tasks:
+            return None
+
+        return task
+
+    def update_build_tasks(self, data: Iterable[Mapping[str, Any]]):
         new_build_tasks = {BuildTask(
             project=t['project'],
             definition_id=t['definition_id'],
-            name=t['pipeline'],
+            pipeline=t['pipeline'],
             type='build'
         ) for t in data}
 
@@ -168,14 +213,14 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
                 self.account.add_task(DevOpsBuildTask(
                     project=task.project,
                     definition_id=task.definition_id,
-                    pipeline=task.name
+                    pipeline=task.pipeline
                 ))
 
-    def update_release_tasks(self, data: List[Mapping[str, Any]]):
+    def update_release_tasks(self, data: Iterable[Mapping[str, Any]]):
         new_release_tasks = {ReleaseTask(
             project=t['project'],
             definition_id=int(t['definition_id']),
-            name=t['pipeline'],
+            pipeline=t['pipeline'],
             environment=t['environment'],
             environment_id=int(t['environment_id']),
             uses_webhook=t['uses_webhook']
@@ -193,8 +238,17 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
                 self.account.add_task(DevOpsReleaseTask(
                     project=task.project,
                     definition_id=task.definition_id,
-                    pipeline=task.name,
+                    pipeline=task.pipeline,
                     environment=task.environment,
                     environment_id=task.environment_id,
                     uses_webhook=task.uses_webhook
                 ))
+
+            # tasks to edit
+            for t in new_release_tasks.union(current_release_tasks):
+                for task in self.account.tasks:
+                    if task != t:
+                        continue
+
+                    task.uses_webhook = t.uses_webhook
+                    break

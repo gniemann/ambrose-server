@@ -109,7 +109,7 @@ class DevOpsTaskForm(FlaskForm):
         environment = HiddenField()
         environment_id = HiddenField()
         definition_id = HiddenField()
-        monitored = BooleanField()
+        current = BooleanField()
         uses_webhook = BooleanField()
 
     class BuildFields(FlaskForm):
@@ -119,44 +119,23 @@ class DevOpsTaskForm(FlaskForm):
         definition_id = HiddenField()
         project = HiddenField()
         pipeline = HiddenField()
-        monitored = BooleanField()
+        current = BooleanField()
 
     builds = FieldList(FormField(BuildFields))
     releases = FieldList(FormField(ReleaseFields))
 
     @classmethod
-    def build(cls, all_tasks: Iterable, current_build_tasks: Iterable, current_release_tasks: Iterable):
+    def build(cls, build_tasks: Iterable, release_tasks: Iterable) -> DevOpsTaskForm:
         """
         Factory method for building a populated form.
-        :param all_tasks: A consolidated list of all tasks
-        :param current_build_tasks: A collection of currently monitored build tasks
-        :param current_release_tasks: A collection of currently monitored release tasks
-        :return: A DevOpsTaskForm populated with the input data
+        :param build_tasks: The build tasks
+        :param release_tasks: The release tasks
+        :return: A DevOpsTaskForm
         """
-        release_data = []
-        build_data = []
-        for task in all_tasks:
-            if task.type == 'release':
-                release_data.append({
-                    'project': task.project,
-                    'pipeline': task.name,
-                    'environment': task.environment,
-                    'environment_id': task.environment_id,
-                    'definition_id': task.definition_id,
-                    'monitored': task in current_release_tasks,
-                    'uses_webhook': task.uses_webhook
-                })
-            if task.type == 'build':
-                build_data.append({
-                    'project': task.project,
-                    'definition_id': task.definition_id,
-                    'pipeline': task.name,
-                    'monitored': task in current_build_tasks
-                })
 
         form_data = {
-            'builds': build_data,
-            'releases': release_data
+            'builds': build_tasks,
+            'releases': release_tasks
         }
 
         return DevOpsTaskForm(data=form_data)
