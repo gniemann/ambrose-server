@@ -22,7 +22,7 @@
     {% for build in form.builds %}
         {{ build.hidden_tag() }}
         <tr>
-            <td>{{ build.monitored() }}</td>
+            <td>{{ build.current() }}</td>
             <td>{{ build.project.data }}</td>
             <td>{{ build.pipeline.data }}</td>
         </tr>
@@ -45,7 +45,7 @@
     {% for release in form.releases %}
         {{ release.hidden_tag() }}
         <tr>
-        <td>{{ release.monitored() }}</td>
+        <td>{{ release.current() }}</td>
         <td>{{ release.project.data }}</td>
         <td>{{ release.pipeline.data }}</td>
         <td>{{ release.environment.data }}</td>
