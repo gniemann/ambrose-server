@@ -1,3 +1,19 @@
+GET https://devops-status-monitor.herokuapp.com/api/status
+Authorization: Basic greg.niemann@willowtreeapps.com awesome_password
+Accept: application/json
+
+<> 2019-05-02T112536.200.json
+
+###
+
+GET https://devops-status-monitor.herokuapp.com/api/status
+Authorization: Basic greg.niemann@willowtreeapps.com awesome_password
+Accept: application/json
+
+<> 2019-05-02T112521.200.json
+
+###
+
 POST http://localhost:5000/api/account/2/devops/Lidl-DSD
 Authorization: Basic greg.niemann@willowtreeapps.com password
 Content-Type: application/json
@@ -10650,33 +10666,6 @@ Content-Type: application/json
 }
 
 <> 2019-02-24T053201.401.html
-
-###
-
-POST http://localhost:5000/api/login
-Accept: application/json
-Content-Type: application/json
-
-{
-"username": "greg.niemann@willowtreeapps.com",
-"password": "password"
-
-}
-
-<> 2019-02-24T053118.500.html
-
-###
-
-POST http://localhost:5000/api/login
-Accept: application/json
-Content-Type: application/json
-
-{
-"username": greg.niemann@willowtreeapps.com,
-"password": password
-}
-
-<> 2019-02-24T053033.400.html
 
 ###
 
