@@ -10,6 +10,7 @@ GREEN = Color(0, 255, 0)
 BLUE = Color(0, 0, 255)
 MAGENTA = Color(255, 0, 255)
 OFF = Color(0, 0, 0)
+YELLOW = Color(255, 255, 0)
 
 
 class LightConfiguration:
@@ -54,6 +55,8 @@ class LightService:
             return RED
         elif status == 'queued' or status == 'inprogress':
             return BLUE
+        elif status == 'partiallysucceeded':
+            return YELLOW
         elif status == 'pending_approval':
             return MAGENTA
         elif status == 'no_open_prs':
