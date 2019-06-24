@@ -9,6 +9,7 @@ from ambrose.services import LightService
     ('Queued', (0, 0, 255)),
     ('inPROGRESS', (0, 0, 255)),
     ('Pending_Approval', (255, 0, 255)),
+    ('partiallysucceeded', (255, 255, 0)),
     ('prs_need_review', (0, 0, 255)),
     ('prs_with_issues', (255, 0, 0)),
     ('open_prs', (0, 0, 255)),
