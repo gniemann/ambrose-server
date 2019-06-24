@@ -11,7 +11,7 @@ from devops import DevOpsService
 class BuildTask:
     def __init__(self, project, definition_id, **kwargs):
         self.project = project
-        self.definition_id = definition_id
+        self.definition_id = int(definition_id)
         self.current = False
         for key, val in kwargs.items():
             self.__setattr__(key, val)
@@ -26,8 +26,8 @@ class BuildTask:
 class ReleaseTask:
     def __init__(self, project, definition_id, environment_id, **kwargs):
         self.project = project
-        self.definition_id = definition_id
-        self.environment_id = environment_id
+        self.definition_id = int(definition_id)
+        self.environment_id = int(environment_id)
         self.current = False
         for key, val in kwargs.items():
             self.__setattr__(key, val)
@@ -194,12 +194,7 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
         return task
 
     def update_build_tasks(self, data: Iterable[Mapping[str, Any]]):
-        new_build_tasks = {BuildTask(
-            project=t['project'],
-            definition_id=t['definition_id'],
-            pipeline=t['pipeline'],
-            type='build'
-        ) for t in data}
+        new_build_tasks = {BuildTask(**t) for t in data}
 
         current_build_tasks = self.build_tasks
 
@@ -217,14 +212,7 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
                 ))
 
     def update_release_tasks(self, data: Iterable[Mapping[str, Any]]):
-        new_release_tasks = {ReleaseTask(
-            project=t['project'],
-            definition_id=int(t['definition_id']),
-            pipeline=t['pipeline'],
-            environment=t['environment'],
-            environment_id=int(t['environment_id']),
-            uses_webhook=t['uses_webhook']
-        ) for t in data}
+        new_release_tasks = {ReleaseTask(**t) for t in data}
 
         current_release_tasks = self.release_tasks
 
@@ -244,8 +232,8 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
                     uses_webhook=task.uses_webhook
                 ))
 
-            # tasks to edit
-            for t in new_release_tasks.union(current_release_tasks):
+            # tasks to edit - order matters in this set operation and new_release_tasks must be second
+            for t in current_release_tasks.intersection(new_release_tasks):
                 for task in self.account.tasks:
                     if task != t:
                         continue
