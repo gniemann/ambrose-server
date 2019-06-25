@@ -3,6 +3,7 @@ from typing import Any, Dict
 
 from cryptography.fernet import Fernet
 from flask import Blueprint, request, abort
+from flask_jwt_extended import jwt_required, get_current_user
 
 from ambrose.common import cipher_required
 from ambrose.models import User, Account
@@ -45,15 +46,17 @@ register_api(Devices, 'devices', pk='device_id')
 
 @api_bp.route('/status')
 @with_schema(StatusSchema)
-@AuthService.auth_required
-def get_status(user: User, user_service: UserService) -> Dict[str, Any]:
+@jwt_required
+def get_status() -> Dict[str, Any]:
+    user = get_current_user()
+
     retval = {
         "lights": LightService.lights_for_user(user),
         "messages": [m.value for m in user.messages],
         'gauges': user.gauges
     }
 
-    user_service.mark_tasks_viewed()
+    UserService(user).mark_tasks_viewed()
     return retval
 
 

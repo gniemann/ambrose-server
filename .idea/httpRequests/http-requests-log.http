@@ -1,3 +1,83 @@
+GET http://localhost:5000/api/status
+Accept: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NjE0ODM4MjcsIm5iZiI6MTU2MTQ4MzgyNywianRpIjoiODNlODk0YjgtZmE3OC00YjdhLWIxNTUtMmFlNjdiMTRlODQ3IiwiZXhwIjoxNTYxNDg0NzI3LCJpZGVudGl0eSI6ImVjZDczNTMzLWE2ZDYtNGY2Ni1iNTlhLWRhODk1YzZjYTI5NiIsImZyZXNoIjpmYWxzZSwidHlwZSI6ImFjY2VzcyJ9.GirZvxlkVPIMft2-80KzhQSC5TRBDKaPI1r-abS3gP8
+
+<> 2019-06-25T013106.200.json
+
+###
+
+POST http://localhost:5000/api/devices/register
+Authorization: Basic greg.niemann@willowtreeapps.com password
+Content-Type: application/json
+
+{
+  "name": "ambrose I"
+}
+
+<> 2019-06-25T013027.200.json
+
+###
+
+GET http://localhost:5000/api/status
+Accept: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NjE0ODE1NjksIm5iZiI6MTU2MTQ4MTU2OSwianRpIjoiMjc0MTBjOTAtNDdkNS00ZTg5LTk4YjEtNjAwYWY5ZDVlN2ZkIiwiZXhwIjoxNTYxNDgyNDY5LCJpZGVudGl0eSI6IjQwZTZkMTM0LTI0YzktNDZjZS04MjYwLTdkMTIzM2RmNDkzZSIsImZyZXNoIjpmYWxzZSwidHlwZSI6ImFjY2VzcyJ9.i1uHKGhZc4Qnxj0iinryCuiNwXrFsKp6MX-9JV9hj_8
+
+<> 2019-06-25T125311.200.json
+
+###
+
+GET http://localhost:5000/api/status
+Accept: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NjE0ODE1NjksIm5iZiI6MTU2MTQ4MTU2OSwianRpIjoiMjc0MTBjOTAtNDdkNS00ZTg5LTk4YjEtNjAwYWY5ZDVlN2ZkIiwiZXhwIjoxNTYxNDgyNDY5LCJpZGVudGl0eSI6IjQwZTZkMTM0LTI0YzktNDZjZS04MjYwLTdkMTIzM2RmNDkzZSIsImZyZXNoIjpmYWxzZSwidHlwZSI6ImFjY2VzcyJ9.i1uHKGhZc4Qnxj0iinryCuiNwXrFsKp6MX-9JV9hj_8
+
+<> 2019-06-25T125257.200.json
+
+###
+
+POST http://localhost:5000/api/devices/register
+Authorization: Basic greg.niemann@willowtreeapps.com password
+Content-Type: application/json
+
+{
+  "name": "ambrose I"
+}
+
+<> 2019-06-25T125249.200.json
+
+###
+
+POST http://localhost:5000/api/devices/register
+Authorization: Basic greg.niemann@willowtreeapps.com password
+Content-Type: application/json
+
+{
+  "name": "ambrose I"
+}
+
+<> 2019-06-25T125057.500.html
+
+###
+
+GET https://devops-status-monitor.herokuapp.com/api/status
+Accept: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NjE0ODA3MTgsIm5iZiI6MTU2MTQ4MDcxOCwianRpIjoiZWIyYTQ0M2QtZWM2OC00NWRiLThiNmEtOTUwNzNkMGY2NGE2IiwiZXhwIjoxNTYxNDgxNjE4LCJpZGVudGl0eSI6IjJkNWJlZjVjLWVkZWItNGEyMy1hOTFmLWNkMmNlNTc1MzFlNyIsImZyZXNoIjpmYWxzZSwidHlwZSI6ImFjY2VzcyJ9.ZZaYdWO3nBMzbeTA1RD060ByB4x_OAVBH93BXROPybo
+
+<> 2019-06-25T123910.200.json
+
+###
+
+POST https://devops-status-monitor.herokuapp.com/api/devices/register
+Authorization: Basic greg.niemann@willowtreeapps.com awesome_password
+Content-Type: application/json
+
+{
+  "name": "ambrose I"
+}
+
+<> 2019-06-25T123839.200.json
+
+###
+
 GET https://devops-status-monitor.herokuapp.com/api/status
 Authorization: Basic greg.niemann@willowtreeapps.com awesome_password
 Accept: application/json
@@ -10554,118 +10634,6 @@ Accept: application/json
 Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NTEwNDc5ODYsIm5iZiI6MTU1MTA0Nzk4NiwianRpIjoiNTQ2ZjZlMDEtZjEyMi00NzM0LTg3MDctNjJlMmY4MzE3OWNmIiwiZXhwIjoxNTUxMDQ4ODg2LCJpZGVudGl0eSI6ImdyZWcubmllbWFubkB3aWxsb3d0cmVlYXBwcy5jb20iLCJmcmVzaCI6ZmFsc2UsInR5cGUiOiJhY2Nlc3MifQ.O0DugQSbsqceOhhH2wYGuHmaJLoO5q2L8yLeOLJBgQQ
 
 <> 2019-02-24T053959.200.json
-
-###
-
-POST http://localhost:5000/api/login
-Accept: application/json
-Content-Type: application/json
-
-{
-"username": "greg.niemann@willowtreeapps.com",
-"password": "password"
-
-}
-
-<> 2019-02-24T053946.200.json
-
-###
-
-POST http://localhost:5000/api/login
-Accept: application/json
-Content-Type: application/json
-
-{
-"username": "greg.niemann@willowtreeapps.com",
-"password": "password"
-
-}
-
-<> 2019-02-24T053934.200.json
-
-###
-
-POST http://localhost:5000/api/login
-Accept: application/json
-Content-Type: application/json
-
-{
-"username": "greg.niemann@willowtreeapps.com",
-"password": "password"
-
-}
-
-<> 2019-02-24T053549.200.json
-
-###
-
-POST http://localhost:5000/api/login
-Accept: application/json
-Content-Type: application/json
-
-{
-"username": "greg.niemann@willowtreeapps.com",
-"password": "password"
-
-}
-
-<> 2019-02-24T053431.500.html
-
-###
-
-POST http://localhost:5000/api/login
-Accept: application/json
-Content-Type: application/json
-
-{
-"username": "greg.niemann@willowtreeapps.com",
-"password": "password"
-
-}
-
-<> 2019-02-24T053324.401.html
-
-###
-
-POST http://localhost:5000/api/login
-Accept: application/json
-Content-Type: application/json
-
-{
-"username": "greg.niemann@willowtreeapps.com",
-"password": "password"
-
-}
-
-<> 2019-02-24T053318.401.html
-
-###
-
-POST http://localhost:5000/api/login
-Accept: application/json
-Content-Type: application/json
-
-{
-"username": "greg.niemann@willowtreeapps.com",
-"password": "password"
-
-}
-
-<> 2019-02-24T053216.401.html
-
-###
-
-POST http://localhost:5000/api/login
-Accept: application/json
-Content-Type: application/json
-
-{
-"username": "greg.niemann@willowtreeapps.com",
-"password": "password"
-
-}
-
-<> 2019-02-24T053201.401.html
 
 ###
 
