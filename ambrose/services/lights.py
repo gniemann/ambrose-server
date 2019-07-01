@@ -1,7 +1,7 @@
 from collections import namedtuple
 from typing import List
 
-from ambrose.models import User, Task, Device
+from ambrose.models import Task, Device, LightSettings
 
 Color = namedtuple('Color', 'red green blue')
 
@@ -43,45 +43,32 @@ class InitiallyBlinking(LightConfiguration):
 
 
 class LightService:
-    @classmethod
-    def color_for_status(cls, status: str) -> Color:
+    def __init__(self, settings: List[LightSettings]):
+        self.settings = settings
+
+    def color_for_status(self, status: str) -> Color:
         if status is None:
             return OFF
 
         status = status.lower()
-        if status == 'succeeded':
-            return GREEN
-        elif status == 'failed' or status == 'canceled':
-            return RED
-        elif status == 'queued' or status == 'inprogress':
-            return BLUE
-        elif status == 'partiallysucceeded':
-            return YELLOW
-        elif status == 'pending_approval':
-            return MAGENTA
-        elif status == 'no_open_prs':
-            return GREEN
-        elif status == 'prs_with_issues':
-            return RED
-        elif status == 'open_prs':
-            return BLUE
-        elif status == 'prs_need_review':
-            return BLUE
-        else:
-            return OFF
 
-    @classmethod
-    def light_for_task(cls, task: Task) -> LightConfiguration:
+        for setting in self.settings:
+            if status == setting.status.lower():
+                return Color(setting.color_red, setting.color_green, setting.color_blue)
+
+        return OFF
+
+    def light_for_task(self, task: Task) -> LightConfiguration:
         if task is None:
             return SteadyLight(OFF)
 
         status = task.value.lower()
-        primary_color = cls.color_for_status(status)
+        primary_color = self.color_for_status(status)
 
         # queued, in_progress and pending_approval always are the same regardless of has_changed (to ensure they persist between updates
         if status == 'queued' or \
                 status == 'inprogress':
-            secondary_color = cls.color_for_status(task.prev_value)
+            secondary_color = self.color_for_status(task.prev_value)
             if secondary_color == primary_color:
                 secondary_color = OFF
             return BlinkingLight(primary_color, 4, secondary_color, 4)
@@ -94,6 +81,5 @@ class LightService:
 
         return InitiallyBlinking(primary_color, primary_period, 1, 20)
 
-    @classmethod
-    def lights_for_device(cls, device: Device) -> List[LightConfiguration]:
-        return [cls.light_for_task(light.task) for light in device.lights]
+    def lights_for_device(self, device: Device) -> List[LightConfiguration]:
+        return [self.light_for_task(light.task) for light in device.lights]

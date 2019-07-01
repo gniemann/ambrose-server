@@ -5,7 +5,7 @@ from typing import Optional
 import flask_login
 
 from .device import Device
-from . import db, StatusLight, Message, Account, Gauge
+from . import db, Message, Account, Gauge, LightSettings
 from .task import Task
 
 
@@ -21,6 +21,8 @@ class User(db.Model, flask_login.UserMixin):
 
     gauges = db.relationship('Gauge', cascade='all, delete, delete-orphan')
     devices = db.relationship('Device', cascade='all, delete, delete-orphan', back_populates='user')
+
+    light_settings = db.relationship('LightSettings', cascade='all, delete, delete-orphan', back_populates='user')
 
     @classmethod
     def by_username(cls, username: str) -> Optional[User]:

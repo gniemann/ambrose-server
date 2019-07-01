@@ -9,7 +9,7 @@
 {% else %}
     <h1 class="text-center">Device Configuration</h1>
     {% for device in user.devices %}
-        <h3>device.name</h3>
+        <h3>{{ device.name }}</h3>
 
         <div class="d-flex justify-content-between">
         <h4>Status Lights</h4>

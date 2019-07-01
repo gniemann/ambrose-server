@@ -54,7 +54,7 @@ def get_status() -> Dict[str, Any]:
     user = device.user
 
     retval = {
-        "lights": LightService.lights_for_device(device),
+        "lights": LightService(user.light_settings).lights_for_device(device),
         "messages": [m.value for m in user.messages],
         'gauges': user.gauges
     }
