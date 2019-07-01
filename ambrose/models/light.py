@@ -7,7 +7,7 @@ from . import db
 
 class StatusLight(db.Model):
     __tablename__ = 'status_light'
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    device_id = db.Column(db.Integer, db.ForeignKey('device.id'), primary_key=True)
     slot = db.Column(db.Integer, primary_key=True)
 
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'))
@@ -26,5 +26,5 @@ class StatusLight(db.Model):
         return None
 
     @classmethod
-    def by_id(cls, user_id: int, slot: int) -> Optional[StatusLight]:
-        return cls.query.get((user_id, slot))
+    def by_id(cls, device_id: int, slot: int) -> Optional[StatusLight]:
+        return cls.query.get((device_id, slot))

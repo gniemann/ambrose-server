@@ -1,39 +1,46 @@
 {% extends "base.html" %}
 {% set active_page = "dashboard" %}
 {% import "macros.html" as macros %}
-{% block title %}DevOps Monitor{% endblock %}
+{% block title %}Ambrose{% endblock %}
 
 {% block content %}
-<h1 class="text-center">DevOps Monitor Configuration</h1>
-<div class="d-flex justify-content-between">
-<h3>Status Lights</h3>
-<a href="{{ url_for('.edit') }}" class="btn btn-outline-secondary">Edit</a>
-</div>
+{% if user.devices|length == 0 %}
+    <p>No devices yet!</p>
+{% else %}
+    <h1 class="text-center">Device Configuration</h1>
+    {% for device in user.devices %}
+        <h3>device.name</h3>
 
-<table class="table">
-    <thead>
-    <tr>
-    <th scope="col">Slot</th>
-    <th scope="col">Name</th>
-    <th scope="col">Type</th>
-    <th scope="col">Last Status</th>
-    </tr>
-    </thead>
+        <div class="d-flex justify-content-between">
+        <h4>Status Lights</h4>
+        <a href="{{ url_for('devices.edit_lights', device_id=device.id) }}" class="btn btn-outline-secondary">Edit</a>
+        </div>
 
-    <tbody>
-    {% for light in lights|sort(attribute='slot') %}
-        <tr>
-        <td>{{ light.slot }}</td>
-        <td>{% if light.task %}{{ light.task.name }}{% endif %}</td>
-        <td>{% if light.task %}{{ light.task.type }}{% endif %}</td>
-        <td>{% if light.task %}{{ light.task.status }}{% endif %}</td>
-        </tr>
+        <table class="table">
+            <thead>
+            <tr>
+            <th scope="col">Slot</th>
+            <th scope="col">Name</th>
+            <th scope="col">Type</th>
+            <th scope="col">Last Status</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            {% for light in device.lights|sort(attribute='slot') %}
+                <tr>
+                <td>{{ light.slot }}</td>
+                <td>{% if light.task %}{{ light.task.name }}{% endif %}</td>
+                <td>{% if light.task %}{{ light.task.type }}{% endif %}</td>
+                <td>{% if light.task %}{{ light.task.status }}{% endif %}</td>
+                </tr>
+            {% endfor %}
+
+            </tbody>
+        </table>
     {% endfor %}
+    <h4>Messages</h4>
+    {{ macros.message_list(messages, jwt) }}
 
-    </tbody>
-</table>
-
-<h3>Messages</h3>
-{{ macros.message_list(messages, jwt) }}
-
+{% endif %}
 {% endblock %}

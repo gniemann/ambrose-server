@@ -66,7 +66,7 @@ class DevOpsAccountForm(AccountForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        if self.token.data:
+        if 'obj' in kwargs and self.token.data:
             self.token.data = '*' * len(self.token.data)
 
 

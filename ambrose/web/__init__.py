@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, abort, redirect, url_for
 
 from ambrose.models import User
 from ambrose.services import UserService, UserCredentialMismatchException, AuthService
-from .forms import LoginForm, RegisterForm, create_edit_form
+from .forms import LoginForm, RegisterForm
 from .tasks import tasks_bp
 from .accounts import accounts_bp
 from .messages import messages_bp
@@ -16,7 +16,7 @@ web_bp = Blueprint('web', __name__, template_folder='templates')
 @AuthService.auth_required
 def index(user: User):
     token = AuthService.jwt(user)
-    return render_template('index.html', lights=user.lights, messages=user.messages, jwt=token)
+    return render_template('index.html', user=user, messages=user.messages, jwt=token)
 
 
 @web_bp.route('/login', methods=['GET', 'POST'])
@@ -51,16 +51,3 @@ def register():
 def logout():
     AuthService.logout()
     return redirect(url_for('.login'))
-
-
-@web_bp.route('/edit', methods=['GET', 'POST'])
-@AuthService.auth_required
-def edit(user: User, user_service: UserService):
-    edit_form = create_edit_form(user.lights, user.tasks)
-
-    if edit_form.validate_on_submit():
-        user_service.update_lights(edit_form.data)
-        # regenerate the form, in case there were size changes
-        edit_form = create_edit_form(user.lights, user.tasks)
-
-    return render_template('edit.html', form=edit_form)

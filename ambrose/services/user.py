@@ -33,16 +33,13 @@ class UserService:
     def add_message(self, text: str):
         return self._add_message(TextMessage(text=text))
 
-    def update_lights(self, data: Mapping[str, Any]):
+    def update_lights(self, device_id: int, data: Mapping[str, Any]):
+        device = self.get_device(device_id)
         with db_transaction():
-            if data['num_lights'] != len(self.user.lights):
-                self.user.resize_lights(data['num_lights'])
-                return
-
             for light_data in data['lights']:
                 task_id = light_data['task']
                 task = Task.by_id(task_id) if task_id >= 0 else None
-                self.user.set_task_for_light(task, light_data['slot'])
+                device.set_task_for_light(task, light_data['slot'])
 
     def add_datetime_message(self, format_string: str, date_format: str, timezone: str) -> Message:
         return self._add_message(DateTimeMessage(
@@ -96,9 +93,9 @@ class UserService:
         with db_transaction():
             self.user.add_gauge(Gauge(min_val=min_val, max_val=max_val, task_id=task_id, nickname=nickname))
 
-    def add_device(self, name: str) -> Device:
+    def add_device(self, name: str, lights: int, gagues: int, supports_messages: bool) -> Device:
         with db_transaction():
-            device = Device(name=name)
+            device = Device(name, lights, gagues, supports_messages)
             self.user.add_device(device)
             return device
 

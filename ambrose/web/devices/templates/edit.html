@@ -5,12 +5,9 @@
 {% block content %}
 <h1 class="text-center">Edit Configuration</h1>
 
-<form method="POST" action="{{ url_for('.edit') }}">
+<form method="POST" action="{{ url_for('.edit_lights', device_id=device_id) }}">
 {{ form.csrf_token }}
-<div class="form-group row">
-    {{ form.num_lights.label(class='col-sm-2 col-form-label') }}
-    <div class="col-sm-4">{{ form.num_lights(class='form-control') }}</div>
-</div>
+
 <table class="table">
 <thead>
 <tr>

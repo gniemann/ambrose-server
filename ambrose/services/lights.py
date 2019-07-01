@@ -1,7 +1,7 @@
 from collections import namedtuple
 from typing import List
 
-from ambrose.models import User, Task
+from ambrose.models import User, Task, Device
 
 Color = namedtuple('Color', 'red green blue')
 
@@ -95,5 +95,5 @@ class LightService:
         return InitiallyBlinking(primary_color, primary_period, 1, 20)
 
     @classmethod
-    def lights_for_user(cls, user: User) -> List[LightConfiguration]:
-        return [cls.light_for_task(light.task) for light in user.lights]
+    def lights_for_device(cls, device: Device) -> List[LightConfiguration]:
+        return [cls.light_for_task(light.task) for light in device.lights]

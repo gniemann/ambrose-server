@@ -24,6 +24,7 @@ class LightSchema(Schema):
 class GaugeSchema(Schema):
     position = fields.Float()
 
+
 class StatusSchema(Schema):
     lights = fields.Nested(LightSchema, many=True)
     messages = fields.List(fields.String())
@@ -52,6 +53,13 @@ class TaskSchema(Schema):
     value = fields.String()
     prev_value = fields.String()
     has_changed = fields.Boolean()
+
+
+class RegisterDeviceSchema(Schema):
+    name = fields.String()
+    lights = fields.Integer()
+    gagues = fields.Integer()
+    messages = fields.Boolean()
 
 
 def with_schema(schema: Union[Type[Schema], Schema]) -> Callable[[Callable], Callable]:

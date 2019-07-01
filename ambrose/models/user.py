@@ -19,7 +19,6 @@ class User(db.Model, flask_login.UserMixin):
     tasks = db.relationship('Task', back_populates='user', cascade='all, delete, delete-orphan')
     messages = db.relationship('Message', cascade='all, delete, delete-orphan')
 
-    lights = db.relationship('StatusLight', cascade='all, delete, delete-orphan')
     gauges = db.relationship('Gauge', cascade='all, delete, delete-orphan')
     devices = db.relationship('Device', cascade='all, delete, delete-orphan', back_populates='user')
 
@@ -30,32 +29,6 @@ class User(db.Model, flask_login.UserMixin):
     @classmethod
     def by_id(cls, user_id: int) -> Optional[User]:
         return cls.query.get(user_id)
-
-    def light_for_slot(self, index: int) -> Optional[StatusLight]:
-        return StatusLight.by_id(self.id, index)
-
-    def set_task_for_light(self, task: Optional[Task], index: int):
-        light = self.light_for_slot(index)
-        if light:
-            light.task = task
-        else:
-            light = StatusLight(slot=index, user_id=self.id)
-            light.task = task
-            self.lights.append(light)
-
-    def resize_lights(self, count: int):
-        lights = self.lights
-        current_count = len(lights)
-        if count == current_count:
-            return
-        if count > current_count:
-            last_slot = lights[-1].slot if current_count > 0 else 0
-            diff = count - current_count
-            for slot in range(last_slot + 1, last_slot + diff + 1):
-                self.set_task_for_light(None, slot)
-        else:
-            for light in lights[count:]:
-                self.lights.remove(light)
 
     def add_message(self, message: Message):
         self.messages.append(message)

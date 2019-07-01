@@ -21,12 +21,12 @@ def id_for_jwt(identity: Union[User, Device]):
 
 
 @jwt.user_loader_callback_loader
-def user_from_jwt(identity):
+def user_from_jwt(identity) -> Union[Device, User]:
     # the token is for either a device UUID or a username
     # try the device first, if its not a device, try the username next
     device = Device.by_uuid(identity)
     if device:
-        return device.user
+        return device
 
     return User.by_username(identity)
 

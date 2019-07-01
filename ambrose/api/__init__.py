@@ -1,16 +1,18 @@
 import inspect
-from typing import Any, Dict
+from typing import Any, Dict, Type
 
 from cryptography.fernet import Fernet
 from flask import Blueprint, request, abort
+from flask.views import MethodView
 from flask_jwt_extended import jwt_required, get_current_user
 
 from ambrose.common import cipher_required
 from ambrose.models import User, Account
 from ambrose.services import LightService, AuthService, UserCredentialMismatchException, \
-    UserService, NotFoundException, UnauthorizedAccessException, GitHubAccountService, DevOpsAccountService, AccountService
+    UserService, NotFoundException, UnauthorizedAccessException, GitHubAccountService, DevOpsAccountService, \
+    AccountService
 from devops import DevOpsReleaseWebHook
-from .schema import TaskSchema, StatusSchema, with_schema, LoginSchema, AccessTokenSchema
+from .schema import TaskSchema, StatusSchema, with_schema, LoginSchema, AccessTokenSchema, RegisterDeviceSchema
 from .messages import Messages
 from .tasks import Tasks
 from .devices import Devices
@@ -18,18 +20,18 @@ from .devices import Devices
 api_bp = Blueprint('api', __name__)
 
 
-def register_api(view, endpoint, pk='id', pk_type='int'):
+def register_api(view: Type[MethodView], endpoint: str, pk='id', pk_type='int'):
     view_func = view.as_view(endpoint)
     url = '/{}/'.format(endpoint)
     methods_with_pk = []
     if hasattr(view, 'get'):
-        api_bp.add_url_rule(url, defaults={pk: None}, view_func=view_func, methods=['GET',])
+        api_bp.add_url_rule(url, defaults={pk: None}, view_func=view_func, methods=['GET', ])
         signature = inspect.signature(view.get)
         if pk in signature.parameters:
             methods_with_pk.append('GET')
 
     if hasattr(view, 'post'):
-        api_bp.add_url_rule(url, view_func=view_func, methods=['POST',])
+        api_bp.add_url_rule(url, view_func=view_func, methods=['POST', ])
 
     if hasattr(view, 'put'):
         methods_with_pk.append('PUT')
@@ -48,10 +50,11 @@ register_api(Devices, 'devices', pk='device_id')
 @with_schema(StatusSchema)
 @jwt_required
 def get_status() -> Dict[str, Any]:
-    user = get_current_user()
+    device = get_current_user()
+    user = device.user
 
     retval = {
-        "lights": LightService.lights_for_user(user),
+        "lights": LightService.lights_for_device(device),
         "messages": [m.value for m in user.messages],
         'gauges': user.gauges
     }
@@ -78,8 +81,9 @@ def login():
 @AuthService.auth_required
 @with_schema(AccessTokenSchema)
 def register_device(user_service: UserService):
-    name = request.json['name']
-    device = user_service.add_device(name)
+    settings = RegisterDeviceSchema().load(request.json)
+
+    device = user_service.add_device(settings['name'], settings['lights'], settings['gagues'], settings['messages'])
 
     return {
         'access_token': AuthService.jwt(device)
