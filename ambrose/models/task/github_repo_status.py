@@ -3,6 +3,7 @@ from typing import Mapping, Any
 from .task import Task, StatusTask
 from ambrose.models import db
 
+
 class GitHubRepositoryStatusTask(Task, StatusTask):
     __tablename__ = 'github_repoistory_status'
     __mapper_args__ = {

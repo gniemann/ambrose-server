@@ -42,10 +42,3 @@ class TaskForm(FlaskForm):
         """
         form_type = cls._model_registry.get(task.__class__.__name__, cls)
         return form_type(*args, obj=task, **kwargs)
-
-
-class LightSettingForm(FlaskForm):
-    status = StringField('Status', [InputRequired()], render_kw={'required': True})
-    red = IntegerField('Red Value', default=0)
-    green = IntegerField('Green Value', default=0)
-    blue = IntegerField('Blue Value', default=0)

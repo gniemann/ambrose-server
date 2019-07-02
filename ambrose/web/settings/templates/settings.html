@@ -24,6 +24,9 @@
             <td>{{ setting.color_red }}</td>
             <td>{{ setting.color_green }}</td>
             <td>{{ setting.color_blue }}</td>
+            <td>
+
+            </td>
             </tr>
         {% endfor %}
         </tbody>
@@ -31,7 +34,7 @@
     </table>
 
     <h4>New Status</h4>
-    <form method="POST" action="{{ url_for('web.settings') }}">
+    <form method="POST" action="{{ url_for('settings.index') }}">
         {{ form.hidden_tag() }}
         <div class="form-row">
             <div class="col-md-4 mb-3">
