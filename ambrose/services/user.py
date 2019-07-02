@@ -119,7 +119,7 @@ class UserService:
         with db_transaction():
             device.last_contact = datetime.datetime.now()
             for light in device.lights:
-                if light:
+                if light.task:
                     light.task.has_changed = False
 
     def add_setting(self, status: str, red: int, green: int, blue: int):
