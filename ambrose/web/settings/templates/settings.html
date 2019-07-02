@@ -4,54 +4,60 @@
 {% block title %}Ambrose Settings{% endblock %}
 
 {% block content %}
-
     <h1 class="text-center">Light Settings</h1>
 
-    <table class="table">
-        <thead>
-        <tr>
-            <th scope="col">Status</th>
-            <th scope="col">Red</th>
-            <th scope="col">Green</th>
-            <th scope="col">Blue</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        {% for setting in settings %}
+    <form method="POST" action="{{ url_for('.index') }}">
+        {{ edit_form.hidden_tag() }}
+        <div class="d-flex justify-content-end">
+            <input type="submit" class="btn btn-primary" value="Save">
+        </div>
+        <table class="table">
+            <thead>
             <tr>
-            <td>{{ setting.status }}</td>
-            <td>{{ setting.color_red }}</td>
-            <td>{{ setting.color_green }}</td>
-            <td>{{ setting.color_blue }}</td>
-            <td>
-
-            </td>
+                <th scope="col">Status</th>
+                <th scope="col">Red</th>
+                <th scope="col">Green</th>
+                <th scope="col">Blue</th>
             </tr>
-        {% endfor %}
-        </tbody>
+            </thead>
 
-    </table>
+            <tbody>
+            {% for setting in edit_form.settings %}
+                {{ setting.setting_id() }}
+                <tr>
+                <td>{{ setting.status(class='form-control') }}</td>
+                <td>{{ setting.red(class='form-control') }}</td>
+                <td>{{ setting.green(class='form-control') }}</td>
+                <td>{{ setting.blue(class='form-control') }}</td>
+                <td>
+
+                </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+
+        </table>
+    </form>
 
     <h4>New Status</h4>
-    <form method="POST" action="{{ url_for('settings.index') }}">
-        {{ form.hidden_tag() }}
+    <form method="POST" action="{{ url_for('settings.new_setting') }}">
+        {{ new_form.hidden_tag() }}
         <div class="form-row">
             <div class="col-md-4 mb-3">
-                {{ form.status.label() }}
-                {{ form.status(class='form-control') }}
+                {{ new_form.status.label() }}
+                {{ new_form.status(class='form-control') }}
             </div>
             <div class="col-md-2 mb-3">
-                {{ form.red.label() }}
-                {{ form.red(class='form-control') }}
+                {{ new_form.red.label() }}
+                {{ new_form.red(class='form-control') }}
             </div>
             <div class="col-md-2 mb-3">
-                {{ form.green.label() }}
-                {{ form.green(class='form-control') }}
+                {{ new_form.green.label() }}
+                {{ new_form.green(class='form-control') }}
             </div>
             <div class="col-md-2 mb-3">
-                {{ form.blue.label() }}
-                {{ form.blue(class='form-control') }}
+                {{ new_form.blue.label() }}
+                {{ new_form.blue(class='form-control') }}
             </div>
             <divb class="col-md-2">
                 <br/>

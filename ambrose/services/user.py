@@ -1,4 +1,4 @@
-from typing import Any, Mapping
+from typing import Any, Mapping, List
 
 import flask_bcrypt as bcrypt
 
@@ -117,3 +117,14 @@ class UserService:
     def add_setting(self, status: str, red: int, green: int, blue: int):
         with db_transaction():
             self.user.add_setting(LightSettings(status=status, color_red=red, color_blue=blue, color_green=green))
+
+    def edit_settings(self, settings: List[Mapping[str, Any]]):
+        with db_transaction():
+            for setting in settings:
+                record = LightSettings.by_id(setting['setting_id'])
+                if not record:
+                    continue
+                record.status = setting['status']
+                record.color_red = setting['red']
+                record.color_green = setting['green']
+                record.color_blue = setting['blue']

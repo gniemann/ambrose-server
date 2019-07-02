@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import Optional
+
 from . import db
 
 
@@ -13,3 +17,6 @@ class LightSettings(db.Model):
 
     user = db.relationship('User', uselist=False, back_populates='light_settings')
 
+    @classmethod
+    def by_id(cls, setting_is: int) -> Optional[LightSettings]:
+        return cls.query.get(setting_is)
