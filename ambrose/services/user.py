@@ -1,3 +1,4 @@
+import datetime
 from typing import Any, Mapping, List
 
 import flask_bcrypt as bcrypt
@@ -113,6 +114,12 @@ class UserService:
         with db_transaction():
             for task in self.user.tasks:
                 task.has_changed = False
+
+    def mark_device_visit(self, device: Device):
+        with db_transaction():
+            device.last_contact = datetime.datetime.now()
+            for light in device.lights:
+                light.task.has_changed = False
 
     def add_setting(self, status: str, red: int, green: int, blue: int):
         with db_transaction():

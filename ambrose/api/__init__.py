@@ -59,7 +59,7 @@ def get_status() -> Dict[str, Any]:
         'gauges': user.gauges
     }
 
-    UserService(user).mark_tasks_viewed()
+    UserService(user).mark_device_visit(device)
     return retval
 
 

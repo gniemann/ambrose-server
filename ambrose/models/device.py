@@ -11,6 +11,7 @@ class Device(db.Model):
     device_uuid = db.Column(db.String, default=lambda: str(uuid.uuid4()))
     name = db.Column(db.String)
     supports_messages = db.Column(db.Boolean)
+    last_contact = db.Column(db.DateTime)
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
