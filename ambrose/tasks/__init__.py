@@ -1,3 +1,5 @@
+from concurrent import futures
+
 import celery
 from cryptography.fernet import Fernet
 from flask import current_app
@@ -16,5 +18,11 @@ def setup_periodic_tasks(sender, **kwargs):
 def update_accounts():
     print("Updating all accounts")
     cipher = Fernet(current_app.secret_key)
-    for account in Account.all():
-        AccountService(account, cipher).get_task_statuses()
+
+    jobs = []
+    with futures.ThreadPoolExecutor() as executor:
+        for account in Account.all():
+            service = AccountService(account, cipher)
+            jobs.append(executor.submit(service.get_task_statuses))
+
+    futures.wait(jobs)
