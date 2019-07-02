@@ -1,8 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for
 
 from ambrose.models import User
-from ambrose.services import AuthService
-from services import UserService
+from ambrose.services import AuthService, UserService
 from .forms import LightSettingsForm, EditSettingsForm
 
 settings_bp = Blueprint('settings', __name__, template_folder='templates')
