@@ -49,3 +49,6 @@ class User(db.Model, flask_login.UserMixin):
 
     def add_device(self, device: Device):
         self.devices.append(device)
+
+    def add_setting(self, setting: LightSettings):
+        self.light_settings.append(setting)

@@ -3,7 +3,7 @@ from typing import Any, Mapping
 import flask_bcrypt as bcrypt
 
 from ambrose.common import db_transaction
-from ambrose.models import User, DateTimeMessage, TextMessage, TaskMessage, Message, Device, Task, Gauge
+from ambrose.models import User, DateTimeMessage, TextMessage, TaskMessage, Message, Device, Task, Gauge, LightSettings
 from ambrose.services import UnauthorizedAccessException
 
 
@@ -113,3 +113,7 @@ class UserService:
         with db_transaction():
             for task in self.user.tasks:
                 task.has_changed = False
+
+    def add_setting(self, status: str, red: int, green: int, blue: int):
+        with db_transaction():
+            self.user.add_setting(LightSettings(status=status, color_red=red, color_blue=blue, color_green=green))

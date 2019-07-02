@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, abort, redirect, url_for
 
 from ambrose.models import User
 from ambrose.services import UserService, UserCredentialMismatchException, AuthService
-from .forms import LoginForm, RegisterForm
+from .forms import LoginForm, RegisterForm, LightSettingForm
 from .tasks import tasks_bp
 from .accounts import accounts_bp
 from .messages import messages_bp
@@ -51,3 +51,17 @@ def register():
 def logout():
     AuthService.logout()
     return redirect(url_for('.login'))
+
+
+@web_bp.route('/settings', methods=['GET', 'POST'])
+@AuthService.auth_required
+def settings(user: User, user_service: UserService):
+    light_form = LightSettingForm()
+
+    if light_form.validate_on_submit():
+        user_service.add_setting(light_form.status.data, light_form.red.data, light_form.green.data, light_form.blue.data)
+
+        light_form = LightSettingForm()
+
+
+    return render_template('settings.html', settings=user.light_settings, form=light_form)

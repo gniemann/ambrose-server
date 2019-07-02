@@ -1,12 +1,8 @@
 from __future__ import annotations
 
-from typing import List
-
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, FormField, FieldList, HiddenField, SelectField, IntegerField
+from wtforms import StringField, PasswordField, SelectField, IntegerField
 from wtforms.validators import InputRequired, EqualTo
-
-from ambrose.models import StatusLight, Task
 
 
 class LoginForm(FlaskForm):
@@ -20,9 +16,6 @@ class RegisterForm(FlaskForm):
                              [InputRequired(), EqualTo('confirm_password', message='Passwords did not match')],
                              render_kw={'required': True})
     confirm_password = PasswordField('Confirm Password', render_kw={'required': True})
-
-
-
 
 
 class NewTaskForm(FlaskForm):
@@ -49,3 +42,10 @@ class TaskForm(FlaskForm):
         """
         form_type = cls._model_registry.get(task.__class__.__name__, cls)
         return form_type(*args, obj=task, **kwargs)
+
+
+class LightSettingForm(FlaskForm):
+    status = StringField('Status', [InputRequired()], render_kw={'required': True})
+    red = IntegerField('Red Value', default=0)
+    green = IntegerField('Green Value', default=0)
+    blue = IntegerField('Blue Value', default=0)

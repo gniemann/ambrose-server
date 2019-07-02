@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% set active_page = "settings" %}
+{% import "macros.html" as macros %}
+{% block title %}Ambrose Settings{% endblock %}
+
+{% block content %}
+
+    <h1 class="text-center">Light Settings</h1>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Status</th>
+            <th scope="col">Red</th>
+            <th scope="col">Green</th>
+            <th scope="col">Blue</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        {% for setting in settings %}
+            <tr>
+            <td>{{ setting.status }}</td>
+            <td>{{ setting.color_red }}</td>
+            <td>{{ setting.color_green }}</td>
+            <td>{{ setting.color_blue }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+
+    </table>
+
+    <h4>New Status</h4>
+    <form method="POST" action="{{ url_for('web.settings') }}">
+        {{ form.hidden_tag() }}
+        <div class="form-row">
+            <div class="col-md-4 mb-3">
+                {{ form.status.label() }}
+                {{ form.status(class='form-control') }}
+            </div>
+            <div class="col-md-2 mb-3">
+                {{ form.red.label() }}
+                {{ form.red(class='form-control') }}
+            </div>
+            <div class="col-md-2 mb-3">
+                {{ form.green.label() }}
+                {{ form.green(class='form-control') }}
+            </div>
+            <div class="col-md-2 mb-3">
+                {{ form.blue.label() }}
+                {{ form.blue(class='form-control') }}
+            </div>
+            <divb class="col-md-2">
+                <br/>
+                <input type="submit" class="btn btn-primary" value="Submit">
+            </divb>
+        </div>
+    </form>
+
+
+{% endblock %}
