@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Set, List, Union, Mapping, Any, Tuple, Iterable
+from typing import Set, List, Mapping, Any, Tuple, Iterable
 
 from ambrose.common import db_transaction
 from ambrose.models import DevOpsAccount, DevOpsReleaseTask, DevOpsBuildTask

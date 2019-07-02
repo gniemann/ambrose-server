@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+{% set active_page = "accounts" %}
+{% block title %}Setup Web API Tasks{% endblock %}
+
+{% block content %}
+<h1 class="text-center">Setup Web API Tasks</h1>
+
+{{ macros.render_form(form, url_for('.account_tasks', account_id=account_id), 'Add Task') }}
+{% endblock %}

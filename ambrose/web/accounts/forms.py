@@ -6,7 +6,7 @@ from flask_wtf import FlaskForm
 from wtforms import SelectField, StringField, HiddenField, BooleanField, FieldList, FormField
 from wtforms.validators import InputRequired
 
-from ambrose.models import Account, GitHubRepositoryStatusTask, ApplicationInsightsMetricTask
+from ambrose.models import Account, GitHubRepositoryStatusTask, ApplicationInsightsMetricTask, HealthcheckTask
 from ambrose.web.forms import TaskForm
 
 
@@ -81,7 +81,6 @@ class ApplicationInsightsAccountForm(AccountForm):
             self.api_key.data = '*' * len(self.api_key.data)
 
 
-
 class GitHubAccountForm(AccountForm):
     token = StringField('Personal Access Token', [InputRequired()], render_kw={'required': True})
 
@@ -90,6 +89,10 @@ class GitHubAccountForm(AccountForm):
 
         if self.token.data:
             self.token.data = '*' * len(self.token.data)
+
+
+class WebAccountForm(AccountForm):
+    base_url = StringField('Base URL', [InputRequired()], render_kw={'required': True})
 
 
 class DevOpsTaskForm(FlaskForm):
@@ -159,3 +162,8 @@ class ApplicationInsightsMetricForm(TaskForm):
     def __init__(self, *args, **kwargs):
         super(ApplicationInsightsMetricForm, self).__init__(*args, **kwargs)
         self.metric.choices = ApplicationInsightsMetricTask.choices()
+
+
+class HealthcheckTaskForm(TaskForm):
+    _model = HealthcheckTask
+    path = StringField('Healthcheck Path')

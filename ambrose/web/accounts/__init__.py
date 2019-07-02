@@ -2,10 +2,11 @@ from cryptography.fernet import Fernet
 from flask import Blueprint, render_template, redirect, url_for, abort
 
 from ambrose.common import cipher_required
-from ambrose.models import User, GitHubAccount, ApplicationInsightsAccount, DevOpsAccount
+from ambrose.models import User, GitHubAccount, ApplicationInsightsAccount, DevOpsAccount, WebAccount
 from ambrose.services import DevOpsAccountService, UnauthorizedAccessException, AuthService, \
-    ApplicationInsightsAccountService, GitHubAccountService, AccountService
-from .forms import NewAccountForm, AccountForm, DevOpsTaskForm, ApplicationInsightsMetricForm, GitHubRepoStatusForm
+    ApplicationInsightsAccountService, GitHubAccountService, AccountService, WebAccountService
+from .forms import NewAccountForm, AccountForm, DevOpsTaskForm, ApplicationInsightsMetricForm, GitHubRepoStatusForm, \
+    HealthcheckTaskForm
 
 accounts_bp = Blueprint('accounts', __name__, template_folder='templates')
 
@@ -81,6 +82,9 @@ def account_tasks(account_id: int, user: User, cipher: Fernet):
     if isinstance(account, GitHubAccount):
         return github_account_tasks(account, cipher)
 
+    if isinstance(account, WebAccount):
+        return web_account_tasks(account)
+
 
 def devops_account_tasks(account: DevOpsAccount, cipher: Fernet):
     account_service = DevOpsAccountService(account, cipher)
@@ -120,3 +124,13 @@ def github_account_tasks(account: GitHubAccount, cipher: Fernet):
         return redirect(url_for('.index'))
 
     return render_template('github_account_tasks.html', form=form, account_id=account.id)
+
+def web_account_tasks(account: WebAccount):
+    form = HealthcheckTaskForm()
+
+    if form.validate_on_submit():
+        WebAccountService(account).add_healthcheck(form.path.data)
+
+        return redirect(url_for('.index'))
+
+    return render_template('web_account.html', form=form, account_id=account.id)

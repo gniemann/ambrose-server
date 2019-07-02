@@ -1,4 +1,3 @@
-import itertools
 from datetime import datetime
 
 from ambrose.common import db_transaction
