@@ -26,4 +26,4 @@ def update_accounts():
         # service.get_task_statuses()
             jobs.append(executor.submit(service.get_task_statuses))
 
-    futures.as_completed()
+    futures.wait(jobs)
