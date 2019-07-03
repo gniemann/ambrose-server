@@ -59,7 +59,7 @@ class LightService:
         return OFF
 
     def light_for_task(self, task: Task) -> LightConfiguration:
-        if task is None:
+        if task is None or task.value is None:
             return SteadyLight(OFF)
 
         status = task.value.lower()
