@@ -77,7 +77,7 @@ class ApplicationInsightsAccountForm(AccountForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        if self.api_key.data:
+        if 'obj' in kwargs and self.api_key.data:
             self.api_key.data = '*' * len(self.api_key.data)
 
 
@@ -87,7 +87,7 @@ class GitHubAccountForm(AccountForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        if self.token.data:
+        if 'obj' in kwargs and self.token.data:
             self.token.data = '*' * len(self.token.data)
 
 
