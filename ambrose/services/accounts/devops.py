@@ -185,13 +185,12 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
             task.last_update = datetime.now()
 
     def get_release_task(self, project_id: str, definition_id: str, environment_id: str):
-        task = DevOpsReleaseTask.query.filter_by(project=project_id, definition_id=definition_id,
-                                                 environment_id=int(environment_id)).one_or_none()
+        matches = [t for t in self.account.tasks if t.project == project_id and t.definition_id == definition_id and t.environment_id == int(environment_id)]
 
-        if not task or task not in self.account.tasks:
+        if len(matches) != 1:
             return None
 
-        return task
+        return matches[0]
 
     def update_build_tasks(self, data: Iterable[Mapping[str, Any]]):
         new_build_tasks = {BuildTask(**t) for t in data}
