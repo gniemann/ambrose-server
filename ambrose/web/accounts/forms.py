@@ -66,9 +66,6 @@ class DevOpsAccountForm(AccountForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        if 'obj' in kwargs and self.token.data:
-            self.token.data = '*' * len(self.token.data)
-
 
 class ApplicationInsightsAccountForm(AccountForm):
     application_id = StringField('Application ID', [InputRequired()], render_kw={'required': True})
@@ -77,18 +74,12 @@ class ApplicationInsightsAccountForm(AccountForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        if 'obj' in kwargs and self.api_key.data:
-            self.api_key.data = '*' * len(self.api_key.data)
-
 
 class GitHubAccountForm(AccountForm):
     token = StringField('Personal Access Token', [InputRequired()], render_kw={'required': True})
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        if 'obj' in kwargs and self.token.data:
-            self.token.data = '*' * len(self.token.data)
 
 
 class WebAccountForm(AccountForm):

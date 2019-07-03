@@ -1,5 +1,37 @@
 GET http://localhost:5000/api/status
 Accept: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NjIwMTE3MDEsIm5iZiI6MTU2MjAxMTcwMSwianRpIjoiOTgyYjA2OTMtNWJhYy00MDZmLWJjMTgtOWJlMThmNzY5ZTk2IiwiaWRlbnRpdHkiOiIzNzg2MzdlOS0xYjZiLTQxZTUtYjI5YS1kMjI4NTRkOWFhZGYiLCJmcmVzaCI6ZmFsc2UsInR5cGUiOiJhY2Nlc3MifQ.UWTCGhYLDFxl6TibhHgu_JW3zHrs7CQWOTMxem5cBuk
+
+<> 2019-07-02T112742.200.json
+
+###
+
+GET http://localhost:5000/api/status
+Accept: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NjIwMTE3MDEsIm5iZiI6MTU2MjAxMTcwMSwianRpIjoiOTgyYjA2OTMtNWJhYy00MDZmLWJjMTgtOWJlMThmNzY5ZTk2IiwiaWRlbnRpdHkiOiIzNzg2MzdlOS0xYjZiLTQxZTUtYjI5YS1kMjI4NTRkOWFhZGYiLCJmcmVzaCI6ZmFsc2UsInR5cGUiOiJhY2Nlc3MifQ.UWTCGhYLDFxl6TibhHgu_JW3zHrs7CQWOTMxem5cBuk
+
+<> 2019-07-02T112721.200.json
+
+###
+
+GET http://localhost:5000/api/status
+Accept: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NjIwMTE3MDEsIm5iZiI6MTU2MjAxMTcwMSwianRpIjoiOTgyYjA2OTMtNWJhYy00MDZmLWJjMTgtOWJlMThmNzY5ZTk2IiwiaWRlbnRpdHkiOiIzNzg2MzdlOS0xYjZiLTQxZTUtYjI5YS1kMjI4NTRkOWFhZGYiLCJmcmVzaCI6ZmFsc2UsInR5cGUiOiJhY2Nlc3MifQ.UWTCGhYLDFxl6TibhHgu_JW3zHrs7CQWOTMxem5cBuk
+
+<> 2019-07-02T112709.200.json
+
+###
+
+GET http://localhost:5000/api/status
+Accept: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NjIwMTE3MDEsIm5iZiI6MTU2MjAxMTcwMSwianRpIjoiOTgyYjA2OTMtNWJhYy00MDZmLWJjMTgtOWJlMThmNzY5ZTk2IiwiaWRlbnRpdHkiOiIzNzg2MzdlOS0xYjZiLTQxZTUtYjI5YS1kMjI4NTRkOWFhZGYiLCJmcmVzaCI6ZmFsc2UsInR5cGUiOiJhY2Nlc3MifQ.UWTCGhYLDFxl6TibhHgu_JW3zHrs7CQWOTMxem5cBuk
+
+<> 2019-07-02T091941.200.json
+
+###
+
+GET http://localhost:5000/api/status
+Accept: application/json
 Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NjE0ODM4MjcsIm5iZiI6MTU2MTQ4MzgyNywianRpIjoiODNlODk0YjgtZmE3OC00YjdhLWIxNTUtMmFlNjdiMTRlODQ3IiwiZXhwIjoxNTYxNDg0NzI3LCJpZGVudGl0eSI6ImVjZDczNTMzLWE2ZDYtNGY2Ni1iNTlhLWRhODk1YzZjYTI5NiIsImZyZXNoIjpmYWxzZSwidHlwZSI6ImFjY2VzcyJ9.GirZvxlkVPIMft2-80KzhQSC5TRBDKaPI1r-abS3gP8
 
 <> 2019-06-25T013106.200.json
@@ -10602,38 +10634,6 @@ Authorization: Basic Greg.niemann@willowtreeapps.com password
 Accept: application/json
 
 <> 2019-02-27T033704.200.json
-
-###
-
-GET http://localhost:5000/api/status
-Authorization: Basic greg.niemann@willowtreeapps.com password
-Accept: application/json
-
-<> 2019-02-25T113556.200.json
-
-###
-
-GET https://devops-status-monitor.herokuapp.com/api/status
-Authorization: Basic greg.niemann@willowtreeapps.com awesome_password
-Accept: application/json
-
-<> 2019-02-25T100756.200.json
-
-###
-
-GET https://devops-status-monitor.herokuapp.com/api/status
-Authorization: Basic greg.niemann@willowtreeapps.com awesome_password
-Accept: application/json
-
-<> 2019-02-25T094603.200.json
-
-###
-
-GET http://localhost:5000/api/messages/
-Accept: application/json
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NTEwNDc5ODYsIm5iZiI6MTU1MTA0Nzk4NiwianRpIjoiNTQ2ZjZlMDEtZjEyMi00NzM0LTg3MDctNjJlMmY4MzE3OWNmIiwiZXhwIjoxNTUxMDQ4ODg2LCJpZGVudGl0eSI6ImdyZWcubmllbWFubkB3aWxsb3d0cmVlYXBwcy5jb20iLCJmcmVzaCI6ZmFsc2UsInR5cGUiOiJhY2Nlc3MifQ.O0DugQSbsqceOhhH2wYGuHmaJLoO5q2L8yLeOLJBgQQ
-
-<> 2019-02-24T053959.200.json
 
 ###
 
