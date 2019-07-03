@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Iterable
 
+from flask import request
 from flask_wtf import FlaskForm
 from wtforms import SelectField, StringField, HiddenField, BooleanField, FieldList, FormField
 from wtforms.validators import InputRequired
@@ -66,6 +67,9 @@ class DevOpsAccountForm(AccountForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        if not request.form:
+            self.token.data = ''
+
 
 class ApplicationInsightsAccountForm(AccountForm):
     application_id = StringField('Application ID', [InputRequired()], render_kw={'required': True})
@@ -74,12 +78,18 @@ class ApplicationInsightsAccountForm(AccountForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        if not request.form:
+            self.api_key.data = ''
+
 
 class GitHubAccountForm(AccountForm):
     token = StringField('Personal Access Token', [InputRequired()], render_kw={'required': True})
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        if not request.form:
+            self.token.data = ''
 
 
 class WebAccountForm(AccountForm):

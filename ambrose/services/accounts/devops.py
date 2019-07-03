@@ -160,7 +160,7 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
 
     def update_release_statuses(self):
         # filter out the releases that use web hooks
-        releases = [r for r in self.account.release_tasks if not r.uses_webhook]
+        releases = [r for r in self.account.release_tasks if not r.uses_webhook or r.status == 'queued']
         service = self.get_service()
 
         with db_transaction():

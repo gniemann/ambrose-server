@@ -1,5 +1,5 @@
 import celery
-from flask import Flask
+from flask import Flask, redirect, url_for
 
 from .models import db, migrate
 from .common import login_manager
@@ -38,5 +38,9 @@ def build_app(config):
     app.register_blueprint(gauges_bp, url_prefix='/web/gauges')
     app.register_blueprint(devices_bp, url_prefix='/web/devices')
     app.register_blueprint(settings_bp, url_prefix='/web/settings')
+
+    @app.route('/')
+    def index():
+        return redirect(url_for('web.index'))
 
     return app
