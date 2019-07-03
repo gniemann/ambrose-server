@@ -20,9 +20,10 @@ def update_accounts():
     cipher = Fernet(current_app.secret_key)
 
     jobs = []
-    with futures.ThreadPoolExecutor() as executor:
-        for account in Account.all():
-            service = AccountService(account, cipher)
-            jobs.append(executor.submit(service.get_task_statuses))
+    # with futures.ThreadPoolExecutor() as executor:
+    for account in Account.all():
+        service = AccountService(account, cipher)
+        service.get_task_statuses()
+            # jobs.append(executor.submit(service.get_task_statuses))
 
-    futures.wait(jobs)
+    # futures.wait(jobs)

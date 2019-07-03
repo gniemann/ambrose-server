@@ -113,6 +113,7 @@ class DateTimeMessage(Message):
     def update(self, data: Mapping[str, Any]):
         super(DateTimeMessage, self).update(data)
         self.dateformat = data.get('dateformat', self.dateformat)
+        self.timezone = data.get('timezone', self.timezone)
 
     @classmethod
     def class_variables(cls):
