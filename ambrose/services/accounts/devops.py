@@ -185,7 +185,7 @@ class DevOpsAccountService(AccountService, model=DevOpsAccount):
             task.last_update = datetime.now()
 
     def get_release_task(self, project_id: str, definition_id: str, environment_id: str):
-        matches = [t for t in self.account.tasks if t.project == project_id and t.definition_id == definition_id and t.environment_id == int(environment_id)]
+        matches = [t for t in self.account.release_tasks if t.project == project_id and t.definition_id == definition_id and t.environment_id == int(environment_id)]
 
         if len(matches) != 1:
             return None
