@@ -11,6 +11,8 @@
 <tr>
     <th scope="col">Name</th>
     <th scope="col">Type</th>
+    <th scope="col">Current Value</th>
+    <th scope="col">Last Updated</th>
 </tr>
 </thead>
     <tbody>
@@ -18,9 +20,12 @@
     <tr>
         <td>{{ task.name }}</td>
         <td>{{ task.type }}</td>
+        <td>{{ task.value }}</td>
+        <td>{{ task.last_update }}</td>
         <td>
             <div class="d-flex justify-content-between">
                 <div class="btn-group">
+                    <a class="btn btn-outline-primary">Refresh</a>
                     <a href="{{ url_for('.task', task_id=task.id) }}" class="btn btn-outline-secondary">Edit</a>
                     <a class="btn btn-outline-danger" onclick="deleteTask({{ task.id }})">Delete</a>
                 </div>
