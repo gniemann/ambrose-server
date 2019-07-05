@@ -83,7 +83,7 @@ def login():
 def register_device(user_service: UserService):
     settings = RegisterDeviceSchema().load(request.json)
 
-    device = user_service.add_device(settings['name'], settings['lights'], settings['gagues'], settings['messages'])
+    device = user_service.add_device(settings['name'], settings['lights'], settings['gauges'], settings['messages'])
 
     return {
         'access_token': AuthService.jwt(device)

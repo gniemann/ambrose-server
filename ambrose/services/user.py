@@ -94,9 +94,9 @@ class UserService:
         with db_transaction():
             self.user.add_gauge(Gauge(min_val=min_val, max_val=max_val, task_id=task_id, nickname=nickname))
 
-    def add_device(self, name: str, lights: int, gagues: int, supports_messages: bool) -> Device:
+    def add_device(self, name: str, lights: int, gauges: int, supports_messages: bool) -> Device:
         with db_transaction():
-            device = Device(name, lights, gagues, supports_messages)
+            device = Device(name, lights, gauges, supports_messages)
             self.user.add_device(device)
             return device
 

@@ -58,7 +58,7 @@ class TaskSchema(Schema):
 class RegisterDeviceSchema(Schema):
     name = fields.String()
     lights = fields.Integer()
-    gagues = fields.Integer()
+    gauges = fields.Integer()
     messages = fields.Boolean()
 
 

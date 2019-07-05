@@ -16,7 +16,9 @@ def authenticated_user(user):
     '/web/',
     '/web/messages/',
     '/web/accounts/',
-    '/web/edit'
+    '/web/devices/',
+    '/web/settings/',
+    '/web/tasks/'
 ])
 def test_unauthenticated(client, route):
     resp = client.get(route)
@@ -31,7 +33,6 @@ def test_unauthenticated(client, route):
     '/web/messages/new/text',
     '/web/messages/new/datetime',
     '/web/messages/new/task',
-    '/web/edit',
     '/web/accounts/',
     '/web/accounts/devops',
     '/web/accounts/applicationinsights',

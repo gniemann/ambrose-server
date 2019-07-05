@@ -26,7 +26,7 @@ class Device(db.Model):
     def by_uuid(cls, device_uuid: str) -> Optional[Device]:
         return cls.query.filter_by(device_uuid=device_uuid).one_or_none()
 
-    def __init__(self, name: str, num_lights: int, num_gagues: int, supports_messages: bool):
+    def __init__(self, name: str, num_lights: int, num_gauges: int, supports_messages: bool):
         self.name = name
         self.supports_messages = supports_messages
 

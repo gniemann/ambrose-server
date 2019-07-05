@@ -20,3 +20,9 @@ class LightSettings(db.Model):
     @classmethod
     def by_id(cls, setting_is: int) -> Optional[LightSettings]:
         return cls.query.get(setting_is)
+
+    def __init__(self, status, color_red=0, color_green=0, color_blue=0):
+        self.status = status
+        self.color_red = color_red
+        self.color_green = color_green
+        self.color_blue = color_blue

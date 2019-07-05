@@ -58,8 +58,11 @@ def test_delete_task(client, user, access_token):
 
 
 def test_delete_device(client, user, access_token):
-    device = Device(name='my device', user=user)
+    device = Device('my device', 3, 0, True)
+    user.add_device(device)
+
     db.session.add(device)
+    db.session.add(user)
     db.session.commit()
     device_id = device.id
 
@@ -69,7 +72,10 @@ def test_delete_device(client, user, access_token):
 
 def test_register_device(client, user , password):
     data = {
-        'name': 'My Device'
+        'name': 'My Device',
+        'lights': 3,
+        'messages': True,
+        'gauges': 0,
     }
 
     resp = client.post('/api/devices/register', json=data)
